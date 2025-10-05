@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #14171A;
+  --primary: #1DA1F2;
+  --secondary: #14171A;
+  --accent: #FFAD1F;
+  --card: #ffffff;
+  --card-foreground: #14171A;
+  --border: #e1e8ed;
+  --input: #e1e8ed;
+  --muted: #f7f9fa;
+  --muted-foreground: #657786;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --card: #15202b;
+    --card-foreground: #ededed;
+    --border: #38444d;
+    --input: #38444d;
+    --muted: #192734;
+    --muted-foreground: #8899a6;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 700;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
