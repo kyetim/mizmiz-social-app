@@ -43,9 +43,9 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full mb-6">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-primary-700">
+              <span className="text-sm font-medium text-green-700">
                 1,234 kullanıcı aktif
               </span>
             </div>
@@ -53,7 +53,7 @@ export default function HomePage() {
             {/* Heading */}
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
               Modern sosyal<br />
-              <span className="text-primary-600">deneyim</span>
+              <span className="text-green-600">deneyim</span>
             </h1>
 
             {/* Description */}
@@ -64,7 +64,7 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link 
+              <Link
                 href="/register"
                 className="px-8 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2 group"
               >
@@ -82,15 +82,15 @@ export default function HomePage() {
             {/* Trust Indicators */}
             <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-primary-600" />
+                <Shield className="w-4 h-4 text-green-600" />
                 <span>Güvenli</span>
               </div>
               <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-primary-600" />
+                <Heart className="w-4 h-4 text-green-600" />
                 <span>Ücretsiz</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary-600" />
+                <Users className="w-4 h-4 text-green-600" />
                 <span>1K+ Kullanıcı</span>
               </div>
             </div>
@@ -130,9 +130,9 @@ export default function HomePage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white p-8 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all group"
+                className="bg-white p-8 rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition-all group"
               >
-                <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -150,7 +150,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl p-12 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl">
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -159,12 +159,12 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Hemen katıl, ücretsiz başla
               </h2>
-              <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+              <p className="text-xl text-green-50 mb-8 max-w-2xl mx-auto">
                 Binlerce kullanıcının deneyimlediği modern sosyal platformu sen de keşfet
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-xl group"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-xl group"
               >
                 Ücretsiz Hesap Oluştur
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

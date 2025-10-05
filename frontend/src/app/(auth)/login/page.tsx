@@ -30,8 +30,8 @@ export default function LoginPage() {
 
           {/* Back to Home */}
           <div className="mt-8 text-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,11 +49,11 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-20">
           <FloatingSphere />
         </div>
-        
+
         {/* Decorative Elements */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-primary-100 rounded-full blur-3xl opacity-60 animate-pulse"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-40 animate-pulse delay-1000"></div>
-        
+
         {/* Content */}
         <div className="relative z-10 max-w-lg">
           <div className="mb-8">
@@ -62,11 +62,11 @@ export default function LoginPage() {
               <span className="text-sm font-medium text-gray-700">1,234 kullanıcı aktif</span>
             </div>
           </div>
-          
+
           <h2 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
             Topluluğuna<br />geri dön
           </h2>
-          
+
           <p className="text-lg text-gray-600 mb-8 leading-relaxed">
             Arkadaşlarınla bağlantıda kal, düşüncelerini paylaş ve
             ilham verici içerikleri keşfet.
@@ -79,8 +79,8 @@ export default function LoginPage() {
               { icon: '🔒', text: 'Güvenli ve gizli' },
               { icon: '🌍', text: 'Türkçe topluluk' },
             ].map((feature, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="flex items-center gap-3 text-gray-700"
               >
                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">

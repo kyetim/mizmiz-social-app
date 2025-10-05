@@ -132,11 +132,11 @@ export default function FeedPage() {
                             {/* Create Post Card */}
                             <GlassmorphismCard hover={false}>
                                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <span className="text-white font-semibold">
-                      {user.username[0].toUpperCase()}
-                    </span>
-                  </div>
+                                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        <span className="text-white font-semibold">
+                                            {user.username[0].toUpperCase()}
+                                        </span>
+                                    </div>
                                     <button className="flex-1 text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 text-sm transition-colors font-medium">
                                         Ne düşünüyorsun?
                                     </button>
@@ -251,12 +251,12 @@ export default function FeedPage() {
                         <div className="hidden md:block space-y-4">
                             {/* User Card */}
                             <div className="bg-white rounded-xl border border-gray-200 p-4">
-                                    <div className="text-center mb-4">
-                                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
-                                            <span className="text-white text-2xl font-bold">
-                                                {user.username[0].toUpperCase()}
-                                            </span>
-                                        </div>
+                                <div className="text-center mb-4">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+                                        <span className="text-white text-2xl font-bold">
+                                            {user.username[0].toUpperCase()}
+                                        </span>
+                                    </div>
                                     <h3 className="font-bold text-gray-900">@{user.username}</h3>
                                     <p className="text-sm text-gray-600">{user.email}</p>
                                 </div>

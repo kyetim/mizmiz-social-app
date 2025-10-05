@@ -54,7 +54,7 @@ export function ModernLoginForm() {
     try {
       const result = await dispatch(login(data)).unwrap()
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
-      
+
       setTimeout(() => {
         router.push(redirectTo)
         router.refresh()
@@ -80,8 +80,8 @@ export function ModernLoginForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email Field */}
         <div className="space-y-2">
-          <Label 
-            htmlFor="email" 
+          <Label
+            htmlFor="email"
             className="text-sm font-medium text-gray-700"
           >
             Email
@@ -104,8 +104,8 @@ export function ModernLoginForm() {
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label 
-              htmlFor="password" 
+            <Label
+              htmlFor="password"
               className="text-sm font-medium text-gray-700"
             >
               Şifre
@@ -189,8 +189,8 @@ export function ModernLoginForm() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Hesabın yok mu?{' '}
-            <a 
-              href="/register" 
+            <a
+              href="/register"
               className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
             >
               Kayıt ol

@@ -96,7 +96,7 @@ export function ModernRegisterForm() {
       // Automatically log in after successful registration
       localStorage.setItem('token', response.token)
       toast.success('Kayıt başarılı! Hoş geldiniz 🎉')
-      
+
       setTimeout(() => {
         router.push('/feed')
         router.refresh()
@@ -124,8 +124,8 @@ export function ModernRegisterForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Username Field */}
         <div className="space-y-2">
-          <Label 
-            htmlFor="username" 
+          <Label
+            htmlFor="username"
             className="text-sm font-medium text-gray-700"
           >
             Kullanıcı Adı
@@ -147,8 +147,8 @@ export function ModernRegisterForm() {
 
         {/* Email Field */}
         <div className="space-y-2">
-          <Label 
-            htmlFor="email" 
+          <Label
+            htmlFor="email"
             className="text-sm font-medium text-gray-700"
           >
             Email
@@ -171,8 +171,8 @@ export function ModernRegisterForm() {
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label 
-              htmlFor="password" 
+            <Label
+              htmlFor="password"
               className="text-sm font-medium text-gray-700"
             >
               Şifre
@@ -214,11 +214,10 @@ export function ModernRegisterForm() {
                 {[1, 2, 3, 4, 5].map((level) => (
                   <div
                     key={level}
-                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                      level <= passwordStrength.strength
+                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength
                         ? passwordStrength.color
                         : 'bg-gray-200'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -236,8 +235,8 @@ export function ModernRegisterForm() {
         {/* Confirm Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label 
-              htmlFor="confirmPassword" 
+            <Label
+              htmlFor="confirmPassword"
               className="text-sm font-medium text-gray-700"
             >
               Şifre Tekrarı
@@ -335,8 +334,8 @@ export function ModernRegisterForm() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Zaten hesabın var mı?{' '}
-            <a 
-              href="/login" 
+            <a
+              href="/login"
               className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
             >
               Giriş yap
