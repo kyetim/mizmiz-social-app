@@ -17,20 +17,20 @@ interface PostCardProps {
   image?: string
 }
 
-export function PostCard({ 
-  author, 
-  content, 
-  timestamp, 
-  likes = 0, 
+export function PostCard({
+  author,
+  content,
+  timestamp,
+  likes = 0,
   comments = 0,
-  image 
+  image
 }: PostCardProps) {
   return (
     <GlassmorphismCard>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm">
             <span className="text-white font-semibold text-sm">
               {author.name[0].toUpperCase()}
             </span>
@@ -53,9 +53,9 @@ export function PostCard({
       {/* Image */}
       {image && (
         <div className="mb-4 rounded-xl overflow-hidden">
-          <img 
-            src={image} 
-            alt="Post" 
+          <img
+            src={image}
+            alt="Post"
             className="w-full h-auto object-cover"
           />
         </div>

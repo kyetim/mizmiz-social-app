@@ -47,7 +47,7 @@ export default function FeedPage() {
                         {/* Logo */}
                         <div className="flex items-center gap-8">
                             <Link href="/feed" className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
                                     <span className="text-white font-bold">M</span>
                                 </div>
                                 <span className="text-xl font-bold text-gray-900">MIZMIZ</span>
@@ -100,7 +100,7 @@ export default function FeedPage() {
                             {/* User Menu */}
                             <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
                                 <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm">
                                         <span className="text-white text-sm font-semibold">
                                             {user.username[0].toUpperCase()}
                                         </span>
@@ -132,22 +132,22 @@ export default function FeedPage() {
                             {/* Create Post Card */}
                             <GlassmorphismCard hover={false}>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <span className="text-white font-semibold">
-                                            {user.username[0].toUpperCase()}
-                                        </span>
-                                    </div>
-                  <button className="flex-1 text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 text-sm transition-colors font-medium">
-                    Ne düşünüyorsun?
-                  </button>
-                                    <Button className="bg-primary-600 hover:bg-primary-700 text-white">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span className="text-white font-semibold">
+                      {user.username[0].toUpperCase()}
+                    </span>
+                  </div>
+                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 text-sm transition-colors font-medium">
+                                        Ne düşünüyorsun?
+                                    </button>
+                                    <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
                                         <Plus className="w-4 h-4" />
                                     </Button>
                                 </div>
                             </GlassmorphismCard>
 
-              {/* Welcome Card */}
-              <GlassmorphismCard className="bg-gradient-to-br from-primary-50/90 to-white/95 border-primary-200">
+                            {/* Welcome Card */}
+                            <GlassmorphismCard className="bg-gradient-to-br from-primary-50/90 to-white/95 border-primary-200">
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -251,12 +251,12 @@ export default function FeedPage() {
                         <div className="hidden md:block space-y-4">
                             {/* User Card */}
                             <div className="bg-white rounded-xl border border-gray-200 p-4">
-                                <div className="text-center mb-4">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <span className="text-white text-2xl font-bold">
-                                            {user.username[0].toUpperCase()}
-                                        </span>
-                                    </div>
+                                    <div className="text-center mb-4">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+                                            <span className="text-white text-2xl font-bold">
+                                                {user.username[0].toUpperCase()}
+                                            </span>
+                                        </div>
                                     <h3 className="font-bold text-gray-900">@{user.username}</h3>
                                     <p className="text-sm text-gray-600">{user.email}</p>
                                 </div>
@@ -275,21 +275,21 @@ export default function FeedPage() {
                                 </div>
                             </div>
 
-                {/* Trending Topics */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                <h3 className="font-bold text-gray-900 mb-4 text-base">📈 Trend Konular</h3>
-                <div className="space-y-3">
-                  {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
-                    <a 
-                      key={i}
-                      href={`/explore?tag=${tag.slice(1)}`}
-                      className="block text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors hover:underline"
-                    >
-                      {tag}
-                    </a>
-                  ))}
-                </div>
-              </div>
+                            {/* Trending Topics */}
+                            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                                <h3 className="font-bold text-gray-900 mb-4 text-base">📈 Trend Konular</h3>
+                                <div className="space-y-3">
+                                    {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
+                                        <a
+                                            key={i}
+                                            href={`/explore?tag=${tag.slice(1)}`}
+                                            className="block text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors hover:underline"
+                                        >
+                                            {tag}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

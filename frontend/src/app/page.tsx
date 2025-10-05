@@ -12,7 +12,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-lg">M</span>
               </div>
               <span className="text-xl font-bold text-gray-900">MIZMIZ</span>
@@ -28,7 +28,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center gap-1"
+                className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-1 shadow-sm"
               >
                 Başla
                 <ArrowRight className="w-4 h-4" />
@@ -64,14 +64,14 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
+              <Link 
                 href="/register"
-                className="px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2 group"
+                className="px-8 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2 group"
               >
                 Ücretsiz Başla
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link 
+              <Link
                 href="/login"
                 className="px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-all border-2 border-gray-300 inline-flex items-center gap-2 shadow-sm"
               >
@@ -179,7 +179,7 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold">M</span>
               </div>
               <span className="font-bold text-gray-900">MIZMIZ</span>

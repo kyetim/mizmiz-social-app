@@ -87,7 +87,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center mb-8">
-            <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-xl">M</span>
             </div>
             <span className="ml-3 text-2xl font-bold text-gray-900">

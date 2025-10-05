@@ -10,10 +10,10 @@ interface GlassmorphismCardProps {
   hover?: boolean
 }
 
-export function GlassmorphismCard({ 
-  children, 
+export function GlassmorphismCard({
+  children,
   className,
-  hover = true 
+  hover = true
 }: GlassmorphismCardProps) {
   return (
     <motion.div
@@ -33,7 +33,7 @@ export function GlassmorphismCard({
     >
       {/* Gradient Overlay */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-      
+
       {/* Content */}
       <div className="relative z-10">
         {children}

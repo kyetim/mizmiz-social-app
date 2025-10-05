@@ -157,7 +157,7 @@ export function ModernLoginForm() {
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-11 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
+          className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
           disabled={isLoading}
         >
           {isLoading ? (
