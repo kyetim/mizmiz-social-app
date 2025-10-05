@@ -68,10 +68,10 @@ export function ModernLoginForm() {
     <div className="w-full max-w-md">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
           Tekrar hoş geldin
         </h1>
-        <p className="text-gray-600 text-sm">
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
           Hesabına giriş yapmak için bilgilerini gir
         </p>
       </div>
@@ -82,7 +82,7 @@ export function ModernLoginForm() {
         <div className="space-y-2">
           <Label
             htmlFor="email"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Email
           </Label>
@@ -106,7 +106,7 @@ export function ModernLoginForm() {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="password"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Şifre
             </Label>
@@ -179,7 +179,7 @@ export function ModernLoginForm() {
             <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="px-4 bg-white text-gray-500 font-medium">
+            <span className="px-4 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 font-medium">
               VEYA
             </span>
           </div>
@@ -187,11 +187,11 @@ export function ModernLoginForm() {
 
         {/* Register Link */}
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Hesabın yok mu?{' '}
             <a
               href="/register"
-              className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors"
             >
               Kayıt ol
             </a>

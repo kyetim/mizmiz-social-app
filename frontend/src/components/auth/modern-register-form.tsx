@@ -126,7 +126,7 @@ export function ModernRegisterForm() {
         <div className="space-y-2">
           <Label
             htmlFor="username"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Kullanıcı Adı
           </Label>
@@ -149,7 +149,7 @@ export function ModernRegisterForm() {
         <div className="space-y-2">
           <Label
             htmlFor="email"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Email
           </Label>
@@ -215,8 +215,8 @@ export function ModernRegisterForm() {
                   <div
                     key={level}
                     className={`h-1 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength
-                        ? passwordStrength.color
-                        : 'bg-gray-200'
+                      ? passwordStrength.color
+                      : 'bg-gray-200'
                       }`}
                   />
                 ))}
@@ -237,7 +237,7 @@ export function ModernRegisterForm() {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="confirmPassword"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Şifre Tekrarı
             </Label>
@@ -324,7 +324,7 @@ export function ModernRegisterForm() {
             <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="px-4 bg-white text-gray-500 font-medium">
+            <span className="px-4 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 font-medium">
               VEYA
             </span>
           </div>
@@ -332,11 +332,11 @@ export function ModernRegisterForm() {
 
         {/* Login Link */}
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Zaten hesabın var mı?{' '}
             <a
               href="/login"
-              className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors"
             >
               Giriş yap
             </a>

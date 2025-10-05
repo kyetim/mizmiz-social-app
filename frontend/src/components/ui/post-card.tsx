@@ -36,18 +36,18 @@ export function PostCard({
             </span>
           </div>
           <div>
-            <p className="font-semibold text-gray-900 text-sm">{author.name}</p>
-            <p className="text-gray-500 text-xs">@{author.username} · {timestamp}</p>
+            <p className="font-semibold text-gray-900 dark:text-white text-sm">{author.name}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-xs">@{author.username} · {timestamp}</p>
           </div>
         </div>
-        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <MoreHorizontal className="w-4 h-4 text-gray-400" />
+        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500" />
         </button>
       </div>
 
       {/* Content */}
       <div className="mb-4">
-        <p className="text-gray-900 leading-relaxed font-normal">{content}</p>
+        <p className="text-gray-900 dark:text-gray-100 leading-relaxed font-normal">{content}</p>
       </div>
 
       {/* Image */}
@@ -62,20 +62,20 @@ export function PostCard({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-6 pt-3 border-t border-gray-100">
+      <div className="flex items-center gap-6 pt-3 border-t border-gray-100 dark:border-gray-700">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors group"
         >
-          <Heart className="w-5 h-5" />
+          <Heart className="w-5 h-5 group-hover:fill-current" />
           <span className="text-sm font-medium">{likes}</span>
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
         >
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm font-medium">{comments}</span>
@@ -84,7 +84,7 @@ export function PostCard({
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors ml-auto"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors ml-auto"
         >
           <Share2 className="w-5 h-5" />
         </motion.button>

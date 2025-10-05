@@ -2,37 +2,46 @@
 
 import Link from 'next/link'
 import { ArrowRight, Users, Zap, Shield, Heart } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       {/* Header/Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center shadow-sm">
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center shadow-sm"
+              >
                 <span className="text-white font-bold text-lg">M</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">MIZMIZ</span>
+              </motion.div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               <Link
                 href="/login"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Giriş Yap
               </Link>
-              <Link
-                href="/register"
-                className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-1 shadow-sm"
-              >
-                Başla
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-1 shadow-sm"
+                >
+                  Başla
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -43,72 +52,107 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full mb-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-full mb-6"
+            >
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-green-700">
+              <span className="text-sm font-medium text-green-700 dark:text-green-400">
                 1,234 kullanıcı aktif
               </span>
-            </div>
+            </motion.div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight"
+            >
               Modern sosyal<br />
-              <span className="text-green-600">deneyim</span>
-            </h1>
+              <span className="text-green-600 dark:text-green-400">deneyim</span>
+            </motion.h1>
 
             {/* Description */}
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed"
+            >
               Düşüncelerini paylaş, insanlarla bağlantı kur ve ilham verici
               bir topluluğun parçası ol. Tamamen ücretsiz.
-            </p>
+            </motion.p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className="px-8 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2 group"
-              >
-                Ücretsiz Başla
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/login"
-                className="px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-all border-2 border-gray-300 inline-flex items-center gap-2 shadow-sm"
-              >
-                Giriş Yap
-              </Link>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/register"
+                  className="px-8 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2 group"
+                >
+                  Ücretsiz Başla
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/login"
+                  className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all border-2 border-gray-300 dark:border-gray-700 inline-flex items-center gap-2 shadow-sm"
+                >
+                  Giriş Yap
+                </Link>
+              </motion.div>
+            </motion.div>
 
             {/* Trust Indicators */}
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-green-600" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-600 dark:text-gray-400"
+            >
+              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span>Güvenli</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-green-600" />
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span>Ücretsiz</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-green-600" />
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span>1K+ Kullanıcı</span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50 px-6">
+      <section className="py-20 bg-gray-50 dark:bg-gray-800/50 px-6 transition-colors duration-300">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Neden MIZMIZ?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Modern, hızlı ve kullanıcı dostu bir platform
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -128,20 +172,29 @@ export default function HomePage() {
                 description: 'Gerçek insanlarla gerçek bağlantılar kur',
               },
             ].map((feature, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="bg-white p-8 rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition-all group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-green-200 dark:hover:border-green-700 hover:shadow-lg transition-all group"
               >
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform">
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400 mb-4"
+                >
                   {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                </motion.div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   {feature.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -150,48 +203,87 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="bg-gradient-to-br from-green-600 to-green-700 dark:from-green-700 dark:to-green-800 rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl"
+          >
             {/* Decorative Elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.15, 0.1] }}
+              transition={{ duration: 8, repeat: Infinity }}
+              className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.15, 0.1] }}
+              transition={{ duration: 8, repeat: Infinity, delay: 2 }}
+              className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"
+            />
 
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Hemen katıl, ücretsiz başla
-              </h2>
-              <p className="text-xl text-green-50 mb-8 max-w-2xl mx-auto">
-                Binlerce kullanıcının deneyimlediği modern sosyal platformu sen de keşfet
-              </p>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-xl group"
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-white mb-4"
               >
-                Ücretsiz Hesap Oluştur
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
+                Hemen katıl, ücretsiz başla
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="text-xl text-green-50 mb-8 max-w-2xl mx-auto"
+              >
+                Binlerce kullanıcının deneyimlediği modern sosyal platformu sen de keşfet
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-xl group"
+                >
+                  Ücretsiz Hesap Oluştur
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-gray-100">
+      <footer className="py-12 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 360 }}
+                transition={{ duration: 0.5 }}
+                className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm"
+              >
                 <span className="text-white font-bold">M</span>
-              </div>
-              <span className="font-bold text-gray-900">MIZMIZ</span>
+              </motion.div>
+              <span className="font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
             </div>
 
-            <div className="flex items-center gap-6 text-sm text-gray-600">
-              <a href="/terms" className="hover:text-gray-900 transition-colors">Kullanım Koşulları</a>
-              <a href="/privacy" className="hover:text-gray-900 transition-colors">Gizlilik</a>
-              <a href="/contact" className="hover:text-gray-900 transition-colors">İletişim</a>
+            <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+              <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors">Kullanım Koşulları</a>
+              <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors">Gizlilik</a>
+              <a href="/contact" className="hover:text-gray-900 dark:hover:text-white transition-colors">İletişim</a>
             </div>
 
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               © 2025 MIZMIZ. Tüm hakları saklıdır.
             </div>
           </div>

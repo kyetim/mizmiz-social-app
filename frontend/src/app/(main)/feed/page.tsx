@@ -7,8 +7,10 @@ import { logout } from '@/store/slices/auth-slice'
 import { Button } from '@/components/ui/button'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { Bell, Home, Search, User, LogOut, Plus, TrendingUp, Users } from 'lucide-react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 export default function FeedPage() {
     const router = useRouter()
@@ -29,49 +31,52 @@ export default function FeedPage() {
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Yükleniyor...</p>
+                    <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Yükleniyor...</p>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
                 <div className="container mx-auto px-6">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
                         <div className="flex items-center gap-8">
                             <Link href="/feed" className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
-                                    <span className="text-white font-bold">M</span>
-                                </div>
-                                <span className="text-xl font-bold text-gray-900">MIZMIZ</span>
+                                <motion.div
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-md"
+                                >
+                                    <span className="text-white font-bold text-base">M</span>
+                                </motion.div>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
                             </Link>
 
                             {/* Navigation */}
                             <nav className="hidden md:flex items-center gap-1">
                                 <Link
                                     href="/feed"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg transition-colors"
                                 >
                                     <Home className="w-4 h-4" />
                                     Ana Sayfa
                                 </Link>
                                 <Link
                                     href="/explore"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <TrendingUp className="w-4 h-4" />
                                     Keşfet
                                 </Link>
                                 <Link
                                     href="/people"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <Users className="w-4 h-4" />
                                     İnsanlar
@@ -81,42 +86,54 @@ export default function FeedPage() {
 
                         {/* Right Side */}
                         <div className="flex items-center gap-3">
+                            {/* Theme Toggle */}
+                            <ThemeToggle />
+
                             {/* Search */}
-                            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-                                <Search className="w-4 h-4 text-gray-400" />
+                            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                 <input
                                     type="text"
                                     placeholder="Ara..."
-                                    className="bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-400 w-48"
+                                    className="bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder:text-gray-500 w-48"
                                 />
                             </div>
 
                             {/* Notifications */}
-                            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative">
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
+                            >
                                 <Bell className="w-5 h-5" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-primary-600 rounded-full"></span>
-                            </button>
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-green-600 rounded-full"></span>
+                            </motion.button>
 
                             {/* User Menu */}
-                            <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
+                            <div className="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-700">
                                 <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm">
+                                    <motion.div
+                                        whileHover={{ scale: 1.1 }}
+                                        className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm"
+                                    >
                                         <span className="text-white text-sm font-semibold">
                                             {user.username[0].toUpperCase()}
                                         </span>
-                                    </div>
-                                    <span className="hidden md:inline text-sm font-medium text-gray-900">
+                                    </motion.div>
+                                    <span className="hidden md:inline text-sm font-medium text-gray-900 dark:text-white transition-colors">
                                         {user.username}
                                     </span>
                                 </Link>
 
-                                <button
+                                <motion.button
                                     onClick={handleLogout}
-                                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                     title="Çıkış Yap"
                                 >
                                     <LogOut className="w-4 h-4" />
-                                </button>
+                                </motion.button>
                             </div>
                         </div>
                     </div>
@@ -137,50 +154,58 @@ export default function FeedPage() {
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </div>
-                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 text-sm transition-colors font-medium">
+                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 text-sm transition-colors font-medium">
                                         Ne düşünüyorsun?
                                     </button>
-                                    <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
-                                        <Plus className="w-4 h-4" />
-                                    </Button>
+                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                        <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
+                                            <Plus className="w-4 h-4" />
+                                        </Button>
+                                    </motion.div>
                                 </div>
                             </GlassmorphismCard>
 
                             {/* Welcome Card */}
-                            <GlassmorphismCard className="bg-gradient-to-br from-primary-50/90 to-white/95 border-primary-200">
-                                <div className="flex items-start justify-between mb-4">
+                            <GlassmorphismCard className="bg-gradient-to-br from-green-50/90 dark:from-green-900/20 to-white/95 dark:to-gray-800/95 border-green-200 dark:border-green-800">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex items-start justify-between mb-4"
+                                >
                                     <div>
-                                        <h2 className="text-xl font-bold text-gray-900 mb-1">
+                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                                             🎉 Hoş geldin, {user.firstName || user.username}!
                                         </h2>
-                                        <p className="text-gray-600 text-sm">
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm">
                                             MIZMIZ sosyal platformuna başarıyla giriş yaptın
                                         </p>
                                     </div>
+                                </motion.div>
+
+                                <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-white/80 dark:bg-gray-700/50 rounded-lg">
+                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+                                        <div className="text-xs text-gray-600 dark:text-gray-400">Gönderi</div>
+                                    </motion.div>
+                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+                                        <div className="text-xs text-gray-600 dark:text-gray-400">Takipçi</div>
+                                    </motion.div>
+                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
+                                        <div className="text-xs text-gray-600 dark:text-gray-400">Takip</div>
+                                    </motion.div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-white/80 rounded-lg">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-900">0</div>
-                                        <div className="text-xs text-gray-600">Gönderi</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-900">0</div>
-                                        <div className="text-xs text-gray-600">Takipçi</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-900">0</div>
-                                        <div className="text-xs text-gray-600">Takip</div>
-                                    </div>
-                                </div>
-
-                                <Link
-                                    href="/profile"
-                                    className="inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
-                                >
-                                    <User className="w-4 h-4" />
-                                    Profilini tamamla
-                                </Link>
+                                <motion.div whileHover={{ x: 5 }}>
+                                    <Link
+                                        href="/profile"
+                                        className="inline-flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
+                                    >
+                                        <User className="w-4 h-4" />
+                                        Profilini tamamla
+                                    </Link>
+                                </motion.div>
                             </GlassmorphismCard>
 
                             {/* Example Posts with Glassmorphism */}
@@ -219,7 +244,7 @@ export default function FeedPage() {
 
                             {/* Coming Soon Card */}
                             <GlassmorphismCard>
-                                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                                     🚧 Yakında Gelecek Özellikler
                                 </h3>
                                 <div className="space-y-3">
@@ -230,18 +255,19 @@ export default function FeedPage() {
                                         { icon: '🔔', text: 'Bildirim sistemi', status: 'Sprint 7' },
                                         { icon: '🌟', text: 'Keşfet sayfası', status: 'Sprint 8' },
                                     ].map((feature, i) => (
-                                        <div
+                                        <motion.div
                                             key={i}
-                                            className="flex items-center justify-between p-3 bg-gray-50/80 rounded-lg hover:bg-gray-100 transition-colors"
+                                            whileHover={{ scale: 1.02, x: 5 }}
+                                            className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="text-2xl">{feature.icon}</span>
-                                                <span className="text-sm font-semibold text-gray-800">{feature.text}</span>
+                                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{feature.text}</span>
                                             </div>
-                                            <span className="text-xs text-gray-600 font-semibold px-2 py-1 bg-white/90 rounded border border-gray-200">
+                                            <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold px-2 py-1 bg-white/90 dark:bg-gray-800/90 rounded border border-gray-200 dark:border-gray-600">
                                                 {feature.status}
                                             </span>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </div>
                             </GlassmorphismCard>
@@ -250,22 +276,27 @@ export default function FeedPage() {
                         {/* Sidebar */}
                         <div className="hidden md:block space-y-4">
                             {/* User Card */}
-                            <div className="bg-white rounded-xl border border-gray-200 p-4">
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+                            >
                                 <div className="text-center mb-4">
                                     <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <span className="text-white text-2xl font-bold">
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </div>
-                                    <h3 className="font-bold text-gray-900">@{user.username}</h3>
-                                    <p className="text-sm text-gray-600">{user.email}</p>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">@{user.username}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
                                 </div>
 
-                                <div className="pt-4 border-t border-gray-100">
-                                    <div className="text-sm text-gray-600 mb-2">
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                                         Üyelik Tarihi
                                     </div>
-                                    <div className="text-sm font-medium text-gray-900">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
                                         {new Date(user.createdAt).toLocaleDateString('tr-TR', {
                                             year: 'numeric',
                                             month: 'long',
@@ -273,27 +304,33 @@ export default function FeedPage() {
                                         })}
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Trending Topics */}
-                            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                <h3 className="font-bold text-gray-900 mb-4 text-base">📈 Trend Konular</h3>
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+                            >
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-base">📈 Trend Konular</h3>
                                 <div className="space-y-3">
                                     {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
-                                        <a
+                                        <motion.a
                                             key={i}
                                             href={`/explore?tag=${tag.slice(1)}`}
-                                            className="block text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors hover:underline"
+                                            whileHover={{ x: 5 }}
+                                            className="block text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors hover:underline"
                                         >
                                             {tag}
-                                        </a>
+                                        </motion.a>
                                     ))}
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     )
 }
