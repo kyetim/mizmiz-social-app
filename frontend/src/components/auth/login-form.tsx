@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,7 +10,6 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
 
@@ -33,9 +32,11 @@ interface LoginFormData {
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
   const { isLoading } = useAppSelector((state) => state.auth)
   const [showPassword, setShowPassword] = useState(false)
+  const redirectTo = searchParams.get('redirect') || '/feed'
 
   const {
     register,
@@ -53,105 +54,112 @@ export function LoginForm() {
     try {
       const result = await dispatch(login(data)).unwrap()
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
-      router.push('/feed')
+      
+      // Force navigation after short delay to ensure token is stored
+      setTimeout(() => {
+        router.push(redirectTo)
+        router.refresh()
+      }, 100)
     } catch (error: any) {
       toast.error(error || 'Giriş başarısız. Lütfen tekrar deneyin.')
     }
   }
 
   return (
-    <Card className="w-full max-w-md shadow-lg">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
+    <div className="w-full">
+      <div className="space-y-2 mb-8">
+        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           Giriş Yap
-        </CardTitle>
-        <CardDescription className="text-center">
+        </h2>
+        <p className="text-center text-slate-600 dark:text-slate-400">
           Hesabına giriş yapmak için email ve şifreni gir
-        </CardDescription>
-      </CardHeader>
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="ornek@email.com"
-              autoComplete="email"
-              disabled={isLoading}
-              aria-invalid={!!errors.email}
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          {/* Password Field */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Şifre</Label>
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? 'Gizle' : 'Göster'}
-              </button>
-            </div>
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              autoComplete="current-password"
-              disabled={isLoading}
-              aria-invalid={!!errors.password}
-              {...register('password')}
-            />
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Forgot Password */}
-          <div className="flex justify-end">
-            <a
-              href="/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
-              Şifremi unuttum
-            </a>
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full"
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Email Field */}
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-semibold">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="ornek@email.com"
+            autoComplete="email"
             disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" />
-                Giriş yapılıyor...
-              </>
-            ) : (
-              'Giriş Yap'
-            )}
-          </Button>
+            aria-invalid={!!errors.email}
+            className="h-12 px-4 rounded-xl border-2 focus:border-purple-500 transition-all"
+            {...register('email')}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500 font-medium">{errors.email.message}</p>
+          )}
+        </div>
 
-          <p className="text-sm text-center text-muted-foreground">
-            Hesabın yok mu?{' '}
-            <a href="/register" className="text-primary hover:underline font-medium">
-              Kayıt ol
-            </a>
-          </p>
-        </CardFooter>
+        {/* Password Field */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-slate-700 dark:text-slate-300 font-semibold">
+              Şifre
+            </Label>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-xs text-purple-600 hover:text-purple-700 font-medium transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? 'Gizle' : 'Göster'}
+            </button>
+          </div>
+          <Input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            disabled={isLoading}
+            aria-invalid={!!errors.password}
+            className="h-12 px-4 rounded-xl border-2 focus:border-purple-500 transition-all"
+            {...register('password')}
+          />
+          {errors.password && (
+            <p className="text-sm text-red-500 font-medium">{errors.password.message}</p>
+          )}
+        </div>
+
+        {/* Forgot Password */}
+        <div className="flex justify-end">
+          <a
+            href="/forgot-password"
+            className="text-sm text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+          >
+            Şifremi unuttum
+          </a>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin mr-2" />
+              Giriş yapılıyor...
+            </>
+          ) : (
+            'Giriş Yap'
+          )}
+        </Button>
+
+        <p className="text-sm text-center text-slate-600 dark:text-slate-400 mt-6">
+          Hesabın yok mu?{' '}
+          <a href="/register" className="text-purple-600 hover:text-purple-700 font-semibold transition-colors">
+            Kayıt ol
+          </a>
+        </p>
       </form>
-    </Card>
+    </div>
   )
 }
 
