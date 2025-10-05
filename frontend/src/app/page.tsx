@@ -71,9 +71,9 @@ export default function HomePage() {
                 Ücretsiz Başla
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link
+              <Link 
                 href="/login"
-                className="px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-all border-2 border-gray-200 inline-flex items-center gap-2"
+                className="px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-all border-2 border-gray-300 inline-flex items-center gap-2 shadow-sm"
               >
                 Giriş Yap
               </Link>

@@ -137,17 +137,17 @@ export default function FeedPage() {
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </div>
-                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100/80 hover:bg-gray-200/80 rounded-lg text-gray-500 text-sm transition-colors backdrop-blur-sm">
-                                        Ne düşünüyorsun?
-                                    </button>
+                  <button className="flex-1 text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 text-sm transition-colors font-medium">
+                    Ne düşünüyorsun?
+                  </button>
                                     <Button className="bg-primary-600 hover:bg-primary-700 text-white">
                                         <Plus className="w-4 h-4" />
                                     </Button>
                                 </div>
                             </GlassmorphismCard>
 
-                            {/* Welcome Card */}
-                            <GlassmorphismCard className="bg-gradient-to-br from-primary-50/80 to-white/80 border-primary-100">
+              {/* Welcome Card */}
+              <GlassmorphismCard className="bg-gradient-to-br from-primary-50/90 to-white/95 border-primary-200">
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -232,13 +232,13 @@ export default function FeedPage() {
                                     ].map((feature, i) => (
                                         <div
                                             key={i}
-                                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                            className="flex items-center justify-between p-3 bg-gray-50/80 rounded-lg hover:bg-gray-100 transition-colors"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="text-2xl">{feature.icon}</span>
-                                                <span className="text-sm font-medium text-gray-700">{feature.text}</span>
+                                                <span className="text-sm font-semibold text-gray-800">{feature.text}</span>
                                             </div>
-                                            <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-white rounded">
+                                            <span className="text-xs text-gray-600 font-semibold px-2 py-1 bg-white/90 rounded border border-gray-200">
                                                 {feature.status}
                                             </span>
                                         </div>
@@ -275,21 +275,21 @@ export default function FeedPage() {
                                 </div>
                             </div>
 
-                            {/* Trending Topics */}
-                            <div className="bg-white rounded-xl border border-gray-200 p-4">
-                                <h3 className="font-bold text-gray-900 mb-4">📈 Trend Konular</h3>
-                                <div className="space-y-3">
-                                    {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
-                                        <a
-                                            key={i}
-                                            href={`/explore?tag=${tag.slice(1)}`}
-                                            className="block text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
-                                        >
-                                            {tag}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
+                {/* Trending Topics */}
+              <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4 text-base">📈 Trend Konular</h3>
+                <div className="space-y-3">
+                  {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
+                    <a 
+                      key={i}
+                      href={`/explore?tag=${tag.slice(1)}`}
+                      className="block text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors hover:underline"
+                    >
+                      {tag}
+                    </a>
+                  ))}
+                </div>
+              </div>
                         </div>
                     </div>
                 </div>

@@ -47,7 +47,7 @@ export function PostCard({
 
       {/* Content */}
       <div className="mb-4">
-        <p className="text-gray-800 leading-relaxed">{content}</p>
+        <p className="text-gray-900 leading-relaxed font-normal">{content}</p>
       </div>
 
       {/* Image */}
