@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { logout } from '@/store/slices/auth-slice'
+import { logout, getCurrentUser } from '@/store/slices/auth-slice'
 import { Button } from '@/components/ui/button'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
@@ -15,23 +15,33 @@ import { motion } from 'framer-motion'
 export default function FeedPage() {
     const router = useRouter()
     const dispatch = useAppDispatch()
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+    const { user, isLoading } = useAppSelector((state) => state.auth)
+    const [isInitialized, setIsInitialized] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!token) {
             router.replace('/login')
+            return
         }
-    }, [router])
+
+        // Token varsa ama user yoksa getCurrentUser'ı çağır
+        if (token && !user && !isLoading) {
+            dispatch(getCurrentUser())
+        }
+
+        setIsInitialized(true)
+    }, [router, user, isLoading, dispatch])
 
     function handleLogout() {
         dispatch(logout())
         router.push('/login')
     }
 
-    if (!user) {
+    // Loading durumunu göster
+    if (!isInitialized || isLoading || !user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600 dark:text-gray-400">Yükleniyor...</p>
@@ -50,12 +60,13 @@ export default function FeedPage() {
                         <div className="flex items-center gap-8">
                             <Link href="/feed" className="flex items-center gap-2">
                                 <motion.div
-                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    whileHover={{ scale: 1.05, rotate: 3 }}
+                                    transition={{ duration: 0.15 }}
                                     className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-md"
                                 >
                                     <span className="text-white font-bold text-base">M</span>
                                 </motion.div>
-                                <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
+                                <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors duration-150">MIZMIZ</span>
                             </Link>
 
                             {/* Navigation */}
@@ -101,9 +112,10 @@ export default function FeedPage() {
 
                             {/* Notifications */}
                             <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ duration: 0.1 }}
+                                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 relative"
                             >
                                 <Bell className="w-5 h-5" />
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-green-600 rounded-full"></span>
@@ -111,25 +123,27 @@ export default function FeedPage() {
 
                             {/* User Menu */}
                             <div className="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-700">
-                                <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                                <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-150">
                                     <motion.div
-                                        whileHover={{ scale: 1.1 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ duration: 0.1 }}
                                         className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm"
                                     >
                                         <span className="text-white text-sm font-semibold">
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </motion.div>
-                                    <span className="hidden md:inline text-sm font-medium text-gray-900 dark:text-white transition-colors">
+                                    <span className="hidden md:inline text-sm font-medium text-gray-900 dark:text-white transition-colors duration-150">
                                         {user.username}
                                     </span>
                                 </Link>
 
                                 <motion.button
                                     onClick={handleLogout}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    transition={{ duration: 0.1 }}
+                                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-150"
                                     title="Çıkış Yap"
                                 >
                                     <LogOut className="w-4 h-4" />
@@ -154,11 +168,11 @@ export default function FeedPage() {
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </div>
-                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 text-sm transition-colors font-medium">
+                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 text-sm transition-colors duration-150 font-medium">
                                         Ne düşünüyorsun?
                                     </button>
-                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                        <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
+                                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}>
+                                        <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm transition-colors duration-150">
                                             <Plus className="w-4 h-4" />
                                         </Button>
                                     </motion.div>
@@ -167,11 +181,7 @@ export default function FeedPage() {
 
                             {/* Welcome Card */}
                             <GlassmorphismCard className="bg-gradient-to-br from-green-50/90 dark:from-green-900/20 to-white/95 dark:to-gray-800/95 border-green-200 dark:border-green-800">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex items-start justify-between mb-4"
-                                >
+                                <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                                             🎉 Hoş geldin, {user.firstName || user.username}!
@@ -180,27 +190,27 @@ export default function FeedPage() {
                                             MIZMIZ sosyal platformuna başarıyla giriş yaptın
                                         </p>
                                     </div>
-                                </motion.div>
+                                </div>
 
                                 <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-white/80 dark:bg-gray-700/50 rounded-lg">
-                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
                                         <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
                                         <div className="text-xs text-gray-600 dark:text-gray-400">Gönderi</div>
                                     </motion.div>
-                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
                                         <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
                                         <div className="text-xs text-gray-600 dark:text-gray-400">Takipçi</div>
                                     </motion.div>
-                                    <motion.div whileHover={{ scale: 1.05 }} className="text-center">
+                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
                                         <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
                                         <div className="text-xs text-gray-600 dark:text-gray-400">Takip</div>
                                     </motion.div>
                                 </div>
 
-                                <motion.div whileHover={{ x: 5 }}>
+                                <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.1 }}>
                                     <Link
                                         href="/profile"
-                                        className="inline-flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
+                                        className="inline-flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors duration-150"
                                     >
                                         <User className="w-4 h-4" />
                                         Profilini tamamla
@@ -257,8 +267,9 @@ export default function FeedPage() {
                                     ].map((feature, i) => (
                                         <motion.div
                                             key={i}
-                                            whileHover={{ scale: 1.02, x: 5 }}
-                                            className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+                                            whileHover={{ x: 3 }}
+                                            transition={{ duration: 0.1 }}
+                                            className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors duration-150"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <span className="text-2xl">{feature.icon}</span>
@@ -276,12 +287,7 @@ export default function FeedPage() {
                         {/* Sidebar */}
                         <div className="hidden md:block space-y-4">
                             {/* User Card */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
-                            >
+                            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm transition-shadow duration-150">
                                 <div className="text-center mb-4">
                                     <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <span className="text-white text-2xl font-bold">
@@ -304,29 +310,25 @@ export default function FeedPage() {
                                         })}
                                     </div>
                                 </div>
-                            </motion.div>
+                            </div>
 
                             {/* Trending Topics */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
-                            >
+                            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm transition-shadow duration-150">
                                 <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-base">📈 Trend Konular</h3>
                                 <div className="space-y-3">
                                     {['#development', '#design', '#startup', '#ai', '#tech'].map((tag, i) => (
                                         <motion.a
                                             key={i}
                                             href={`/explore?tag=${tag.slice(1)}`}
-                                            whileHover={{ x: 5 }}
-                                            className="block text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors hover:underline"
+                                            whileHover={{ x: 3 }}
+                                            transition={{ duration: 0.1 }}
+                                            className="block text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors duration-150 hover:underline"
                                         >
                                             {tag}
                                         </motion.a>
                                     ))}
                                 </div>
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
                 </div>

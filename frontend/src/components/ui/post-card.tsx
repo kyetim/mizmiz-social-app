@@ -40,7 +40,7 @@ export function PostCard({
             <p className="text-gray-500 dark:text-gray-400 text-xs">@{author.username} · {timestamp}</p>
           </div>
         </div>
-        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150">
           <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500" />
         </button>
       </div>
@@ -64,27 +64,30 @@ export function PostCard({
       {/* Actions */}
       <div className="flex items-center gap-6 pt-3 border-t border-gray-100 dark:border-gray-700">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors group"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.1 }}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150 group"
         >
-          <Heart className="w-5 h-5 group-hover:fill-current" />
+          <Heart className="w-5 h-5 group-hover:fill-current transition-all duration-150" />
           <span className="text-sm font-medium">{likes}</span>
         </motion.button>
 
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.1 }}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-150"
         >
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm font-medium">{comments}</span>
         </motion.button>
 
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors ml-auto"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.1 }}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-150 ml-auto"
         >
           <Share2 className="w-5 h-5" />
         </motion.button>
