@@ -5,6 +5,15 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 
+// Extend JSX types for Three.js
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      meshStandardMaterial: any
+    }
+  }
+}
+
 function AnimatedCube() {
   const meshRef = useRef<THREE.Mesh>(null)
 
