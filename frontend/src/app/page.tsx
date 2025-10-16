@@ -13,15 +13,15 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <motion.div
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-9 h-9 bg-green-600 rounded-xl flex items-center justify-center shadow-sm"
+                className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-sm ring-2 ring-primary/20"
               >
-                <span className="text-white font-bold text-lg">M</span>
+                <span className="text-white font-bold text-xl">M</span>
               </motion.div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
+              <span className="text-2xl font-bold text-foreground transition-colors">MIZMIZ</span>
             </div>
 
             {/* CTA Buttons */}

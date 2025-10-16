@@ -31,3 +31,6 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     }
 }
 
+// Export alias for better readability
+export const authenticate = authMiddleware
+

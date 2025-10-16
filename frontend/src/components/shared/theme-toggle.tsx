@@ -20,15 +20,15 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+    <div className="flex items-center gap-1 bg-secondary p-1 rounded-lg border border-border">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('light')}
-        className={`p-2 rounded-md transition-colors ${
+        className={`p-2 rounded-md transition-colors duration-200 ${
           theme === 'light'
-            ? 'bg-white dark:bg-gray-700 text-green-600 shadow-sm'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            ? 'bg-background text-primary shadow-sm border border-border'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
         title="Light Mode"
       >
@@ -39,10 +39,10 @@ export function ThemeToggle() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('system')}
-        className={`p-2 rounded-md transition-colors ${
+        className={`p-2 rounded-md transition-colors duration-200 ${
           theme === 'system'
-            ? 'bg-white dark:bg-gray-700 text-green-600 shadow-sm'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            ? 'bg-background text-primary shadow-sm border border-border'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
         title="System"
       >
@@ -53,10 +53,10 @@ export function ThemeToggle() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('dark')}
-        className={`p-2 rounded-md transition-colors ${
+        className={`p-2 rounded-md transition-colors duration-200 ${
           theme === 'dark'
-            ? 'bg-white dark:bg-gray-700 text-green-600 shadow-sm'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            ? 'bg-background text-primary shadow-sm border border-border'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
         title="Dark Mode"
       >

@@ -255,7 +255,7 @@ interface PostInterface {
 interface PostCardProps {
   post: PostInterface
   onLike: (postId: string) => void
-  onComment: (postId: string) => void
+  onComment: (postId: string) => void 
 }
 
 // ❌ Yanlış - type kullanımı

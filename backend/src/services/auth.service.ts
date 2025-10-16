@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { generateToken } from '../utils/jwt'
 import { RegisterDto } from '../interfaces/auth.interface'
-
-const prisma = new PrismaClient()
+import { prisma } from '../lib/prisma'
 
 export class AuthService {
     static async register(data: RegisterDto) {
@@ -56,7 +54,7 @@ export class AuthService {
         })
 
         // Generate JWT token
-        const token = generateToken({ userId: user.id })
+        const token = generateToken({ userId: user.id, role: 'user' })
 
         return { user, token }
     }
@@ -93,7 +91,7 @@ export class AuthService {
         const { passwordHash, ...userWithoutPassword } = user
 
         // Generate JWT token
-        const token = generateToken({ userId: user.id })
+        const token = generateToken({ userId: user.id, role: user.role })
 
         return { user: userWithoutPassword, token }
     }

@@ -20,7 +20,7 @@ export const prisma = new PrismaClient()
 // Middleware
 app.use(helmet()) // Security headers
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -36,6 +36,20 @@ app.get('/health', (_req: Request, res: Response) => {
         message: 'MIZMIZ Backend is running!',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
+    })
+})
+
+// Root endpoint - friendly message for browser visits
+app.get('/', (_req: Request, res: Response) => {
+    res.status(200).json({
+        success: true,
+        message: 'Welcome to MIZMIZ API Server',
+        version: '0.1.0',
+        documentation: {
+            health: '/health',
+            api: '/api',
+            endpoints: 'Visit /api for available endpoints'
+        }
     })
 })
 

@@ -42,6 +42,13 @@ model User {
   followers Follow[] @relation("Following")
   following Follow[] @relation("Follower")
   
+  // New category system relations
+  categoryVotes          CategoryVote[]
+  vibeVotes              VibeVote[]
+  categoryPreferences    UserCategoryPreference[]
+  vibePreferences        UserVibePreference[]
+  gamification           UserGamification?
+  
   @@map("users")
 }
 
@@ -64,6 +71,10 @@ model Post {
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments Comment[]
   likes    Like[]
+  
+  // Category system relations
+  postCategories PostCategory[]
+  postVibes      PostVibe[]
   
   @@index([userId])
   @@index([createdAt])
@@ -147,5 +158,272 @@ model Notification {
   @@index([userId])
   @@index([createdAt])
   @@map("notifications")
+}
+
+// ==================== CATEGORY SYSTEM MODELS ====================
+
+enum CategoryType {
+  STANDARD  // Continuous categories (Humor, Sports, etc.)
+  TEMPORAL  // Temporal categories (World Cup, etc.)
+  TRENDING  // Trending categories
+  EVENT     // Special event categories
+}
+
+model Category {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  icon        String       // Emoji or icon identifier
+  color       String       // HEX color code
+  description String?
+  
+  // Category types
+  type        CategoryType @default(STANDARD)
+  
+  // Temporal properties
+  isActive    Boolean      @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Statistics
+  postsCount  Int          @default(0)
+  votesCount  Int          @default(0)
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  postCategories     PostCategory[]
+  userPreferences    UserCategoryPreference[]
+  battlesAsCategory1 CategoryBattle[]       @relation("BattleCategory1")
+  battlesAsCategory2 CategoryBattle[]       @relation("BattleCategory2")
+  
+  @@index([type])
+  @@index([isActive])
+  @@map("categories")
+}
+
+model Vibe {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  icon        String   // Emoji
+  color       String   // HEX color
+  description String?
+  
+  isActive    Boolean  @default(true)
+  postsCount  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  postVibes       PostVibe[]
+  userPreferences UserVibePreference[]
+  
+  @@map("vibes")
+}
+
+model PostCategory {
+  id         String  @id @default(uuid())
+  postId     String
+  categoryId String
+  
+  // Scoring
+  voteCount   Int     @default(0)
+  upvotes     Int     @default(0)
+  downvotes   Int     @default(0)
+  confidence  Float   @default(0.0) // 0-1 range
+  weight      Float   @default(0.0) // 0-100 range, percentage
+  
+  // AI suggested?
+  isAISuggested Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  post     Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  votes    CategoryVote[]
+  
+  @@unique([postId, categoryId])
+  @@index([postId])
+  @@index([categoryId])
+  @@map("post_categories")
+}
+
+model PostVibe {
+  id     String  @id @default(uuid())
+  postId String
+  vibeId String
+  
+  // Scoring
+  voteCount     Int     @default(0)
+  upvotes       Int     @default(0)
+  downvotes     Int     @default(0)
+  confidence    Float   @default(0.0)
+  weight        Float   @default(0.0)
+  isAISuggested Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  post  Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  vibe  Vibe       @relation(fields: [vibeId], references: [id], onDelete: Cascade)
+  votes VibeVote[]
+  
+  @@unique([postId, vibeId])
+  @@index([postId])
+  @@index([vibeId])
+  @@map("post_vibes")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+model CategoryVote {
+  id             String       @id @default(uuid())
+  userId         String
+  postCategoryId String
+  voteType       VoteType
+  
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postCategory PostCategory @relation(fields: [postCategoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postCategoryId])
+  @@index([userId])
+  @@index([postCategoryId])
+  @@map("category_votes")
+}
+
+model VibeVote {
+  id         String   @id @default(uuid())
+  userId     String
+  postVibeId String
+  voteType   VoteType
+  
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postVibe PostVibe @relation(fields: [postVibeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postVibeId])
+  @@index([userId])
+  @@index([postVibeId])
+  @@map("vibe_votes")
+}
+
+model UserCategoryPreference {
+  id         String @id @default(uuid())
+  userId     String
+  categoryId String
+  
+  // Feed mixer settings
+  weight    Float   @default(0.0) // 0-100 range percentage
+  isBlocked Boolean @default(false) // Never show
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, categoryId])
+  @@index([userId])
+  @@map("user_category_preferences")
+}
+
+model UserVibePreference {
+  id        String  @id @default(uuid())
+  userId    String
+  vibeId    String
+  isBlocked Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vibe Vibe @relation(fields: [vibeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, vibeId])
+  @@index([userId])
+  @@map("user_vibe_preferences")
+}
+
+model UserGamification {
+  id     String @id @default(uuid())
+  userId String @unique
+  
+  // Scores
+  totalVotes             Int   @default(0)
+  accurateVotes          Int   @default(0)
+  categoryExpertiseScore Float @default(0.0)
+  
+  // Badges (stored as JSON)
+  badges Json @default("[]")
+  
+  // Weekly statistics
+  weeklyVotes    Int   @default(0)
+  weeklyAccuracy Float @default(0.0)
+  
+  // Leaderboard position
+  rank Int?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([categoryExpertiseScore])
+  @@index([rank])
+  @@map("user_gamification")
+}
+
+enum BattleStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+model CategoryBattle {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  
+  category1Id String
+  category2Id String
+  
+  // Scores
+  category1Score Int @default(0)
+  category2Score Int @default(0)
+  
+  // Dates
+  startDate DateTime
+  endDate   DateTime
+  
+  status   BattleStatus @default(UPCOMING)
+  winnerId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  category1 Category @relation("BattleCategory1", fields: [category1Id], references: [id])
+  category2 Category @relation("BattleCategory2", fields: [category2Id], references: [id])
+  
+  @@index([startDate])
+  @@index([status])
+  @@map("category_battles")
 }
 

@@ -27,11 +27,11 @@ export default function LoginPage() {
             <motion.div
               whileHover={{ scale: 1.1, rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md"
+              className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-md ring-2 ring-primary/20"
             >
               <span className="text-white font-bold text-xl">M</span>
             </motion.div>
-            <span className="ml-3 text-2xl font-bold text-gray-900 dark:text-white transition-colors">
+            <span className="ml-3 text-2xl font-bold text-foreground transition-colors">
               MIZMIZ
             </span>
           </Link>
@@ -62,26 +62,26 @@ export default function LoginPage() {
         </div>
 
         {/* Decorative Elements */}
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.4, 0.3] }}
           transition={{ duration: 8, repeat: Infinity }}
           className="absolute top-20 right-20 w-72 h-72 bg-green-100 dark:bg-green-900/20 rounded-full blur-3xl opacity-60 animate-pulse"
         />
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.3, 0.2] }}
           transition={{ duration: 8, repeat: Infinity, delay: 2 }}
           className="absolute bottom-20 left-20 w-96 h-96 bg-green-100 dark:bg-green-900/20 rounded-full blur-3xl opacity-40 animate-pulse delay-1000"
         />
 
         {/* Content */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           className="relative z-10 max-w-lg"
         >
           <div className="mb-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -92,7 +92,7 @@ export default function LoginPage() {
             </motion.div>
           </div>
 
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -101,7 +101,7 @@ export default function LoginPage() {
             Topluluğuna<br />geri dön
           </motion.h2>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -135,7 +135,7 @@ export default function LoginPage() {
         </motion.div>
 
         {/* Floating Cards */}
-        <motion.div 
+        <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
           className="absolute bottom-12 right-12 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700"

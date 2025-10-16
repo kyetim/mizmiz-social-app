@@ -21,22 +21,22 @@ interface AuthResponse {
 
 export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClient.post('/api/auth/register', data)
+    const response = await apiClient.post('/auth/register', data)
     return response.data.data
   },
 
   async login(data: LoginData): Promise<AuthResponse> {
-    const response = await apiClient.post('/api/auth/login', data)
+    const response = await apiClient.post('/auth/login', data)
     return response.data.data
   },
 
   async getCurrentUser(): Promise<UserInterface> {
-    const response = await apiClient.get('/api/auth/me')
+    const response = await apiClient.get('/auth/me')
     return response.data.data
   },
 
   async logout(): Promise<void> {
-    await apiClient.post('/api/auth/logout')
+    await apiClient.post('/auth/logout')
     localStorage.removeItem('token')
   },
 }

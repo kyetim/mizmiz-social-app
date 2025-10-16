@@ -8,15 +8,23 @@ import { Button } from '@/components/ui/button'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
-import { Bell, Home, Search, User, LogOut, Plus, TrendingUp, Users } from 'lucide-react'
+import { CreatePostModal } from '@/components/post/create-post-modal'
+import { Bell, Home, Search, User, LogOut, Plus, TrendingUp, Users, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { postsApi } from '@/lib/api/posts'
+import { PostInterface } from '@/interfaces/post.interface'
+import { toast } from 'react-hot-toast'
 
 export default function FeedPage() {
     const router = useRouter()
     const dispatch = useAppDispatch()
     const { user, isLoading } = useAppSelector((state) => state.auth)
     const [isInitialized, setIsInitialized] = useState(false)
+    const [posts, setPosts] = useState<PostInterface[]>([])
+    const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [filter, setFilter] = useState<'all' | 'following'>('all')
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -33,9 +41,38 @@ export default function FeedPage() {
         setIsInitialized(true)
     }, [router, user, isLoading, dispatch])
 
+    useEffect(() => {
+        if (user) {
+            loadPosts()
+        }
+    }, [user, filter])
+
+    async function loadPosts() {
+        setIsLoadingPosts(true)
+        try {
+            const data = await postsApi.getPosts({
+                following: filter === 'following',
+                limit: 50
+            })
+            setPosts(data)
+        } catch (error: any) {
+            toast.error('Gönderiler yüklenemedi')
+        } finally {
+            setIsLoadingPosts(false)
+        }
+    }
+
     function handleLogout() {
         dispatch(logout())
         router.push('/login')
+    }
+
+    function handlePostCreated() {
+        loadPosts()
+    }
+
+    function handlePostUpdated() {
+        loadPosts()
     }
 
     // Loading durumunu göster
@@ -53,7 +90,7 @@ export default function FeedPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
                 <div className="container mx-auto px-6">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
@@ -168,120 +205,90 @@ export default function FeedPage() {
                                             {user.username[0].toUpperCase()}
                                         </span>
                                     </div>
-                                    <button className="flex-1 text-left px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 text-sm transition-colors duration-150 font-medium">
+                                    <button
+                                        onClick={() => setIsCreateModalOpen(true)}
+                                        className="flex-1 text-left px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 text-sm transition-colors duration-150 font-medium"
+                                    >
                                         Ne düşünüyorsun?
                                     </button>
                                     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}>
-                                        <Button className="bg-green-600 hover:bg-green-700 text-white shadow-sm transition-colors duration-150">
+                                        <Button
+                                            onClick={() => setIsCreateModalOpen(true)}
+                                            className="bg-green-600 hover:bg-green-700 text-white shadow-sm transition-colors duration-150"
+                                        >
                                             <Plus className="w-4 h-4" />
                                         </Button>
                                     </motion.div>
                                 </div>
                             </GlassmorphismCard>
 
-                            {/* Welcome Card */}
-                            <GlassmorphismCard className="bg-gradient-to-br from-green-50/90 dark:from-green-900/20 to-white/95 dark:to-gray-800/95 border-green-200 dark:border-green-800">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div>
-                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                                            🎉 Hoş geldin, {user.firstName || user.username}!
-                                        </h2>
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                            MIZMIZ sosyal platformuna başarıyla giriş yaptın
-                                        </p>
+                            {/* Filter Tabs */}
+                            <GlassmorphismCard hover={false}>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setFilter('all')}
+                                        className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-150 ${filter === 'all'
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        Tüm Gönderiler
+                                    </button>
+                                    <button
+                                        onClick={() => setFilter('following')}
+                                        className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-150 ${filter === 'following'
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        Takip Edilenler
+                                    </button>
+                                    <motion.button
+                                        onClick={loadPosts}
+                                        whileHover={{ scale: 1.05, rotate: 180 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
+                                        title="Yenile"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                    </motion.button>
+                                </div>
+                            </GlassmorphismCard>
+
+                            {/* Posts List */}
+                            {isLoadingPosts ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm">Gönderiler yükleniyor...</p>
                                     </div>
                                 </div>
-
-                                <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-white/80 dark:bg-gray-700/50 rounded-lg">
-                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
-                                        <div className="text-xs text-gray-600 dark:text-gray-400">Gönderi</div>
-                                    </motion.div>
-                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
-                                        <div className="text-xs text-gray-600 dark:text-gray-400">Takipçi</div>
-                                    </motion.div>
-                                    <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.1 }} className="text-center cursor-pointer">
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">0</div>
-                                        <div className="text-xs text-gray-600 dark:text-gray-400">Takip</div>
-                                    </motion.div>
-                                </div>
-
-                                <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.1 }}>
-                                    <Link
-                                        href="/profile"
-                                        className="inline-flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors duration-150"
-                                    >
-                                        <User className="w-4 h-4" />
-                                        Profilini tamamla
-                                    </Link>
-                                </motion.div>
-                            </GlassmorphismCard>
-
-                            {/* Example Posts with Glassmorphism */}
-                            <PostCard
-                                author={{
-                                    name: "Ahmet Yılmaz",
-                                    username: "ahmetyilmaz",
-                                }}
-                                content="MIZMIZ platformunu yeni keşfettim! Modern tasarımı ve kullanıcı dostu arayüzü gerçekten çok başarılı. Topluluğa katılmaktan mutluyum! 🎉"
-                                timestamp="5 dk önce"
-                                likes={12}
-                                comments={3}
-                            />
-
-                            <PostCard
-                                author={{
-                                    name: "Ayşe Demir",
-                                    username: "aysedemir",
-                                }}
-                                content="Bugün yeni bir proje başlattım. Next.js 15 ve TypeScript kombinasyonu harika çalışıyor! Tavsiye ederim. 🚀"
-                                timestamp="15 dk önce"
-                                likes={24}
-                                comments={8}
-                            />
-
-                            <PostCard
-                                author={{
-                                    name: "Mehmet Kaya",
-                                    username: "mehmetkaya",
-                                }}
-                                content="Minimal ve temiz tasarımın gücünü asla hafife almayın. Kullanıcı deneyimi her şeyden önemli! 💚"
-                                timestamp="1 saat önce"
-                                likes={45}
-                                comments={12}
-                            />
-
-                            {/* Coming Soon Card */}
-                            <GlassmorphismCard>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                                    🚧 Yakında Gelecek Özellikler
-                                </h3>
-                                <div className="space-y-3">
-                                    {[
-                                        { icon: '📝', text: 'Post oluşturma ve paylaşma', status: 'Sprint 4' },
-                                        { icon: '❤️', text: 'Beğenme ve yorum yapma', status: 'Sprint 5' },
-                                        { icon: '👥', text: 'Kullanıcı takip sistemi', status: 'Sprint 6' },
-                                        { icon: '🔔', text: 'Bildirim sistemi', status: 'Sprint 7' },
-                                        { icon: '🌟', text: 'Keşfet sayfası', status: 'Sprint 8' },
-                                    ].map((feature, i) => (
-                                        <motion.div
-                                            key={i}
-                                            whileHover={{ x: 3 }}
-                                            transition={{ duration: 0.1 }}
-                                            className="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors duration-150"
+                            ) : posts.length === 0 ? (
+                                <GlassmorphismCard>
+                                    <div className="text-center py-12">
+                                        <div className="text-6xl mb-4">📭</div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                            {filter === 'following' ? 'Takip ettiğin kimse yok' : 'Henüz gönderi yok'}
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                            {filter === 'following'
+                                                ? 'Kullanıcıları takip ederek onların gönderilerini görebilirsin'
+                                                : 'İlk gönderiyi sen oluştur!'}
+                                        </p>
+                                        <Button
+                                            onClick={() => filter === 'following' ? router.push('/people') : setIsCreateModalOpen(true)}
+                                            className="bg-green-600 hover:bg-green-700 text-white"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl">{feature.icon}</span>
-                                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{feature.text}</span>
-                                            </div>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold px-2 py-1 bg-white/90 dark:bg-gray-800/90 rounded border border-gray-200 dark:border-gray-600">
-                                                {feature.status}
-                                            </span>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </GlassmorphismCard>
+                                            {filter === 'following' ? 'Kullanıcıları Keşfet' : 'Gönderi Oluştur'}
+                                        </Button>
+                                    </div>
+                                </GlassmorphismCard>
+                            ) : (
+                                posts.map((post) => (
+                                    <PostCard key={post.id} post={post} onPostUpdated={handlePostUpdated} />
+                                ))
+                            )}
                         </div>
 
                         {/* Sidebar */}
@@ -332,7 +339,14 @@ export default function FeedPage() {
                         </div>
                     </div>
                 </div>
-            </main >
-        </div >
+            </main>
+
+            {/* Create Post Modal */}
+            <CreatePostModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onPostCreated={handlePostCreated}
+            />
+        </div>
     )
 }

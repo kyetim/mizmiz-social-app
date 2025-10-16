@@ -11,11 +11,39 @@ export interface PostInterface {
   isEdited: boolean
   createdAt: string
   updatedAt: string
-  user?: UserInterface
+  user?: {
+    id: string
+    username: string
+    firstName: string | null
+    lastName: string | null
+    avatarUrl: string | null
+  }
+  isLikedByCurrentUser?: boolean
 }
 
 export interface CreatePostDto {
   content: string
   imageUrl?: string
+}
+
+export interface CommentInterface {
+  id: string
+  postId: string
+  userId: string
+  content: string
+  likesCount: number
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    username: string
+    firstName: string | null
+    lastName: string | null
+    avatarUrl: string | null
+  }
+}
+
+export interface CreateCommentDto {
+  content: string
 }
 
