@@ -1,87 +1,69 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { AuthService } from '../services/auth.service'
 import { RegisterDto, LoginDto } from '../interfaces/auth.interface'
+import { ValidationError, createValidationError } from '../utils/errors'
+import { asyncHandler } from '../middleware/error.middleware'
 
 export class AuthController {
-    static async register(req: Request, res: Response): Promise<void> {
-        try {
-            const data: RegisterDto = req.body
+    static register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const data: RegisterDto = req.body
 
-            // Validation
-            if (!data.username || !data.email || !data.password) {
-                res.status(400).json({
-                    success: false,
-                    message: 'Username, email and password are required'
-                })
-                return
-            }
+        // Validation
+        const errors: Record<string, string> = {}
+        if (!data.username) errors.username = 'Username is required'
+        if (!data.email) errors.email = 'Email is required'
+        if (!data.password) errors.password = 'Password is required'
 
-            const result = await AuthService.register(data)
-
-            res.status(201).json({
-                success: true,
-                message: 'User registered successfully',
-                data: result
-            })
-        } catch (error: any) {
-            res.status(400).json({
-                success: false,
-                message: error.message || 'Registration failed'
-            })
+        if (Object.keys(errors).length > 0) {
+            throw createValidationError(errors)
         }
-    }
 
-    static async login(req: Request, res: Response): Promise<void> {
-        try {
-            const data: LoginDto = req.body
+        const result = await AuthService.register(data)
 
-            // Validation
-            if (!data.email || !data.password) {
-                res.status(400).json({
-                    success: false,
-                    message: 'Email and password are required'
-                })
-                return
-            }
+        res.status(201).json({
+            success: true,
+            message: 'User registered successfully',
+            data: result
+        })
+    })
 
-            const result = await AuthService.login(data.email, data.password)
+    static login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const data: LoginDto = req.body
 
-            res.status(200).json({
-                success: true,
-                message: 'Login successful',
-                data: result
-            })
-        } catch (error: any) {
-            res.status(401).json({
-                success: false,
-                message: error.message || 'Login failed'
-            })
+        // Validation
+        const errors: Record<string, string> = {}
+        if (!data.email) errors.email = 'Email is required'
+        if (!data.password) errors.password = 'Password is required'
+
+        if (Object.keys(errors).length > 0) {
+            throw createValidationError(errors)
         }
-    }
 
-    static async logout(_req: Request, res: Response): Promise<void> {
+        const result = await AuthService.login(data.email, data.password)
+
+        res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            data: result
+        })
+    })
+
+    static logout = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
         // JWT is stateless, logout handled on client side
         res.status(200).json({
             success: true,
             message: 'Logout successful'
         })
-    }
+    })
 
-    static async getCurrentUser(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = (req as any).user.userId
-            const user = await AuthService.getUserById(userId)
+    static getCurrentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const userId = (req as any).user.userId
+        const user = await AuthService.getUserById(userId)
 
-            res.status(200).json({
-                success: true,
-                data: user
-            })
-        } catch (error: any) {
-            res.status(404).json({
-                success: false,
-                message: error.message || 'User not found'
-            })
-        }
-    }
+        res.status(200).json({
+            success: true,
+            data: user
+        })
+    })
 }
 

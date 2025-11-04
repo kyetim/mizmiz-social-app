@@ -6,11 +6,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
-import { ArrowRight, Check, Eye, EyeOff, Loader2, X } from 'lucide-react'
+import { ArrowRight, Check, Eye, EyeOff, Loader2, X, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authService } from '@/lib/api/auth'
+import { extractErrorMessage, formatValidationErrors } from '@/lib/utils/error-handler'
 
 // Validation schema
 const registerSchema = z.object({
@@ -51,6 +52,7 @@ export function ModernRegisterForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
     watch,
   } = useForm<RegisterFormData>({
@@ -95,14 +97,38 @@ export function ModernRegisterForm() {
 
       // Automatically log in after successful registration
       localStorage.setItem('token', response.token)
-      toast.success('Kayıt başarılı! Hoş geldiniz 🎉')
 
+      // Success message
+      toast.success('Kayıt başarılı! Hoş geldiniz 🎉', {
+        icon: '🎉',
+        duration: 2000,
+      })
+
+      // Small delay before redirect for better UX
       setTimeout(() => {
         router.push('/feed')
         router.refresh()
-      }, 100)
+      }, 500)
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Kayıt başarısız. Lütfen tekrar deneyin.')
+      // Extract user-friendly error message
+      const errorMessage = extractErrorMessage(error)
+
+      // Show error toast
+      toast.error(errorMessage, {
+        icon: <AlertCircle className="w-5 h-5" />,
+        duration: 5000,
+      })
+
+      // Handle validation errors
+      const validationErrors = formatValidationErrors(error)
+      if (Object.keys(validationErrors).length > 0) {
+        // Set form errors
+        Object.entries(validationErrors).forEach(([field, message]) => {
+          if (field === 'username' || field === 'email' || field === 'password') {
+            setError(field as 'username' | 'email' | 'password', { message })
+          }
+        })
+      }
     } finally {
       setIsLoading(false)
     }

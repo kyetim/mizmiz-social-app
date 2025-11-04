@@ -7,6 +7,8 @@ import {
   CommentResponse,
 } from '../interfaces/post.interface'
 import { prisma } from '../lib/prisma'
+import { NotFoundError, ForbiddenError, BusinessLogicError, ErrorCode } from '../utils/errors'
+import { logInfo } from '../utils/logger'
 
 export const postService = {
   // Create a new post
@@ -145,8 +147,12 @@ export const postService = {
       where: { id: postId },
     })
 
-    if (!post || post.userId !== userId) {
-      throw new Error('Post not found or unauthorized')
+    if (!post) {
+      throw new NotFoundError('Post')
+    }
+
+    if (post.userId !== userId) {
+      throw new ForbiddenError('You are not authorized to update this post')
     }
 
     const updatedPost = await prisma.post.update({
@@ -177,8 +183,12 @@ export const postService = {
       where: { id: postId },
     })
 
-    if (!post || post.userId !== userId) {
-      throw new Error('Post not found or unauthorized')
+    if (!post) {
+      throw new NotFoundError('Post')
+    }
+
+    if (post.userId !== userId) {
+      throw new ForbiddenError('You are not authorized to delete this post')
     }
 
     await prisma.post.update({
@@ -194,6 +204,8 @@ export const postService = {
       where: { id: userId },
       data: { postsCount: { decrement: 1 } },
     })
+
+    logInfo('Post deleted', { postId, userId })
   },
 
   // Like a post
@@ -204,7 +216,7 @@ export const postService = {
     })
 
     if (!post || post.isDeleted) {
-      throw new Error('Post not found')
+      throw new NotFoundError('Post')
     }
 
     // Check if already liked
@@ -218,7 +230,7 @@ export const postService = {
     })
 
     if (existingLike) {
-      throw new Error('Post already liked')
+      throw new BusinessLogicError('Post already liked', ErrorCode.ALREADY_LIKED)
     }
 
     // Create like
@@ -248,7 +260,7 @@ export const postService = {
     })
 
     if (!like) {
-      throw new Error('Like not found')
+      throw new BusinessLogicError('Post not liked yet', ErrorCode.NOT_LIKED)
     }
 
     // Delete like
@@ -304,7 +316,7 @@ export const postService = {
     })
 
     if (!post || post.isDeleted) {
-      throw new Error('Post not found')
+      throw new NotFoundError('Post')
     }
 
     const comment = await prisma.comment.create({
@@ -341,8 +353,12 @@ export const postService = {
       where: { id: commentId },
     })
 
-    if (!comment || comment.userId !== userId) {
-      throw new Error('Comment not found or unauthorized')
+    if (!comment) {
+      throw new NotFoundError('Comment')
+    }
+
+    if (comment.userId !== userId) {
+      throw new ForbiddenError('You are not authorized to delete this comment')
     }
 
     await prisma.comment.update({

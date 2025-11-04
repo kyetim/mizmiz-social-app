@@ -6,12 +6,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
-import { ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
+import { extractErrorMessage, formatValidationErrors } from '@/lib/utils/error-handler'
 
 // Validation schema
 const loginSchema = z.object({
@@ -41,6 +42,7 @@ export function ModernLoginForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -52,15 +54,39 @@ export function ModernLoginForm() {
 
   async function onSubmit(data: LoginFormData) {
     try {
-      const result = await dispatch(login(data)).unwrap()
-      toast.success('Giriş başarılı! Hoş geldiniz 🎉')
+      await dispatch(login(data)).unwrap()
 
+      // Success message
+      toast.success('Giriş başarılı! Hoş geldiniz 🎉', {
+        icon: '🎉',
+        duration: 2000,
+      })
+
+      // Small delay before redirect for better UX
       setTimeout(() => {
         router.push(redirectTo)
         router.refresh()
-      }, 100)
+      }, 500)
     } catch (error: any) {
-      toast.error(error || 'Giriş başarısız. Lütfen tekrar deneyin.')
+      // Extract user-friendly error message
+      const errorMessage = extractErrorMessage(error)
+
+      // Show error toast
+      toast.error(errorMessage, {
+        icon: <AlertCircle className="w-5 h-5" />,
+        duration: 5000,
+      })
+
+      // Handle validation errors
+      const validationErrors = formatValidationErrors(error)
+      if (Object.keys(validationErrors).length > 0) {
+        // Set form errors
+        Object.entries(validationErrors).forEach(([field, message]) => {
+          if (field === 'email' || field === 'password') {
+            setError(field, { message })
+          }
+        })
+      }
     }
   }
 

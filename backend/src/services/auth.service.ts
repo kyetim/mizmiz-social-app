@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs'
 import { generateToken } from '../utils/jwt'
 import { RegisterDto } from '../interfaces/auth.interface'
 import { prisma } from '../lib/prisma'
+import { ConflictError, ValidationError, UnauthorizedError, ErrorCode } from '../utils/errors'
+import { logInfo } from '../utils/logger'
 
 export class AuthService {
     static async register(data: RegisterDto) {
@@ -17,16 +19,25 @@ export class AuthService {
 
         if (existingUser) {
             if (existingUser.email === data.email) {
-                throw new Error('Email already exists')
+                throw new ConflictError('Email already exists', {
+                    field: 'email',
+                    value: data.email
+                })
             }
             if (existingUser.username === data.username) {
-                throw new Error('Username already exists')
+                throw new ConflictError('Username already exists', {
+                    field: 'username',
+                    value: data.username
+                })
             }
         }
 
         // Validate password strength
         if (data.password.length < 8) {
-            throw new Error('Password must be at least 8 characters long')
+            throw new ValidationError('Password must be at least 8 characters long', {
+                field: 'password',
+                minLength: 8
+            })
         }
 
         // Hash password
@@ -56,6 +67,12 @@ export class AuthService {
         // Generate JWT token
         const token = generateToken({ userId: user.id, role: 'user' })
 
+        logInfo('User registered successfully', {
+            userId: user.id,
+            username: user.username,
+            email: user.email
+        })
+
         return { user, token }
     }
 
@@ -66,19 +83,19 @@ export class AuthService {
         })
 
         if (!user) {
-            throw new Error('Invalid email or password')
+            throw new UnauthorizedError('Invalid email or password', ErrorCode.INVALID_CREDENTIALS)
         }
 
         // Check if user is active
         if (!user.isActive) {
-            throw new Error('Account is deactivated')
+            throw new UnauthorizedError('Account is deactivated', ErrorCode.ACCOUNT_DEACTIVATED)
         }
 
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.passwordHash)
 
         if (!isValidPassword) {
-            throw new Error('Invalid email or password')
+            throw new UnauthorizedError('Invalid email or password', ErrorCode.INVALID_CREDENTIALS)
         }
 
         // Update last login
@@ -92,6 +109,11 @@ export class AuthService {
 
         // Generate JWT token
         const token = generateToken({ userId: user.id, role: user.role })
+
+        logInfo('User logged in successfully', {
+            userId: user.id,
+            username: user.username
+        })
 
         return { user: userWithoutPassword, token }
     }
@@ -119,7 +141,7 @@ export class AuthService {
         })
 
         if (!user) {
-            throw new Error('User not found')
+            throw new UnauthorizedError('User not found', ErrorCode.NOT_FOUND)
         }
 
         return user
