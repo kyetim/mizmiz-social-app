@@ -7,13 +7,13 @@ export const vibesApi = {
     const response = await apiClient.get('/vibes', {
       params: { isActive },
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get post vibes
   async getPostVibes(postId: string): Promise<PostVibe[]> {
     const response = await apiClient.get(`/posts/${postId}/vibes`)
-    return response.data
+    return response.data.data || response.data
   },
 
   // Add vibe to post
@@ -21,7 +21,7 @@ export const vibesApi = {
     const response = await apiClient.post(`/posts/${postId}/vibes`, {
       vibeId,
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Remove vibe from post

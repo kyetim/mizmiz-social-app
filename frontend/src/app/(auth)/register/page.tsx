@@ -2,14 +2,9 @@
 
 import { ModernRegisterForm } from '@/components/auth/modern-register-form'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { motion } from 'framer-motion'
-
-const FloatingCube = dynamic(
-  () => import('@/components/3d/floating-cube').then((mod) => mod.FloatingCube),
-  { ssr: false }
-)
+import { FloatingCubeCss } from '@/components/3d/floating-cube-css'
 
 export default function RegisterPage() {
   return (
@@ -23,7 +18,7 @@ export default function RegisterPage() {
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 items-center justify-center p-12 relative overflow-hidden transition-colors duration-300">
         {/* 3D Floating Cube */}
         <div className="absolute inset-0 opacity-20">
-          <FloatingCube />
+          <FloatingCubeCss />
         </div>
 
         {/* Decorative Elements */}

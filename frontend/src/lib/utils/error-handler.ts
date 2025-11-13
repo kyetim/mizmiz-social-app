@@ -49,7 +49,8 @@ export const ErrorCode = {
     // Server Errors
     INTERNAL_ERROR: 'SRV_001',
     DATABASE_ERROR: 'SRV_002',
-    EXTERNAL_SERVICE_ERROR: 'SRV_003',
+    DATABASE_CONNECTION_ERROR: 'SRV_003',
+    EXTERNAL_SERVICE_ERROR: 'SRV_004',
 
     // Rate Limiting
     RATE_LIMIT_EXCEEDED: 'RATE_001',
@@ -93,6 +94,7 @@ const errorMessages: Record<string, string> = {
     // Server errors
     [ErrorCode.INTERNAL_ERROR]: 'Bir hata oluştu. Lütfen tekrar deneyin.',
     [ErrorCode.DATABASE_ERROR]: 'Veritabanı hatası. Lütfen tekrar deneyin.',
+    [ErrorCode.DATABASE_CONNECTION_ERROR]: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.',
     [ErrorCode.EXTERNAL_SERVICE_ERROR]: 'Harici servis hatası.',
 
     // Rate limiting

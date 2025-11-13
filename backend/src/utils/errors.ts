@@ -32,7 +32,8 @@ export enum ErrorCode {
     // Server Errors (5000-5099)
     INTERNAL_ERROR = 'SRV_001',
     DATABASE_ERROR = 'SRV_002',
-    EXTERNAL_SERVICE_ERROR = 'SRV_003',
+    DATABASE_CONNECTION_ERROR = 'SRV_003',
+    EXTERNAL_SERVICE_ERROR = 'SRV_004',
 
     // Rate Limiting (6000-6099)
     RATE_LIMIT_EXCEEDED = 'RATE_001',
@@ -158,6 +159,16 @@ export class DatabaseError extends AppError {
     constructor(message: string = 'Database operation failed', details?: any) {
         super(message, 500, ErrorCode.DATABASE_ERROR, false, details)
         Object.setPrototypeOf(this, DatabaseError.prototype)
+    }
+}
+
+/**
+ * Database Connection Error
+ */
+export class DatabaseConnectionError extends AppError {
+    constructor(message: string = 'Cannot connect to database', details?: any) {
+        super(message, 503, ErrorCode.DATABASE_CONNECTION_ERROR, false, details)
+        Object.setPrototypeOf(this, DatabaseConnectionError.prototype)
     }
 }
 

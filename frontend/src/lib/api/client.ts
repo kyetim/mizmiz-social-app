@@ -83,58 +83,78 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log request duration in development
-    if (process.env.NODE_ENV === 'development') {
-      const duration = new Date().getTime() - response.config.metadata?.startTime?.getTime()
-      console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`)
+    if (
+      process.env.NODE_ENV === 'development' &&
+      response.config.metadata &&
+      response.config.metadata.startTime instanceof Date
+    ) {
+      const duration =
+        new Date().getTime() - response.config.metadata.startTime.getTime();
+      console.log(
+        `✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`
+      );
     }
-    return response
-  },
-  async (error: AxiosError) => {
-    const config = error.config as AxiosRequestConfig & {
-      metadata?: { retryCount: number; startTime: Date }
-    }
-
-    // Handle auth errors (401, 403)
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // Only redirect on 401 (unauthorized)
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token')
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
-        }
+    return response;
+    async (error: AxiosError) => {
+      const config = error.config as AxiosRequestConfig & {
+        metadata?: { retryCount: number; startTime: Date }
       }
-      logError(error, 'Authentication Error')
+
+      // Enhanced error logging for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.group('🔴 API Error Details')
+        console.log('URL:', config?.url)
+        console.log('Method:', config?.method)
+        console.log('Status:', error.response?.status)
+        console.log('Response Data:', error.response?.data)
+        console.log('Error Code:', error.code)
+        console.log('Error Message:', error.message)
+        console.log('Has Response:', !!error.response)
+        console.log('Has Request:', !!error.request)
+        console.groupEnd()
+      }
+
+      // Handle auth errors (401, 403)
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Only redirect on 401 (unauthorized)
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token')
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+          }
+        }
+        logError(error, 'Authentication Error')
+        return Promise.reject(error)
+      }
+
+      // Initialize retry count
+      if (!config.metadata) {
+        config.metadata = { retryCount: 0, startTime: new Date() }
+      }
+
+      // Check if should retry
+      if (shouldRetry(error, config.metadata.retryCount)) {
+        config.metadata.retryCount++
+
+        // Calculate delay with exponential backoff
+        const delay = RETRY_DELAY * Math.pow(2, config.metadata.retryCount - 1)
+
+        console.log(
+          `🔄 Retrying request (${config.metadata.retryCount}/${MAX_RETRIES}) after ${delay}ms...`
+        )
+
+        await sleep(delay)
+
+        // Retry request
+        return apiClient(config)
+      }
+
+      // Log error
+      logError(error, 'API Error')
+
       return Promise.reject(error)
     }
-
-    // Initialize retry count
-    if (!config.metadata) {
-      config.metadata = { retryCount: 0, startTime: new Date() }
-    }
-
-    // Check if should retry
-    if (shouldRetry(error, config.metadata.retryCount)) {
-      config.metadata.retryCount++
-
-      // Calculate delay with exponential backoff
-      const delay = RETRY_DELAY * Math.pow(2, config.metadata.retryCount - 1)
-
-      console.log(
-        `🔄 Retrying request (${config.metadata.retryCount}/${MAX_RETRIES}) after ${delay}ms...`
-      )
-
-      await sleep(delay)
-
-      // Retry request
-      return apiClient(config)
-    }
-
-    // Log error
-    logError(error, 'API Error')
-
-    return Promise.reject(error)
-  }
-)
+  })
 
 /**
  * Helper function to handle API errors consistently

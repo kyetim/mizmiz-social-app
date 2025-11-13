@@ -8,13 +8,13 @@ export const gamificationApi = {
   // Get my gamification stats
   async getMyStats(): Promise<UserGamification> {
     const response = await apiClient.get('/gamification/me')
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get user stats
   async getUserStats(userId: string): Promise<UserGamification> {
     const response = await apiClient.get(`/gamification/users/${userId}`)
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get leaderboard
@@ -22,7 +22,7 @@ export const gamificationApi = {
     const response = await apiClient.get('/gamification/leaderboard', {
       params: { limit },
     })
-    return response.data
+    return response.data.data || response.data
   },
 }
 

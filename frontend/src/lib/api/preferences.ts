@@ -12,13 +12,13 @@ export const preferencesApi = {
     vibePreferences: UserVibePreference[]
   }> {
     const response = await apiClient.get('/preferences')
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get category preferences
   async getCategoryPreferences(): Promise<UserCategoryPreference[]> {
     const response = await apiClient.get('/preferences/categories')
-    return response.data
+    return response.data.data || response.data
   },
 
   // Set category preference
@@ -32,7 +32,7 @@ export const preferencesApi = {
       weight,
       isBlocked,
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Set bulk category preferences
@@ -42,7 +42,7 @@ export const preferencesApi = {
     const response = await apiClient.post('/preferences/categories/bulk', {
       preferences,
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Block/unblock category
@@ -78,7 +78,7 @@ export const preferencesApi = {
         vibes: params?.vibes?.join(','),
       },
     })
-    return response.data
+    return response.data.data || response.data
   },
 }
 

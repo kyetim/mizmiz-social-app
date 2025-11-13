@@ -8,7 +8,7 @@ export const categoriesApi = {
     isActive?: boolean
   }): Promise<Category[]> {
     const response = await apiClient.get('/categories', { params: filters })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get trending categories
@@ -16,19 +16,19 @@ export const categoriesApi = {
     const response = await apiClient.get('/categories/trending', {
       params: { limit },
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get temporal categories
   async getTemporalCategories(): Promise<Category[]> {
     const response = await apiClient.get('/categories/temporal')
-    return response.data
+    return response.data.data || response.data
   },
 
   // Get post categories
   async getPostCategories(postId: string): Promise<PostCategory[]> {
     const response = await apiClient.get(`/posts/${postId}/categories`)
-    return response.data
+    return response.data.data || response.data
   },
 
   // Add category to post
@@ -39,7 +39,7 @@ export const categoriesApi = {
     const response = await apiClient.post(`/posts/${postId}/categories`, {
       categoryId,
     })
-    return response.data
+    return response.data.data || response.data
   },
 
   // Remove category from post
@@ -63,7 +63,7 @@ export const categoriesApi = {
   // Get AI suggestions
   async getSuggestedCategories(content: string): Promise<{ suggestions: string[] }> {
     const response = await apiClient.post('/categories/suggest', { content })
-    return response.data
+    return response.data.data || response.data
   },
 }
 

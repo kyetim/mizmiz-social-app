@@ -4,6 +4,8 @@ import postRoutes from './post.routes'
 import categoryRoutes from './category.routes'
 import preferenceRoutes from './preference.routes'
 import gamificationRoutes from './gamification.routes'
+import uploadRoutes from './upload.routes'
+import userRoutes from './user.routes'
 
 const router = Router()
 
@@ -17,6 +19,7 @@ router.get('/', (_req, res) => {
             auth: '/api/auth',
             users: '/api/users',
             posts: '/api/posts',
+            upload: '/api/upload',
             comments: '/api/comments',
             notifications: '/api/notifications',
             categories: '/api/categories',
@@ -31,10 +34,11 @@ router.get('/', (_req, res) => {
 // Mount route modules
 router.use('/auth', authRoutes)
 router.use('/posts', postRoutes)
+router.use('/upload', uploadRoutes)
+router.use('/users', userRoutes)
 router.use('/', categoryRoutes) // Category routes are at root level
 router.use('/', preferenceRoutes) // Preference and feed routes
 router.use('/', gamificationRoutes) // Gamification routes
-// router.use('/users', userRoutes)
 // router.use('/comments', commentRoutes)
 // router.use('/notifications', notificationRoutes)
 

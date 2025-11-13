@@ -6,6 +6,7 @@ import { X, Image, Smile } from 'lucide-react'
 import { useAppSelector } from '@/store/hooks'
 import { postsApi } from '@/lib/api/posts'
 import { toast } from 'react-hot-toast'
+import { ImageUpload } from '@/components/upload/image-upload'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -16,6 +17,8 @@ interface CreatePostModalProps {
 export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostModalProps) {
   const { user } = useAppSelector((state) => state.auth)
   const [content, setContent] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [showImageUpload, setShowImageUpload] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -34,9 +37,14 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
     setIsLoading(true)
 
     try {
-      await postsApi.createPost({ content: content.trim() })
+      await postsApi.createPost({
+        content: content.trim(),
+        imageUrl: imageUrl || undefined
+      })
       toast.success('Gönderi başarıyla oluşturuldu! 🎉')
       setContent('')
+      setImageUrl('')
+      setShowImageUpload(false)
       onClose()
       onPostCreated()
     } catch (error: any) {
@@ -88,10 +96,18 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
                 <div className="p-4 overflow-y-auto max-h-[60vh]">
                   {/* User Info */}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                      <span className="text-white font-bold text-lg">
-                        {user.username[0].toUpperCase()}
-                      </span>
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden">
+                      {user.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white font-bold text-lg">
+                          {user.username[0].toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">
@@ -113,16 +129,30 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
                     maxLength={500}
                   />
 
+                  {/* Image Upload */}
+                  {showImageUpload && (
+                    <div className="mt-4">
+                      <ImageUpload
+                        onImageUploaded={(url) => setImageUrl(url)}
+                        existingImage={imageUrl}
+                        type="post"
+                      />
+                    </div>
+                  )}
+
                   {/* Character Count */}
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-2">
                       <motion.button
                         type="button"
+                        onClick={() => setShowImageUpload(!showImageUpload)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
-                        title="Resim ekle (yakında)"
-                        disabled
+                        className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 ${showImageUpload
+                          ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                          : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400'
+                          }`}
+                        title="Resim ekle"
                       >
                         <Image className="w-5 h-5" />
                       </motion.button>
@@ -138,13 +168,12 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
                       </motion.button>
                     </div>
                     <span
-                      className={`text-sm font-medium ${
-                        content.length > 450
-                          ? 'text-red-600 dark:text-red-400'
-                          : content.length > 400
+                      className={`text-sm font-medium ${content.length > 450
+                        ? 'text-red-600 dark:text-red-400'
+                        : content.length > 400
                           ? 'text-yellow-600 dark:text-yellow-400'
                           : 'text-gray-600 dark:text-gray-400'
-                      }`}
+                        }`}
                     >
                       {content.length}/500
                     </span>

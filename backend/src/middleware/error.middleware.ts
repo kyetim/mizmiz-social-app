@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { AppError, isOperationalError, InternalServerError } from '../utils/errors'
+import { AppError, isOperationalError, InternalServerError, DatabaseConnectionError } from '../utils/errors'
 import logger, { logError } from '../utils/logger'
 import { Prisma } from '@prisma/client'
 
@@ -14,6 +14,15 @@ function generateRequestId(): string {
  * Handle Prisma errors and convert to AppError
  */
 function handlePrismaError(error: any): AppError {
+    // Database connection errors
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+        return new DatabaseConnectionError(
+            process.env.NODE_ENV === 'development'
+                ? 'Cannot connect to database. Please check your DATABASE_URL and ensure the database is running.'
+                : 'Database connection failed'
+        )
+    }
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Unique constraint violation
         if (error.code === 'P2002') {
