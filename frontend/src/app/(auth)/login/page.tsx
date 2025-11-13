@@ -5,6 +5,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { motion } from 'framer-motion'
+import { Suspense } from 'react'
 
 const FloatingSphere = dynamic(
   () => import('@/components/3d/floating-sphere').then((mod) => mod.FloatingSphere),
@@ -37,7 +38,9 @@ export default function LoginPage() {
           </Link>
 
           {/* Form */}
-          <ModernLoginForm />
+          <Suspense fallback={<div className="text-center py-8">Yükleniyor...</div>}>
+            <ModernLoginForm />
+          </Suspense>
 
           {/* Back to Home */}
           <div className="mt-8 text-center">
