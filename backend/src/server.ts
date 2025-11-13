@@ -28,8 +28,26 @@ if (!fs.existsSync(logsDir)) {
 
 // Middleware
 app.use(helmet()) // Security headers
+// CORS Configuration - normalize URLs (remove trailing slash)
+const allowedOrigins = process.env.FRONTEND_URL 
+    ? [process.env.FRONTEND_URL.replace(/\/$/, '')]  // Remove trailing slash if exists
+    : ['http://localhost:3000', 'http://localhost:3001']
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:3001'],
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true)
+        
+        // Normalize origin (remove trailing slash)
+        const normalizedOrigin = origin.replace(/\/$/, '')
+        
+        // Check if origin is allowed
+        if (allowedOrigins.some(allowed => allowed === normalizedOrigin || allowed === origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
