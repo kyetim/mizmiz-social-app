@@ -1,0 +1,11 @@
+# Backend klasörünü ignore et - sadece frontend deploy edilecek
+backend/
+backend/**/*
+
+# Diğer gereksiz dosyalar
+*.md
+!README.md
+.git/
+.vscode/
+node_modules/
+
