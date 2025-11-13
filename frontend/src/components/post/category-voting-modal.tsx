@@ -58,7 +58,9 @@ export function CategoryVotingModal({
       alert(`Oyunuz kaydedildi: ${voteText}`)
     } catch (error) {
       console.error('Failed to vote:', error)
-      console.error('Error details:', error.response?.data)
+      if (error && typeof error === 'object' && 'response' in error) {
+        console.error('Error details:', (error as any).response?.data)
+      }
       alert('Oylama sırasında hata oluştu. Lütfen tekrar deneyin.')
     }
   }
