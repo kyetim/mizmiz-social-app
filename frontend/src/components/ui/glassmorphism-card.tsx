@@ -23,8 +23,8 @@ export function GlassmorphismCard({
       whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : {}}
       className={cn(
         "relative rounded-2xl p-6",
-        "bg-card/95 backdrop-blur-sm",
-        "border border-border/50",
+        "bg-white dark:bg-gray-900 backdrop-blur-sm",
+        "border border-gray-200 dark:border-gray-700/50",
         "shadow-md transition-shadow duration-200 ease-out will-change-transform",
         hover && "hover:shadow-lg",
         className
