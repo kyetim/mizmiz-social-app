@@ -144,143 +144,143 @@ export default function ExplorePage() {
                     {/* Tabs */}
                     <GlassmorphismCard hover={false}>
                         <div className="flex items-center gap-2">
-                            <motion.button
-                                onClick={() => setActiveTab('trending')}
+                        <motion.button
+                            onClick={() => setActiveTab('trending')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === 'trending'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                <TrendingUp className="w-4 h-4" />
+                                }`}
+                        >
+                            <TrendingUp className="w-4 h-4" />
                                 <span>Trendler</span>
-                            </motion.button>
+                        </motion.button>
 
-                            <motion.button
-                                onClick={() => setActiveTab('categories')}
+                        <motion.button
+                            onClick={() => setActiveTab('categories')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === 'categories'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                <Hash className="w-4 h-4" />
+                                }`}
+                        >
+                            <Hash className="w-4 h-4" />
                                 <span>Kategoriler</span>
-                            </motion.button>
+                        </motion.button>
 
-                            <motion.button
-                                onClick={() => setActiveTab('popular')}
+                        <motion.button
+                            onClick={() => setActiveTab('popular')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === 'popular'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                <Heart className="w-4 h-4" />
+                                }`}
+                        >
+                            <Heart className="w-4 h-4" />
                                 <span>Popüler</span>
-                            </motion.button>
-                        </div>
+                        </motion.button>
+                    </div>
                     </GlassmorphismCard>
 
                     {/* Content */}
-                    <AnimatePresence mode="wait">
-                        {/* Trending Posts */}
-                        {activeTab === 'trending' && (
-                            <motion.div
-                                key="trending"
+                            <AnimatePresence mode="wait">
+                                {/* Trending Posts */}
+                                {activeTab === 'trending' && (
+                                    <motion.div
+                                        key="trending"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 className="space-y-6"
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center justify-center py-16">
-                                        <div className="text-center">
-                                            <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">Yükleniyor...</p>
-                                        </div>
-                                    </div>
-                                ) : displayPosts.length > 0 ? (
-                                    displayPosts.map((post) => (
-                                        <PostCard key={post.id} post={post} onPostUpdated={handlePostUpdated} />
-                                    ))
-                                ) : (
-                                    <GlassmorphismCard>
-                                        <div className="text-center py-12">
-                                            {searchQuery ? (
-                                                <>
-                                                    <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                        Arama sonucu bulunamadı
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" için gönderi bulunamadı
-                                                    </p>
-                                                    <button
-                                                        onClick={() => setSearchQuery('')}
-                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                                                    >
-                                                        Aramayı Temizle
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                        Henüz trend gönderi yok
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400">
-                                                        İlk trend gönderileri oluşturmaya başla!
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </GlassmorphismCard>
+                                    >
+                                        {isLoading ? (
+                                            <div className="flex items-center justify-center py-16">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Yükleniyor...</p>
+                                                </div>
+                                            </div>
+                                        ) : displayPosts.length > 0 ? (
+                                            displayPosts.map((post) => (
+                                                <PostCard key={post.id} post={post} onPostUpdated={handlePostUpdated} />
+                                            ))
+                                        ) : (
+                                            <GlassmorphismCard>
+                                                <div className="text-center py-12">
+                                                    {searchQuery ? (
+                                                        <>
+                                                            <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                                Arama sonucu bulunamadı
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                                                "{searchQuery}" için gönderi bulunamadı
+                                                            </p>
+                                                            <button
+                                                                onClick={() => setSearchQuery('')}
+                                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                                                            >
+                                                                Aramayı Temizle
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                                Henüz trend gönderi yok
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400">
+                                                                İlk trend gönderileri oluşturmaya başla!
+                                                            </p>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </GlassmorphismCard>
+                                        )}
+                                    </motion.div>
                                 )}
-                            </motion.div>
-                        )}
 
-                        {/* Categories */}
-                        {activeTab === 'categories' && (
-                            <motion.div
-                                key="categories"
+                                {/* Categories */}
+                                {activeTab === 'categories' && (
+                                    <motion.div
+                                        key="categories"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                            >
-                                <GlassmorphismCard>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                        <Hash className="w-5 h-5 text-green-600" />
-                                        {searchQuery ? `"${searchQuery}" için Kategoriler` : 'Tüm Kategoriler'}
-                                    </h3>
-                                    {isLoading ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-                                        </div>
-                                    ) : displayCategories.length > 0 ? (
+                                    >
+                                        <GlassmorphismCard>
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                                <Hash className="w-5 h-5 text-green-600" />
+                                                {searchQuery ? `"${searchQuery}" için Kategoriler` : 'Tüm Kategoriler'}
+                                            </h3>
+                                            {isLoading ? (
+                                                <div className="flex items-center justify-center py-12">
+                                                    <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                                                </div>
+                                            ) : displayCategories.length > 0 ? (
                                         <div className="grid gap-3">
-                                            {displayCategories.map((category) => (
-                                                <motion.div
-                                                    key={category.id}
+                                                    {displayCategories.map((category) => (
+                                                        <motion.div
+                                                            key={category.id}
                                                     whileHover={{ scale: 1.01 }}
-                                                    className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-all"
-                                                    style={{ borderColor: category.color + '40' }}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-md"
-                                                            style={{ backgroundColor: category.color + '20' }}
+                                                            className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-all"
+                                                            style={{ borderColor: category.color + '40' }}
                                                         >
-                                                            {category.icon}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900 dark:text-white">{category.name}</h4>
-                                                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                                {category.postsCount} gönderi
-                                                            </p>
+                                                    <div className="flex items-center gap-3">
+                                                                <div
+                                                                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-md"
+                                                                    style={{ backgroundColor: category.color + '20' }}
+                                                                >
+                                                                    {category.icon}
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <h4 className="font-bold text-gray-900 dark:text-white">{category.name}</h4>
+                                                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                                        {category.postsCount} gönderi
+                                                                    </p>
                                                             {category.description && (
                                                                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                                                     {category.description}
@@ -288,111 +288,111 @@ export default function ExplorePage() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            {searchQuery ? (
-                                                <>
-                                                    <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                        Kategori bulunamadı
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" ile eşleşen kategori yok
-                                                    </p>
-                                                    <button
-                                                        onClick={() => setSearchQuery('')}
-                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                                                    >
-                                                        Aramayı Temizle
-                                                    </button>
-                                                </>
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
                                             ) : (
-                                                <p className="text-gray-600 dark:text-gray-400">Henüz kategori yok</p>
+                                                <div className="text-center py-12">
+                                                    {searchQuery ? (
+                                                        <>
+                                                            <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                                Kategori bulunamadı
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                                                "{searchQuery}" ile eşleşen kategori yok
+                                                            </p>
+                                                            <button
+                                                                onClick={() => setSearchQuery('')}
+                                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                                                            >
+                                                                Aramayı Temizle
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <p className="text-gray-600 dark:text-gray-400">Henüz kategori yok</p>
+                                                    )}
+                                                </div>
                                             )}
-                                        </div>
-                                    )}
-                                </GlassmorphismCard>
-                            </motion.div>
-                        )}
+                                        </GlassmorphismCard>
+                                    </motion.div>
+                                )}
 
-                        {/* Popular Posts */}
-                        {activeTab === 'popular' && (
-                            <motion.div
-                                key="popular"
+                                {/* Popular Posts */}
+                                {activeTab === 'popular' && (
+                                    <motion.div
+                                        key="popular"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 className="space-y-6"
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center justify-center py-16">
-                                        <div className="text-center">
-                                            <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">Yükleniyor...</p>
-                                        </div>
-                                    </div>
-                                ) : displayPosts.length > 0 ? (
-                                    displayPosts
-                                        .sort((a, b) => (b.likesCount + b.commentsCount) - (a.likesCount + a.commentsCount))
-                                        .map((post) => (
-                                            <PostCard key={post.id} post={post} onPostUpdated={handlePostUpdated} />
-                                        ))
-                                ) : (
-                                    <GlassmorphismCard>
-                                        <div className="text-center py-12">
-                                            {searchQuery ? (
-                                                <>
-                                                    <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                        Arama sonucu bulunamadı
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" için popüler gönderi bulunamadı
-                                                    </p>
-                                                    <button
-                                                        onClick={() => setSearchQuery('')}
-                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                                                    >
-                                                        Aramayı Temizle
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Heart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                        Henüz popüler gönderi yok
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400">
-                                                        Gönderilere beğeni ve yorum yaparak popüler hale getir!
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </GlassmorphismCard>
+                                    >
+                                        {isLoading ? (
+                                            <div className="flex items-center justify-center py-16">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Yükleniyor...</p>
+                                                </div>
+                                            </div>
+                                        ) : displayPosts.length > 0 ? (
+                                            displayPosts
+                                                .sort((a, b) => (b.likesCount + b.commentsCount) - (a.likesCount + a.commentsCount))
+                                                .map((post) => (
+                                                    <PostCard key={post.id} post={post} onPostUpdated={handlePostUpdated} />
+                                                ))
+                                        ) : (
+                                            <GlassmorphismCard>
+                                                <div className="text-center py-12">
+                                                    {searchQuery ? (
+                                                        <>
+                                                            <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                                Arama sonucu bulunamadı
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                                                "{searchQuery}" için popüler gönderi bulunamadı
+                                                            </p>
+                                                            <button
+                                                                onClick={() => setSearchQuery('')}
+                                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                                                            >
+                                                                Aramayı Temizle
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Heart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                                Henüz popüler gönderi yok
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400">
+                                                                Gönderilere beğeni ve yorum yaparak popüler hale getir!
+                                                            </p>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </GlassmorphismCard>
+                                        )}
+                                    </motion.div>
                                 )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                            </AnimatePresence>
+                        </div>
 
                 {/* Custom Right Sidebar for Explore Page */}
                 <aside className="hidden xl:block sticky top-4 h-fit space-y-4 w-full">
                 {/* Trending Categories */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <div className="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             <Hash className="w-5 h-5 text-green-600" />
-                            Trend Kategoriler
-                        </h3>
+                                    Trend Kategoriler
+                                </h3>
                         <div className="space-y-3">
                             {trendingCategories.slice(0, 6).map((category, index) => (
-                                <motion.div
-                                    key={category.id}
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.05 }}
+                                        <motion.div
+                                            key={category.id}
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: index * 0.05 }}
                                     className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors cursor-pointer group"
                                     onClick={() => setActiveTab('categories')}
                                 >
@@ -403,21 +403,21 @@ export default function ExplorePage() {
                                         >
                                             {category.icon}
                                         </div>
-                                        <div className="flex-1 min-w-0">
+                                            <div className="flex-1 min-w-0">
                                             <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
-                                                {category.name}
-                                            </p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                {category.postsCount} gönderi
-                                            </p>
+                                                    {category.name}
+                                                </p>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                    {category.postsCount} gönderi
+                                                </p>
                                         </div>
                                     </div>
                                     <div className="text-xs font-semibold text-gray-400 dark:text-gray-500">
                                         #{index + 1}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
                         {trendingCategories.length > 5 && (
                             <button
                                 onClick={() => setActiveTab('categories')}
@@ -429,24 +429,24 @@ export default function ExplorePage() {
                     </div>
 
                 {/* Statistics */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+                <div className="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-green-600" />
-                            İstatistikler
-                        </h3>
-                        <div className="space-y-3">
+                                    İstatistikler
+                                </h3>
+                                <div className="space-y-3">
                             <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
                                         <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                    </div>
+                                            </div>
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Gönderi
-                                    </span>
-                                </div>
+                                            </span>
+                                        </div>
                                 <span className="text-xl font-bold text-green-600 dark:text-green-400">
                                     {explorePosts.length}
-                                </span>
+                                        </span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                                 <div className="flex items-center gap-3">
@@ -455,11 +455,11 @@ export default function ExplorePage() {
                                     </div>
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Kategori
-                                    </span>
-                                </div>
+                                            </span>
+                                        </div>
                                 <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                                    {trendingCategories.length}
-                                </span>
+                                            {trendingCategories.length}
+                                        </span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
                                 <div className="flex items-center gap-3">
@@ -507,7 +507,7 @@ export default function ExplorePage() {
                         </div>
                     </motion.div>
                 </aside>
-            </div>
+                </div>
         </div>
     )
 }
