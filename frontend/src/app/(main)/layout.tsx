@@ -70,7 +70,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             {/* Left Sidebar */}
-            <aside className="fixed left-0 top-0 h-screen w-64 xl:w-72 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex flex-col z-40 hidden lg:flex">
+            <aside className="fixed left-0 top-0 h-screen w-64 xl:w-72 border-r border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-900 p-4 flex flex-col z-40 hidden lg:flex">
                 {/* Logo */}
                 <Link href="/feed" className="flex items-center gap-3 px-3 py-2 mb-4">
                     <motion.div
@@ -95,7 +95,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 }`}
                         >
                             <Home className="w-6 h-6" />
-                            <span className="text-lg">Ana Sayfa</span>
+                            <span className="text-lg">Timeline</span>
                         </motion.div>
                     </Link>
 
@@ -209,7 +209,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </aside>
 
             {/* Mobile Top Bar */}
-            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/50">
                 <div className="flex items-center justify-between px-4 h-14">
                     <Link href="/feed" className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
@@ -248,7 +248,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             {/* Right Sidebar - Twitter Style */}
                             <aside className="hidden xl:block sticky top-4 h-fit space-y-4">
                                 {/* Search Box */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+                                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-3">
                                     <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
                                         <Search className="w-4 h-4 text-gray-400" />
                                         <input
@@ -260,7 +260,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 </div>
 
                                 {/* Trending Topics */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                                         🔥 Gündemdekiler
                                     </h3>
@@ -309,7 +309,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 </div>
 
                                 {/* Suggested People */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                                         👥 Kimi takip etmeli?
                                     </h3>
@@ -356,7 +356,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 </div>
 
                                 {/* Footer Links */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
                                     <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                                         <a href="#" className="hover:underline">Hizmet Şartları</a>
                                         <a href="#" className="hover:underline">Gizlilik Politikası</a>

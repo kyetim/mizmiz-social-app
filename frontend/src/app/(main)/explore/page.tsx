@@ -380,8 +380,8 @@ export default function ExplorePage() {
 
                 {/* Custom Right Sidebar for Explore Page */}
                 <aside className="hidden xl:block sticky top-4 h-fit space-y-4 w-full">
-                    {/* Trending Categories */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                {/* Trending Categories */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             <Hash className="w-5 h-5 text-green-600" />
                             Trend Kategoriler
@@ -428,8 +428,8 @@ export default function ExplorePage() {
                         )}
                     </div>
 
-                    {/* Statistics */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                {/* Statistics */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-green-600" />
                             İstatistikler
