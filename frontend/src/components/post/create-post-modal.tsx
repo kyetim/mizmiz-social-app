@@ -8,10 +8,12 @@ import { postsApi } from '@/lib/api/posts'
 import { toast } from 'react-hot-toast'
 import { ImageUpload } from '@/components/upload/image-upload'
 
+import { PostInterface } from '@/interfaces/post.interface'
+
 interface CreatePostModalProps {
   isOpen: boolean
   onClose: () => void
-  onPostCreated: () => void
+  onPostCreated: (post?: PostInterface) => void
 }
 
 export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostModalProps) {
@@ -37,7 +39,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
     setIsLoading(true)
 
     try {
-      await postsApi.createPost({
+      const newPost = await postsApi.createPost({
         content: content.trim(),
         imageUrl: imageUrl || undefined
       })
@@ -46,7 +48,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
       setImageUrl('')
       setShowImageUpload(false)
       onClose()
-      onPostCreated()
+      onPostCreated(newPost) // Pass the new post to parent
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Gönderi oluşturulamadı')
     } finally {

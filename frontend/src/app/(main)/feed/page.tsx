@@ -40,10 +40,14 @@ export default function FeedPage() {
         }
     }
 
-    function handlePostCreated(newPost: PostInterface) {
-        // Add post to Redux store (optimistic update)
-        dispatch(addPost(newPost))
-        toast.success('Gönderi başarıyla oluşturuldu!')
+    function handlePostCreated(newPost?: PostInterface) {
+        if (newPost) {
+            // Optimistic update: Add new post immediately to Redux
+            dispatch(addPost(newPost))
+        } else {
+            // Fallback: Force refresh if post not provided
+            loadPosts(true)
+        }
     }
 
     function handlePostUpdated() {
