@@ -143,7 +143,7 @@ export default function ProfilePage() {
         : user.username
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 lg:pt-2">
             {/* Cover & Profile Section */}
             <div className="relative">
                 <div className="container mx-auto max-w-4xl">

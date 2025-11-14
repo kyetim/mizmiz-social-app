@@ -226,7 +226,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
             {/* Main Content Wrapper */}
             <main className="lg:ml-64 xl:ml-72 pt-14 lg:pt-0 min-h-screen">
-                <div className={`mx-auto px-4 py-4 lg:py-0 ${pathname === '/explore' ? 'max-w-[1400px]' : 'max-w-7xl'}`}>
+                <div className={`mx-auto px-4 py-4 lg:py-6 ${pathname === '/explore' ? 'max-w-[1400px]' : 'max-w-7xl'}`}>
                     {pathname === '/explore' ? (
                         // Explore page renders its own grid
                         children

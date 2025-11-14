@@ -111,11 +111,13 @@ export default function PeoplePage() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 lg:pt-2">
             {/* Page Title */}
-            <div className="flex items-center gap-2 mb-6">
-                <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">İnsanlar</h1>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Users className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">İnsanlar</h1>
             </div>
             {/* Search Bar */}
             <motion.div

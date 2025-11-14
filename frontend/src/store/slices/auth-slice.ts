@@ -80,6 +80,7 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       localStorage.removeItem('token')
+      // Note: Cache clearing for posts and categories will be handled by middleware
     },
     setCredentials: (state, action: PayloadAction<{ user: UserInterface; token: string }>) => {
       state.user = action.payload.user
