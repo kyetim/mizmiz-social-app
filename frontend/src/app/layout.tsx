@@ -19,6 +19,21 @@ export const metadata: Metadata = {
   title: "MIZMIZ - Modern Sosyal Medya Platformu",
   description: "Kullanıcıların içerik paylaşabileceği ve etkileşime girebileceği modern sosyal medya platformu",
   keywords: ["sosyal medya", "içerik paylaşımı", "topluluk", "blog"],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#16a34a" },
+    { media: "(prefers-color-scheme: dark)", color: "#15803d" },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MIZMIZ",
+  },
 };
 
 export default function RootLayout({
