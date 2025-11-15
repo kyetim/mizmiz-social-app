@@ -20,47 +20,44 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center gap-1 bg-secondary p-1 rounded-lg border border-border">
+    <div className="flex items-center justify-between gap-1 w-full bg-gray-100 dark:bg-gray-800/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('light')}
-        className={`p-2 rounded-md transition-colors duration-200 ${
-          theme === 'light'
-            ? 'bg-background text-primary shadow-sm border border-border'
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
+        className={`flex-1 p-2 rounded-md transition-colors duration-200 ${theme === 'light'
+            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+          }`}
         title="Light Mode"
       >
-        <Sun className="w-4 h-4" />
+        <Sun className="w-4 h-4 mx-auto" />
       </motion.button>
 
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('system')}
-        className={`p-2 rounded-md transition-colors duration-200 ${
-          theme === 'system'
-            ? 'bg-background text-primary shadow-sm border border-border'
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
+        className={`flex-1 p-2 rounded-md transition-colors duration-200 ${theme === 'system'
+            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+          }`}
         title="System"
       >
-        <Monitor className="w-4 h-4" />
+        <Monitor className="w-4 h-4 mx-auto" />
       </motion.button>
 
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setTheme('dark')}
-        className={`p-2 rounded-md transition-colors duration-200 ${
-          theme === 'dark'
-            ? 'bg-background text-primary shadow-sm border border-border'
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
+        className={`flex-1 p-2 rounded-md transition-colors duration-200 ${theme === 'dark'
+            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm border border-gray-200 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+          }`}
         title="Dark Mode"
       >
-        <Moon className="w-4 h-4" />
+        <Moon className="w-4 h-4 mx-auto" />
       </motion.button>
     </div>
   )
