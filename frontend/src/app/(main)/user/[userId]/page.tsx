@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useAppSelector } from '@/store/hooks'
-import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
+import { followUser, unfollowUser, checkIsFollowing } from '@/store/slices/follow-slice'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ImageLightbox } from '@/components/ui/image-lightbox'
@@ -31,15 +31,16 @@ import { tr } from 'date-fns/locale'
 
 export default function UserProfilePage() {
     const router = useRouter()
+    const dispatch = useAppDispatch()
     const params = useParams()
     const userId = params.userId as string
     const { user: currentUser } = useAppSelector((state) => state.auth)
+    const { following } = useAppSelector((state) => state.follow)
     const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'media'>('posts')
     const [posts, setPosts] = useState<PostInterface[]>([])
     const [likedPosts, setLikedPosts] = useState<PostInterface[]>([])
     const [profileUser, setProfileUser] = useState<UserInterface | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const [isFollowing, setIsFollowing] = useState(false)
     const [showAvatarLightbox, setShowAvatarLightbox] = useState(false)
     const [showCoverLightbox, setShowCoverLightbox] = useState(false)
 
@@ -66,11 +67,30 @@ export default function UserProfilePage() {
             setProfileUser(user)
             setPosts(userPosts)
             setLikedPosts(userLikedPosts)
+
+            // Check if following this user
+            if (userId !== currentUser?.id) {
+                dispatch(checkIsFollowing(userId))
+            }
         } catch (error) {
             toast.error('Kullanıcı profili yüklenemedi')
             console.error('Load user profile error:', error)
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    async function handleFollowToggle() {
+        try {
+            if (following.has(userId)) {
+                await dispatch(unfollowUser(userId)).unwrap()
+                toast.success('Takibi bıraktınız')
+            } else {
+                await dispatch(followUser(userId)).unwrap()
+                toast.success('Takip ediyorsunuz! 🎉')
+            }
+        } catch (error: any) {
+            toast.error(error || 'İşlem başarısız')
         }
     }
 
@@ -135,7 +155,6 @@ export default function UserProfilePage() {
                                 <p className="text-xs text-gray-600 dark:text-gray-400">{posts.length} gönderi</p>
                             </div>
                         </div>
-                        <ThemeToggle />
                     </div>
                 </div>
             </header>
@@ -185,11 +204,16 @@ export default function UserProfilePage() {
                         {!isOwnProfile && (
                             <div className="flex items-center gap-2 mb-4">
                                 <motion.button
+                                    onClick={handleFollowToggle}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/30 transition-all flex items-center justify-center gap-2"
+                                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${
+                                        following.has(userId)
+                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                            : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-green-500/30'
+                                    }`}
                                 >
-                                    {isFollowing ? (
+                                    {following.has(userId) ? (
                                         <>
                                             <UserMinus className="w-4 h-4" />
                                             Takipten Çık
