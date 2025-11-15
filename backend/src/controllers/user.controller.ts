@@ -143,6 +143,79 @@ export const userController = {
             success: true,
             data: posts
         })
+    }),
+
+    // Follow a user
+    followUser: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        const followerId = req.user!.userId
+        const { userId: followingId } = req.params
+
+        await UserService.followUser(followerId, followingId)
+
+        res.status(200).json({
+            success: true,
+            message: 'User followed successfully'
+        })
+    }),
+
+    // Unfollow a user
+    unfollowUser: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        const followerId = req.user!.userId
+        const { userId: followingId } = req.params
+
+        await UserService.unfollowUser(followerId, followingId)
+
+        res.status(200).json({
+            success: true,
+            message: 'User unfollowed successfully'
+        })
+    }),
+
+    // Check if following a user
+    isFollowing: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        const followerId = req.user!.userId
+        const { userId: followingId } = req.params
+
+        const isFollowing = await UserService.isFollowing(followerId, followingId)
+
+        res.status(200).json({
+            success: true,
+            data: { isFollowing }
+        })
+    }),
+
+    // Get user's followers
+    getFollowers: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        const { userId } = req.params
+        const { limit, offset } = req.query
+
+        const followers = await UserService.getFollowers(
+            userId,
+            limit ? parseInt(limit as string) : undefined,
+            offset ? parseInt(offset as string) : undefined
+        )
+
+        res.status(200).json({
+            success: true,
+            data: followers
+        })
+    }),
+
+    // Get user's following
+    getFollowing: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        const { userId } = req.params
+        const { limit, offset } = req.query
+
+        const following = await UserService.getFollowing(
+            userId,
+            limit ? parseInt(limit as string) : undefined,
+            offset ? parseInt(offset as string) : undefined
+        )
+
+        res.status(200).json({
+            success: true,
+            data: following
+        })
     })
 }
 

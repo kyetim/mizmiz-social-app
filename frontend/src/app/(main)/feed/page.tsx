@@ -19,19 +19,18 @@ export default function FeedPage() {
     const { user } = useAppSelector((state) => state.auth)
     const { feedPosts, isLoading: isLoadingPosts } = useAppSelector((state) => state.posts)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-    const [filter, setFilter] = useState<'all' | 'following'>('all')
 
-    // Load posts from Redux (with cache)
+    // Load posts from Redux (with cache) - Timeline only shows following posts
     useEffect(() => {
         if (user) {
             loadPosts()
         }
-    }, [user, filter])
+    }, [user])
 
     async function loadPosts(forceRefresh = false) {
         try {
             await dispatch(fetchFeedPosts({
-                following: filter === 'following',
+                following: true, // Timeline always shows only followed users' posts
                 limit: 50,
                 forceRefresh
             })).unwrap()
@@ -96,39 +95,20 @@ export default function FeedPage() {
                 </GlassmorphismCard>
             </div>
 
-            {/* Filter Tabs */}
-            <GlassmorphismCard hover={false}>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-150 ${filter === 'all'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                            }`}
-                    >
-                        Tüm Gönderiler
-                    </button>
-                    <button
-                        onClick={() => setFilter('following')}
-                        className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-150 ${filter === 'following'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                            }`}
-                    >
-                        Takip Edilenler
-                    </button>
-                    <motion.button
-                        onClick={() => loadPosts(true)}
-                        whileHover={{ scale: 1.05, rotate: 180 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ duration: 0.3 }}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
-                        title="Yenile"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                    </motion.button>
-                </div>
-            </GlassmorphismCard>
+            {/* Refresh Button */}
+            <div className="flex justify-end">
+                <motion.button
+                    onClick={() => loadPosts(true)}
+                    whileHover={{ scale: 1.05, rotate: 180 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors shadow-sm"
+                    title="Yenile"
+                >
+                    <RefreshCw className="w-4 h-4" />
+                    <span className="text-sm font-medium">Yenile</span>
+                </motion.button>
+            </div>
 
             {/* Posts List */}
             {isLoadingPosts && feedPosts.length === 0 ? (
@@ -141,20 +121,18 @@ export default function FeedPage() {
             ) : feedPosts.length === 0 ? (
                 <GlassmorphismCard>
                     <div className="text-center py-12">
-                        <div className="text-6xl mb-4">📭</div>
+                        <div className="text-6xl mb-4">👥</div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                            {filter === 'following' ? 'Takip ettiğin kimse yok' : 'Henüz gönderi yok'}
+                            Timeline'ın henüz boş
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {filter === 'following'
-                                ? 'Kullanıcıları takip ederek onların gönderilerini görebilirsin'
-                                : 'İlk gönderiyi sen oluştur!'}
+                            Kullanıcıları takip ederek onların gönderilerini burada görebilirsin
                         </p>
                         <Button
-                            onClick={() => filter === 'following' ? router.push('/people') : setIsCreateModalOpen(true)}
+                            onClick={() => router.push('/people')}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
-                            {filter === 'following' ? 'Kullanıcıları Keşfet' : 'Gönderi Oluştur'}
+                            Kullanıcıları Keşfet
                         </Button>
                     </div>
                 </GlassmorphismCard>

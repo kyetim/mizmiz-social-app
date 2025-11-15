@@ -64,15 +64,25 @@ export const usersApi = {
         await apiClient.delete(`/users/${userId}/follow`)
     },
 
-    // Get user's followers
-    async getFollowers(userId: string): Promise<UserInterface[]> {
-        const response = await apiClient.get(`/users/${userId}/followers`)
+    // Check if following a user
+    async isFollowing(userId: string): Promise<boolean> {
+        const response = await apiClient.get(`/users/${userId}/is-following`)
+        return response.data.data.isFollowing
+    },
+
+    // Get followers
+    async getFollowers(userId: string, limit?: number, offset?: number): Promise<UserInterface[]> {
+        const response = await apiClient.get(`/users/${userId}/followers`, {
+            params: { limit, offset }
+        })
         return response.data.data || response.data
     },
 
-    // Get user's following
-    async getFollowing(userId: string): Promise<UserInterface[]> {
-        const response = await apiClient.get(`/users/${userId}/following`)
+    // Get following
+    async getFollowing(userId: string, limit?: number, offset?: number): Promise<UserInterface[]> {
+        const response = await apiClient.get(`/users/${userId}/following`, {
+            params: { limit, offset }
+        })
         return response.data.data || response.data
     },
 

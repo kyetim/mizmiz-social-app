@@ -57,5 +57,27 @@ export const postsApi = {
   async deleteComment(commentId: string): Promise<void> {
     await apiClient.delete(`/posts/comments/${commentId}`)
   },
+
+  // Get explore/all posts (not filtered by following)
+  async getExplorePosts(params?: { limit?: number; cursor?: string }): Promise<PostInterface[]> {
+    const response = await apiClient.get('/posts', { 
+      params: {
+        ...params,
+        following: false
+      }
+    })
+    return response.data.data
+  },
+
+  // Get timeline/feed posts (filtered by following)
+  async getFeedPosts(params?: { limit?: number; cursor?: string }): Promise<PostInterface[]> {
+    const response = await apiClient.get('/posts', { 
+      params: {
+        ...params,
+        following: true
+      }
+    })
+    return response.data.data
+  },
 }
 

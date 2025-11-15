@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
+import { followUser, unfollowUser } from '@/store/slices/follow-slice'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -24,12 +25,13 @@ import { toast } from 'react-hot-toast'
 
 export default function PeoplePage() {
     const router = useRouter()
+    const dispatch = useAppDispatch()
     const { user: currentUser } = useAppSelector((state) => state.auth)
+    const { following } = useAppSelector((state) => state.follow)
     const [users, setUsers] = useState<UserInterface[]>([])
     const [filteredUsers, setFilteredUsers] = useState<UserInterface[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
-    const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set())
     const [activeTab, setActiveTab] = useState<'all' | 'suggested'>('all')
 
     useEffect(() => {
@@ -77,21 +79,15 @@ export default function PeoplePage() {
 
     async function handleFollow(userId: string) {
         try {
-            if (followingUsers.has(userId)) {
-                await usersApi.unfollowUser(userId)
-                setFollowingUsers(prev => {
-                    const newSet = new Set(prev)
-                    newSet.delete(userId)
-                    return newSet
-                })
+            if (following.has(userId)) {
+                await dispatch(unfollowUser(userId)).unwrap()
                 toast.success('Takibi bıraktınız')
             } else {
-                await usersApi.followUser(userId)
-                setFollowingUsers(prev => new Set(prev).add(userId))
+                await dispatch(followUser(userId)).unwrap()
                 toast.success('Takip ediyorsunuz! 🎉')
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'İşlem başarısız')
+            toast.error(error || 'İşlem başarısız')
         }
     }
 
@@ -273,12 +269,12 @@ export default function PeoplePage() {
                                             onClick={() => handleFollow(user.id)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm ${followingUsers.has(user.id)
+                                            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm ${following.has(user.id)
                                                 ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                                 : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-green-500/30'
                                                 }`}
                                         >
-                                            {followingUsers.has(user.id) ? (
+                                            {following.has(user.id) ? (
                                                 <span className="flex items-center gap-1">
                                                     <UserCheck className="w-4 h-4" />
                                                     Takip Ediliyor

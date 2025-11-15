@@ -252,5 +252,178 @@ export class UserService {
                 commentsCount: like.post!._count.comments
             }))
     }
+
+    // Follow a user
+    static async followUser(followerId: string, followingId: string) {
+        // Can't follow yourself
+        if (followerId === followingId) {
+            throw new ValidationError('You cannot follow yourself')
+        }
+
+        // Check if user to follow exists
+        const userToFollow = await prisma.user.findUnique({
+            where: { id: followingId }
+        })
+
+        if (!userToFollow) {
+            throw new NotFoundError('User not found')
+        }
+
+        // Check if already following
+        const existingFollow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId,
+                    followingId
+                }
+            }
+        })
+
+        if (existingFollow) {
+            throw new ConflictError('Already following this user')
+        }
+
+        // Create follow relationship
+        await prisma.$transaction(async (tx) => {
+            // Create follow record
+            await tx.follow.create({
+                data: {
+                    followerId,
+                    followingId
+                }
+            })
+
+            // Update follower's following count
+            await tx.user.update({
+                where: { id: followerId },
+                data: { followingCount: { increment: 1 } }
+            })
+
+            // Update following's followers count
+            await tx.user.update({
+                where: { id: followingId },
+                data: { followersCount: { increment: 1 } }
+            })
+        })
+
+        logInfo('User followed', { followerId, followingId })
+    }
+
+    // Unfollow a user
+    static async unfollowUser(followerId: string, followingId: string) {
+        // Can't unfollow yourself
+        if (followerId === followingId) {
+            throw new ValidationError('Invalid operation')
+        }
+
+        // Check if follow exists
+        const existingFollow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId,
+                    followingId
+                }
+            }
+        })
+
+        if (!existingFollow) {
+            throw new NotFoundError('Follow relationship not found')
+        }
+
+        // Delete follow relationship
+        await prisma.$transaction(async (tx) => {
+            // Delete follow record
+            await tx.follow.delete({
+                where: {
+                    followerId_followingId: {
+                        followerId,
+                        followingId
+                    }
+                }
+            })
+
+            // Update follower's following count
+            await tx.user.update({
+                where: { id: followerId },
+                data: { followingCount: { decrement: 1 } }
+            })
+
+            // Update following's followers count
+            await tx.user.update({
+                where: { id: followingId },
+                data: { followersCount: { decrement: 1 } }
+            })
+        })
+
+        logInfo('User unfollowed', { followerId, followingId })
+    }
+
+    // Check if user is following another user
+    static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+        const follow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId,
+                    followingId
+                }
+            }
+        })
+
+        return !!follow
+    }
+
+    // Get user's followers
+    static async getFollowers(userId: string, limit: number = 50, offset: number = 0) {
+        const follows = await prisma.follow.findMany({
+            where: { followingId: userId },
+            include: {
+                follower: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        bio: true,
+                        avatarUrl: true,
+                        isVerified: true,
+                        followersCount: true,
+                        followingCount: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: offset
+        })
+
+        return follows.map(f => f.follower)
+    }
+
+    // Get user's following
+    static async getFollowing(userId: string, limit: number = 50, offset: number = 0) {
+        const follows = await prisma.follow.findMany({
+            where: { followerId: userId },
+            include: {
+                following: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        bio: true,
+                        avatarUrl: true,
+                        isVerified: true,
+                        followersCount: true,
+                        followingCount: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: offset
+        })
+
+        return follows.map(f => f.following)
+    }
 }
 
