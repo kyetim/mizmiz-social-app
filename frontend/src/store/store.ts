@@ -13,14 +13,6 @@ export const store = configureStore({
     follow: followReducer,
     search: searchReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these paths in the state
-        ignoredActions: ['follow/setFollowing'],
-        ignoredPaths: ['follow.following'],
-      },
-    }),
 })
 
 export type RootState = ReturnType<typeof store.getState>

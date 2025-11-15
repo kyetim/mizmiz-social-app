@@ -3,7 +3,7 @@ import { usersApi } from '@/lib/api/users'
 import { UserInterface } from '@/interfaces/user.interface'
 
 interface FollowState {
-    following: Set<string> // User IDs that current user is following
+    following: string[] // User IDs that current user is following
     followers: UserInterface[]
     followingUsers: UserInterface[]
     isLoading: boolean
@@ -11,7 +11,7 @@ interface FollowState {
 }
 
 const initialState: FollowState = {
-    following: new Set(),
+    following: [],
     followers: [],
     followingUsers: [],
     isLoading: false,
@@ -87,7 +87,7 @@ const followSlice = createSlice({
             state.error = null
         },
         setFollowing: (state, action: PayloadAction<string[]>) => {
-            state.following = new Set(action.payload)
+            state.following = action.payload
         }
     },
     extraReducers: (builder) => {
@@ -99,7 +99,9 @@ const followSlice = createSlice({
             })
             .addCase(followUser.fulfilled, (state, action) => {
                 state.isLoading = false
-                state.following.add(action.payload)
+                if (!state.following.includes(action.payload)) {
+                    state.following.push(action.payload)
+                }
             })
             .addCase(followUser.rejected, (state, action) => {
                 state.isLoading = false
@@ -114,7 +116,7 @@ const followSlice = createSlice({
             })
             .addCase(unfollowUser.fulfilled, (state, action) => {
                 state.isLoading = false
-                state.following.delete(action.payload)
+                state.following = state.following.filter(id => id !== action.payload)
             })
             .addCase(unfollowUser.rejected, (state, action) => {
                 state.isLoading = false
@@ -125,9 +127,11 @@ const followSlice = createSlice({
         builder
             .addCase(checkIsFollowing.fulfilled, (state, action) => {
                 if (action.payload.isFollowing) {
-                    state.following.add(action.payload.userId)
+                    if (!state.following.includes(action.payload.userId)) {
+                        state.following.push(action.payload.userId)
+                    }
                 } else {
-                    state.following.delete(action.payload.userId)
+                    state.following = state.following.filter(id => id !== action.payload.userId)
                 }
             })
 

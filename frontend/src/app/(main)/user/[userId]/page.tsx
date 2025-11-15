@@ -82,7 +82,7 @@ export default function UserProfilePage() {
 
     async function handleFollowToggle() {
         try {
-            if (following.has(userId)) {
+            if (following.includes(userId)) {
                 await dispatch(unfollowUser(userId)).unwrap()
                 toast.success('Takibi bıraktınız')
             } else {
@@ -208,12 +208,12 @@ export default function UserProfilePage() {
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
                                     className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${
-                                        following.has(userId)
+                                        following.includes(userId)
                                             ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                             : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-green-500/30'
                                     }`}
                                 >
-                                    {following.has(userId) ? (
+                                    {following.includes(userId) ? (
                                         <>
                                             <UserMinus className="w-4 h-4" />
                                             Takipten Çık
