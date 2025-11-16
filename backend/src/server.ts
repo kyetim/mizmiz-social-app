@@ -1,12 +1,15 @@
 import express, { Application, Request, Response } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import routes from './routes'
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.middleware'
 import { requestLoggerMiddleware } from './middleware/request-logger.middleware'
+import { generalRateLimiter } from './middleware/rate-limit.middleware'
 import { PrismaClient } from '@prisma/client'
 import logger, { logInfo, logError } from './utils/logger'
+import { securityConfig } from './config/security.config'
 import fs from 'fs'
 import path from 'path'
 
@@ -26,35 +29,29 @@ if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true })
 }
 
-// Middleware
-app.use(helmet()) // Security headers
-// CORS Configuration - normalize URLs (remove trailing slash)
-const allowedOrigins = process.env.FRONTEND_URL 
-    ? [process.env.FRONTEND_URL.replace(/\/$/, '')]  // Remove trailing slash if exists
-    : ['http://localhost:3000', 'http://localhost:3001']
+// Trust proxy (for rate limiting and IP detection behind reverse proxy)
+app.set('trust proxy', 1)
 
-app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true)
-        
-        // Normalize origin (remove trailing slash)
-        const normalizedOrigin = origin.replace(/\/$/, '')
-        
-        // Check if origin is allowed
-        if (allowedOrigins.some(allowed => allowed === normalizedOrigin || allowed === origin)) {
-            callback(null, true)
-        } else {
-            callback(new Error('Not allowed by CORS'))
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}))
-app.use(requestLoggerMiddleware) // Request logging with Winston
-app.use(express.json({ limit: '10mb' })) // Parse JSON bodies
-app.use(express.urlencoded({ extended: true, limit: '10mb' })) // Parse URL-encoded bodies
+// Middleware
+
+// Advanced Helmet configuration for enhanced security
+app.use(helmet(securityConfig.helmet))
+
+// CORS Configuration with credentials support
+app.use(cors(securityConfig.cors))
+
+// Cookie parser for httpOnly cookies
+app.use(cookieParser())
+
+// Request logging
+app.use(requestLoggerMiddleware)
+
+// General rate limiting (applies to all routes)
+app.use(generalRateLimiter)
+
+// Body parsing with size limits
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {

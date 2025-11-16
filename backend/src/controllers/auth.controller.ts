@@ -1,61 +1,142 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import { AuthService } from '../services/auth.service'
 import { RegisterDto, LoginDto } from '../interfaces/auth.interface'
-import { ValidationError, createValidationError } from '../utils/errors'
 import { asyncHandler } from '../middleware/error.middleware'
+import { securityConfig } from '../config/security.config'
 
 export class AuthController {
+    /**
+     * Register new user
+     * Validation is handled by middleware
+     */
     static register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const data: RegisterDto = req.body
 
-        // Validation
-        const errors: Record<string, string> = {}
-        if (!data.username) errors.username = 'Username is required'
-        if (!data.email) errors.email = 'Email is required'
-        if (!data.password) errors.password = 'Password is required'
-
-        if (Object.keys(errors).length > 0) {
-            throw createValidationError(errors)
-        }
-
         const result = await AuthService.register(data)
+
+        // Set httpOnly cookies
+        res.cookie(
+            securityConfig.cookie.accessToken.name,
+            result.accessToken,
+            securityConfig.cookie.accessToken
+        )
+
+        res.cookie(
+            securityConfig.cookie.refreshToken.name,
+            result.refreshToken,
+            securityConfig.cookie.refreshToken
+        )
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
-            data: result
+            data: { user: result.user }
         })
     })
 
+    /**
+     * Login user
+     * Validation is handled by middleware
+     */
     static login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const data: LoginDto = req.body
 
-        // Validation
-        const errors: Record<string, string> = {}
-        if (!data.email) errors.email = 'Email is required'
-        if (!data.password) errors.password = 'Password is required'
+        // Get user agent and IP for security tracking
+        const userAgent = req.headers['user-agent']
+        const ipAddress = req.ip || req.connection.remoteAddress
 
-        if (Object.keys(errors).length > 0) {
-            throw createValidationError(errors)
-        }
+        const result = await AuthService.login(data.email, data.password, userAgent, ipAddress)
 
-        const result = await AuthService.login(data.email, data.password)
+        // Set httpOnly cookies
+        res.cookie(
+            securityConfig.cookie.accessToken.name,
+            result.accessToken,
+            securityConfig.cookie.accessToken
+        )
+
+        res.cookie(
+            securityConfig.cookie.refreshToken.name,
+            result.refreshToken,
+            securityConfig.cookie.refreshToken
+        )
 
         res.status(200).json({
             success: true,
             message: 'Login successful',
-            data: result
+            data: { user: result.user }
         })
     })
 
-    static logout = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-        // JWT is stateless, logout handled on client side
+    /**
+     * Refresh access token
+     */
+    static refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const refreshToken = req.cookies[securityConfig.cookie.refreshToken.name]
+
+        if (!refreshToken) {
+            res.status(401).json({
+                success: false,
+                message: 'No refresh token provided'
+            })
+            return
+        }
+
+        const result = await AuthService.refreshAccessToken(refreshToken)
+
+        // Set new access token cookie
+        res.cookie(
+            securityConfig.cookie.accessToken.name,
+            result.accessToken,
+            securityConfig.cookie.accessToken
+        )
+
+        res.status(200).json({
+            success: true,
+            message: 'Token refreshed successfully'
+        })
+    })
+
+    /**
+     * Logout user
+     */
+    static logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const refreshToken = req.cookies[securityConfig.cookie.refreshToken.name]
+
+        if (refreshToken) {
+            await AuthService.logout(refreshToken)
+        }
+
+        // Clear cookies
+        res.clearCookie(securityConfig.cookie.accessToken.name)
+        res.clearCookie(securityConfig.cookie.refreshToken.name)
+
         res.status(200).json({
             success: true,
             message: 'Logout successful'
         })
     })
 
+    /**
+     * Logout from all devices
+     */
+    static logoutAllDevices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const userId = (req as any).user.userId
+
+        await AuthService.logoutAllDevices(userId)
+
+        // Clear cookies
+        res.clearCookie(securityConfig.cookie.accessToken.name)
+        res.clearCookie(securityConfig.cookie.refreshToken.name)
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out from all devices'
+        })
+    })
+
+    /**
+     * Get current user
+     */
     static getCurrentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const userId = (req as any).user.userId
         const user = await AuthService.getUserById(userId)

@@ -9,6 +9,7 @@ import {
 import { prisma } from '../lib/prisma'
 import { NotFoundError, ForbiddenError, BusinessLogicError, ErrorCode } from '../utils/errors'
 import { logInfo } from '../utils/logger'
+import { NotificationService } from './notification.service'
 
 export const postService = {
   // Create a new post
@@ -246,6 +247,11 @@ export const postService = {
       where: { id: postId },
       data: { likesCount: { increment: 1 } },
     })
+
+    // Create notification if post owner is different from liker
+    if (post.userId !== userId) {
+      await NotificationService.notifyLike(userId, post.userId, postId)
+    }
   },
 
   // Unlike a post
@@ -343,6 +349,11 @@ export const postService = {
       where: { id: postId },
       data: { commentsCount: { increment: 1 } },
     })
+
+    // Create notification if post owner is different from commenter
+    if (post.userId !== userId) {
+      await NotificationService.notifyComment(userId, post.userId, postId)
+    }
 
     return comment as CommentResponse
   },

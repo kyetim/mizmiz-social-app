@@ -12,8 +12,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authService } from '@/lib/api/auth'
 import { extractErrorMessage, formatValidationErrors } from '@/lib/utils/error-handler'
+import { PasswordStrengthMeter } from './password-strength-meter'
 
-// Validation schema
+// Strong password validation (matches backend requirements)
 const registerSchema = z.object({
   username: z
     .string()
@@ -26,8 +27,11 @@ const registerSchema = z.object({
     .email('Geçerli bir email adresi giriniz'),
   password: z
     .string()
-    .min(6, 'Şifre en az 6 karakter olmalıdır')
-    .max(100, 'Şifre çok uzun'),
+    .min(8, 'Şifre en az 8 karakter olmalıdır')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (@$!%*?&) içermelidir'
+    ),
   confirmPassword: z
     .string()
     .min(1, 'Şifre tekrarı gereklidir'),
@@ -68,35 +72,16 @@ export function ModernRegisterForm() {
   const password = watch('password')
   const confirmPassword = watch('confirmPassword')
 
-  // Password strength indicator
-  const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { label: '', strength: 0, color: '' }
-
-    let strength = 0
-    if (pwd.length >= 6) strength++
-    if (pwd.length >= 10) strength++
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++
-    if (/\d/.test(pwd)) strength++
-    if (/[^a-zA-Z0-9]/.test(pwd)) strength++
-
-    if (strength <= 2) return { label: 'Zayıf', strength, color: 'bg-red-500' }
-    if (strength === 3) return { label: 'Orta', strength, color: 'bg-yellow-500' }
-    return { label: 'Güçlü', strength, color: 'bg-green-500' }
-  }
-
-  const passwordStrength = getPasswordStrength(password || '')
-
   async function onSubmit(data: RegisterFormData) {
     setIsLoading(true)
     try {
-      const response = await authService.register({
+      await authService.register({
         username: data.username,
         email: data.email,
         password: data.password,
       })
 
-      // Automatically log in after successful registration
-      localStorage.setItem('token', response.token)
+      // Token is now in httpOnly cookie, automatically handled
 
       // Success message
       toast.success('Kayıt başarılı! Hoş geldiniz 🎉', {
@@ -233,25 +218,8 @@ export function ModernRegisterForm() {
             {...register('password')}
           />
 
-          {/* Password Strength Indicator */}
-          {password && password.length > 0 && (
-            <div className="space-y-2 mt-3">
-              <div className="flex gap-1.5">
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <div
-                    key={level}
-                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength
-                      ? passwordStrength.color
-                      : 'bg-gray-200'
-                      }`}
-                  />
-                ))}
-              </div>
-              <p className="text-xs text-gray-600">
-                Şifre gücü: <span className="font-semibold">{passwordStrength.label}</span>
-              </p>
-            </div>
-          )}
+          {/* Password Strength Meter */}
+          <PasswordStrengthMeter password={password || ''} />
 
           {errors.password && (
             <p className="text-sm text-red-600 font-medium">{errors.password.message}</p>

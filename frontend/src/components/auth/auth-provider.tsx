@@ -20,32 +20,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth)
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-
-        // If token exists but user is not loaded, fetch user data
-        if (token && !user && !isLoading) {
+        // Try to fetch user data on mount (cookie will be sent automatically)
+        if (!user && !isLoading) {
             dispatch(getCurrentUser())
         }
     }, [dispatch, user, isLoading])
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
         const isPublicRoute = publicRoutes.includes(pathname)
         const isAuthRoute = authRoutes.includes(pathname)
 
         // Redirect authenticated users away from auth pages
-        if (token && isAuthRoute) {
+        if (isAuthenticated && isAuthRoute) {
             router.replace('/feed')
             return
         }
 
         // Redirect unauthenticated users to login
-        if (!token && !isPublicRoute) {
+        // Only redirect if we've finished loading and still not authenticated
+        if (!isLoading && !isAuthenticated && !isPublicRoute) {
             const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
             router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
             return
         }
-    }, [pathname, router, searchParams])
+    }, [pathname, router, searchParams, isAuthenticated, isLoading])
 
     return <>{children}</>
 }

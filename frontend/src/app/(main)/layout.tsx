@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { logout, getCurrentUser } from '@/store/slices/auth-slice'
 import { addPost } from '@/store/slices/posts-slice'
+import { fetchUnreadCount } from '@/store/slices/notifications-slice'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { CreatePostModal } from '@/components/post/create-post-modal'
 import { PostInterface } from '@/interfaces/post.interface'
@@ -17,6 +18,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const pathname = usePathname()
     const dispatch = useAppDispatch()
     const { user, isLoading } = useAppSelector((state) => state.auth)
+    const { unreadCount } = useAppSelector((state) => state.notifications)
     const [isInitialized, setIsInitialized] = useState(false)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -35,6 +37,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         setIsInitialized(true)
     }, [router, user, isLoading, dispatch])
+
+    // Fetch unread notifications count
+    useEffect(() => {
+        if (user) {
+            dispatch(fetchUnreadCount())
+            
+            // Poll for new notifications every 30 seconds
+            const interval = setInterval(() => {
+                dispatch(fetchUnreadCount())
+            }, 30000)
+
+            return () => clearInterval(interval)
+        }
+    }, [user, dispatch])
 
     function handleLogout() {
         dispatch(logout())
@@ -129,15 +145,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         </motion.div>
                     </Link>
 
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-4 w-full px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl font-medium transition-colors relative"
-                    >
-                        <Bell className="w-6 h-6" />
-                        <span className="text-lg">Bildirimler</span>
-                        <span className="absolute top-2 left-7 w-2 h-2 bg-green-600 rounded-full"></span>
-                    </motion.button>
+                    <Link href="/notifications">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors relative ${isActive('/notifications')
+                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                        >
+                            <Bell className="w-6 h-6" />
+                            <span className="text-lg">Bildirimler</span>
+                            {unreadCount > 0 && (
+                                <span className="absolute top-2 left-7 px-1.5 min-w-[20px] h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </motion.div>
+                    </Link>
 
                     <Link href="/profile">
                         <motion.div
@@ -341,14 +366,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         </motion.div>
                                     </Link>
 
-                                    <motion.button
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-4 w-full px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-medium transition-colors relative"
-                                    >
-                                        <Bell className="w-6 h-6" />
-                                        <span className="text-lg">Bildirimler</span>
-                                        <span className="absolute top-2 left-7 w-2 h-2 bg-green-600 rounded-full"></span>
-                                    </motion.button>
+                                    <Link href="/notifications" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <motion.div
+                                            whileTap={{ scale: 0.98 }}
+                                            className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors relative ${isActive('/notifications')
+                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                }`}
+                                        >
+                                            <Bell className="w-6 h-6" />
+                                            <span className="text-lg">Bildirimler</span>
+                                            {unreadCount > 0 && (
+                                                <span className="absolute top-2 left-7 px-1.5 min-w-[20px] h-5 bg-green-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                                </span>
+                                            )}
+                                        </motion.div>
+                                    </Link>
 
                                     <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                                         <motion.div

@@ -11,6 +11,7 @@ import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ImageLightbox } from '@/components/ui/image-lightbox'
 import { AvatarUploadModal } from '@/components/profile/avatar-upload-modal'
 import { CoverUploadModal } from '@/components/profile/cover-upload-modal'
+import { EditProfileModal } from '@/components/profile/edit-profile-modal'
 import {
     ArrowLeft,
     Settings,
@@ -400,34 +401,11 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Edit Profile Modal - Placeholder */}
-            {showEditModal && (
-                <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                    onClick={() => setShowEditModal(false)}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6"
-                    >
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                            Profili Düzenle
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            Profil düzenleme özelliği yakında eklenecek! 🚀
-                        </p>
-                        <button
-                            onClick={() => setShowEditModal(false)}
-                            className="w-full px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors"
-                        >
-                            Tamam
-                        </button>
-                    </motion.div>
-                </div>
-            )}
+            {/* Edit Profile Modal */}
+            <EditProfileModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+            />
 
             {/* Avatar Upload Modal */}
             <AvatarUploadModal

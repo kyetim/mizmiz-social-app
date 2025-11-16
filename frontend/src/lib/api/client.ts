@@ -10,13 +10,14 @@ const MAX_RETRIES = 3
 const RETRY_DELAY = 1000 // 1 second
 const RETRY_STATUS_CODES = [408, 429, 500, 502, 503, 504]
 
-// Create axios instance
+// Create axios instance with cookie support
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Enable sending cookies with requests
 })
 
 /**
@@ -48,19 +49,14 @@ function shouldRetry(error: AxiosError, retryCount: number): boolean {
 }
 
 /**
- * Request interceptor - Add token and handle offline
+ * Request interceptor - Handle offline check
+ * Note: Token is now handled via httpOnly cookies automatically
  */
 apiClient.interceptors.request.use(
   (config) => {
     // Check if online
     if (!isOnline()) {
       return Promise.reject(new Error('No internet connection'))
-    }
-
-    // Add auth token
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
     }
 
     // Add request metadata for logging
@@ -115,15 +111,38 @@ apiClient.interceptors.response.use(
       }
 
       // Handle auth errors (401, 403)
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        // Only redirect on 401 (unauthorized)
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token')
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+      if (error.response?.status === 401) {
+        // Try to refresh token on 401
+        if (!config._retry) {
+          config._retry = true
+          
+          try {
+            // Attempt to refresh access token
+            await apiClient.post('/auth/refresh')
+            
+            // Retry original request
+            return apiClient(config)
+          } catch (refreshError) {
+            // Refresh failed, redirect to login
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+              window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+            }
+            logError(refreshError, 'Token Refresh Failed')
+            return Promise.reject(refreshError)
           }
         }
+        
+        // If retry already attempted, redirect to login
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+        }
         logError(error, 'Authentication Error')
+        return Promise.reject(error)
+      }
+      
+      // Handle forbidden (403)
+      if (error.response?.status === 403) {
+        logError(error, 'Authorization Error')
         return Promise.reject(error)
       }
 
@@ -188,13 +207,14 @@ export async function apiRequest<T>(
 
 export default apiClient
 
-// Extend AxiosRequestConfig type to include metadata
+// Extend AxiosRequestConfig type to include metadata and retry flag
 declare module 'axios' {
   export interface AxiosRequestConfig {
     metadata?: {
       retryCount: number
       startTime: Date
     }
+    _retry?: boolean
   }
 }
 

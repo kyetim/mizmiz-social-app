@@ -4,7 +4,6 @@ import { UserInterface } from '@/interfaces/user.interface'
 
 interface AuthState {
   user: UserInterface | null
-  token: string | null
   isLoading: boolean
   error: string | null
   isAuthenticated: boolean
@@ -12,7 +11,6 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: null,
   isLoading: false,
   error: null,
   isAuthenticated: false,
@@ -24,7 +22,7 @@ export const login = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await authService.login({ email, password })
-      localStorage.setItem('token', response.token)
+      // Token is now in httpOnly cookie, no localStorage needed
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed')
@@ -52,7 +50,7 @@ export const register = createAsyncThunk(
   ) => {
     try {
       const response = await authService.register({ username, email, password, firstName, lastName })
-      localStorage.setItem('token', response.token)
+      // Token is now in httpOnly cookie, no localStorage needed
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed')
@@ -77,14 +75,12 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null
-      state.token = null
       state.isAuthenticated = false
-      localStorage.removeItem('token')
+      // Cookies are cleared by backend
       // Note: Cache clearing for posts and categories will be handled by middleware
     },
-    setCredentials: (state, action: PayloadAction<{ user: UserInterface; token: string }>) => {
+    setCredentials: (state, action: PayloadAction<{ user: UserInterface }>) => {
       state.user = action.payload.user
-      state.token = action.payload.token
       state.isAuthenticated = true
     },
     updateUser: (state, action: PayloadAction<UserInterface>) => {
@@ -101,7 +97,6 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false
         state.user = action.payload.user
-        state.token = action.payload.token
         state.isAuthenticated = true
       })
       .addCase(login.rejected, (state, action) => {
@@ -118,7 +113,6 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false
         state.user = action.payload.user
-        state.token = action.payload.token
         state.isAuthenticated = true
       })
       .addCase(register.rejected, (state, action) => {
@@ -140,7 +134,6 @@ const authSlice = createSlice({
         state.isLoading = false
         state.isAuthenticated = false
         state.user = null
-        state.token = null
       })
   },
 })

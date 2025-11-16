@@ -4,6 +4,7 @@ import postsReducer from './slices/posts-slice'
 import categoriesReducer from './slices/categories-slice'
 import followReducer from './slices/follow-slice'
 import searchReducer from './slices/search-slice'
+import notificationsReducer from './slices/notifications-slice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     follow: followReducer,
     search: searchReducer,
+    notifications: notificationsReducer,
   },
 })
 

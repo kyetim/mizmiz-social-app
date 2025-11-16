@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma'
 import { NotFoundError, ValidationError, ConflictError } from '../utils/errors'
 import { logInfo } from '../utils/logger'
+import { NotificationService } from './notification.service'
 
 export interface UpdateUserProfileDto {
     firstName?: string
@@ -305,6 +306,9 @@ export class UserService {
                 data: { followersCount: { increment: 1 } }
             })
         })
+
+        // Create notification
+        await NotificationService.notifyFollow(followerId, followingId)
 
         logInfo('User followed', { followerId, followingId })
     }

@@ -6,6 +6,7 @@ import preferenceRoutes from './preference.routes'
 import gamificationRoutes from './gamification.routes'
 import uploadRoutes from './upload.routes'
 import userRoutes from './user.routes'
+import notificationRoutes from './notification.routes'
 
 const router = Router()
 
@@ -39,8 +40,8 @@ router.use('/users', userRoutes)
 router.use('/', categoryRoutes) // Category routes are at root level
 router.use('/', preferenceRoutes) // Preference and feed routes
 router.use('/', gamificationRoutes) // Gamification routes
+router.use('/notifications', notificationRoutes)
 // router.use('/comments', commentRoutes)
-// router.use('/notifications', notificationRoutes)
 
 export default router
 

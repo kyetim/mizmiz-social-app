@@ -16,7 +16,7 @@ interface LoginData {
 
 interface AuthResponse {
   user: UserInterface
-  token: string
+  // Note: Token is now in httpOnly cookie, not in response
 }
 
 export const authService = {
@@ -36,8 +36,17 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
+    // Cookies are cleared by backend
     await apiClient.post('/auth/logout')
-    localStorage.removeItem('token')
+  },
+
+  async logoutAllDevices(): Promise<void> {
+    await apiClient.post('/auth/logout-all')
+  },
+
+  async refreshToken(): Promise<void> {
+    // Refresh endpoint will set new access token cookie
+    await apiClient.post('/auth/refresh')
   },
 }
 
