@@ -93,8 +93,8 @@ export function ModernLoginForm() {
   return (
     <div className="w-full max-w-md">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
           Tekrar hoş geldin
         </h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -183,7 +183,7 @@ export function ModernLoginForm() {
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
+          className="w-full h-11 sm:h-12 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group min-h-[48px]"
           disabled={isLoading}
         >
           {isLoading ? (

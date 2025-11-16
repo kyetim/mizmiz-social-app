@@ -10,12 +10,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Theme Toggle - Fixed Top Right */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
       </div>
 
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 items-center justify-center p-12 relative overflow-hidden transition-colors duration-300">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 items-center justify-center p-8 md:p-12 relative overflow-hidden transition-colors duration-300">
         {/* 3D Floating Cube */}
         <div className="absolute inset-0 opacity-20">
           <FloatingCubeCss />
@@ -122,18 +122,18 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center mb-8">
+          <Link href="/" className="inline-flex items-center mb-6 sm:mb-8">
             <motion.div
               whileHover={{ scale: 1.1, rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md"
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-md"
             >
-              <span className="text-white font-bold text-xl">M</span>
+              <span className="text-white font-bold text-lg sm:text-xl">M</span>
             </motion.div>
-            <span className="ml-3 text-2xl font-bold text-gray-900 dark:text-white transition-colors">
+            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white transition-colors">
               MIZMIZ
             </span>
           </Link>
@@ -142,10 +142,10 @@ export default function RegisterPage() {
           <ModernRegisterForm />
 
           {/* Back to Home */}
-          <div className="mt-8 text-center">
+          <div className="mt-6 sm:mt-8 text-center">
             <Link
               href="/"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center gap-1"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center gap-1 min-h-[44px]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

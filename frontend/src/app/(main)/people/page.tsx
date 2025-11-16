@@ -107,35 +107,35 @@ export default function PeoplePage() {
     }
 
     return (
-        <div className="space-y-4 lg:pt-2">
+        <div className="space-y-3 sm:space-y-4 lg:pt-2">
             {/* Page Title */}
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Users className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">İnsanlar</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">İnsanlar</h1>
             </div>
             {/* Search Bar */}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
+                className="mb-4 sm:mb-6"
             >
                 <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Kullanıcı ara..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-16 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 dark:text-white placeholder-gray-500 transition-all shadow-sm"
+                        className="w-full pl-10 sm:pl-12 pr-10 sm:pr-16 py-3 sm:py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 transition-all shadow-sm"
                     />
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery('')}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                     )}
                 </div>
@@ -143,7 +143,7 @@ export default function PeoplePage() {
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-center mt-3 text-sm text-gray-600 dark:text-gray-400"
+                        className="text-center mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400"
                     >
                         "{searchQuery}" için {filteredUsers.length} kullanıcı bulundu
                     </motion.p>
@@ -151,30 +151,31 @@ export default function PeoplePage() {
             </motion.div>
 
             {/* Tabs */}
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
                 <motion.button
                     onClick={() => setActiveTab('all')}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${activeTab === 'all'
+                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'all'
                         ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
                         : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
-                    <Users className="w-4 h-4" />
-                    <span>Tüm Kullanıcılar</span>
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Tüm Kullanıcılar</span>
+                    <span className="xs:hidden">Tümü</span>
                 </motion.button>
 
                 <motion.button
                     onClick={() => setActiveTab('suggested')}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${activeTab === 'suggested'
+                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'suggested'
                         ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
                         : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span>Önerilen</span>
                 </motion.button>
             </div>
@@ -194,7 +195,7 @@ export default function PeoplePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid sm:grid-cols-2 gap-4"
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                     >
                         {displayUsers.map((user, index) => (
                             <motion.div
@@ -204,13 +205,13 @@ export default function PeoplePage() {
                                 transition={{ delay: index * 0.05 }}
                             >
                                 <GlassmorphismCard className="hover:shadow-lg transition-shadow">
-                                    <div className="flex items-start gap-4">
+                                    <div className="flex items-start gap-3 sm:gap-4">
                                         {/* Avatar */}
                                         <Link
                                             href={`/user/${user.id}`}
                                             className="relative flex-shrink-0 hover:opacity-80 transition-opacity"
                                         >
-                                            <div className="w-16 h-16 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md ring-2 ring-white dark:ring-gray-800 overflow-hidden">
+                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md ring-2 ring-white dark:ring-gray-800 overflow-hidden">
                                                 {user.avatarUrl ? (
                                                     <img
                                                         src={user.avatarUrl}
@@ -218,7 +219,7 @@ export default function PeoplePage() {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <span className="text-white font-bold text-xl">
+                                                    <span className="text-white font-bold text-lg sm:text-xl">
                                                         {user.username?.[0]?.toUpperCase()}
                                                     </span>
                                                 )}
