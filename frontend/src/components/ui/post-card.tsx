@@ -11,7 +11,8 @@ import { postsApi } from '@/lib/api/posts'
 import { categoriesApi } from '@/lib/api/categories'
 import { vibesApi } from '@/lib/api/vibes'
 import { PostCategory, PostVibe } from '@/interfaces/category.interface'
-import { useAppSelector } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { followUser } from '@/store/slices/follow-slice'
 import { toast } from 'react-hot-toast'
 import { CommentModal } from '@/components/post/comment-modal'
 import { CategoryVotingModal } from '@/components/post/category-voting-modal'
@@ -26,7 +27,9 @@ interface PostCardProps {
 
 export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
+  const { following } = useAppSelector((state) => state.follow)
   const [isLiked, setIsLiked] = useState(post.isLikedByCurrentUser || false)
   const [likesCount, setLikesCount] = useState(post.likesCount)
   const [commentsCount, setCommentsCount] = useState(post.commentsCount)
@@ -37,6 +40,10 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const [categories, setCategories] = useState<PostCategory[]>([])
   const [vibes, setVibes] = useState<PostVibe[]>([])
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
+  const [isAuthorFollowed, setIsAuthorFollowed] = useState(
+    post.isAuthorFollowed ?? following.includes(post.userId)
+  )
 
   useEffect(() => {
     loadCategoriesAndVibes()
@@ -47,6 +54,10 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
     setLikesCount(post.likesCount)
     setCommentsCount(post.commentsCount)
   }, [post.isLikedByCurrentUser, post.likesCount, post.commentsCount])
+
+  useEffect(() => {
+    setIsAuthorFollowed(post.isAuthorFollowed ?? following.includes(post.userId))
+  }, [post.isAuthorFollowed, post.userId, following])
 
   async function loadCategoriesAndVibes() {
     try {
@@ -62,6 +73,22 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   }
 
   const isOwnPost = user?.id === post.userId
+
+  async function handleFollowUser(event: React.MouseEvent) {
+    event.stopPropagation()
+    if (!user || isAuthorFollowed || isFollowLoading) return
+
+    setIsFollowLoading(true)
+    try {
+      await dispatch(followUser(post.userId)).unwrap()
+      setIsAuthorFollowed(true)
+      toast.success('Takip edildi')
+    } catch (error: any) {
+      toast.error(error || 'İşlem başarısız')
+    } finally {
+      setIsFollowLoading(false)
+    }
+  }
 
   async function handleLike() {
     if (!user || isLiking) return
@@ -149,41 +176,59 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
               </div>
             </Link>
 
-            {/* Menu */}
-            {isOwnPost && (
-              <div className="relative">
-                <motion.button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowMenu(!showMenu)
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
-                >
-                  <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                </motion.button>
-
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-10 min-w-[120px]"
+            <div className="flex items-center gap-3">
+              {!isOwnPost && user && (
+                isAuthorFollowed ? (
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 opacity-70 border border-gray-200 dark:border-gray-700">
+                    Takip ediliyor
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleFollowUser}
+                    disabled={isFollowLoading}
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm hover:opacity-90 disabled:opacity-60 transition-colors"
                   >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete()
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+                    Takip et
+                  </button>
+                )
+              )}
+
+              {/* Menu */}
+              {isOwnPost && (
+                <div className="relative">
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(!showMenu)
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                  >
+                    <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  </motion.button>
+
+                  {showMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-10 min-w-[120px]"
                     >
-                      <Trash2 className="w-4 h-4" />
-                      Sil
-                    </button>
-                  </motion.div>
-                )}
-              </div>
-            )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete()
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Sil
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Content */}

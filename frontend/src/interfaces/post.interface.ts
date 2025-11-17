@@ -19,6 +19,7 @@ export interface PostInterface {
     avatarUrl: string | null
   }
   isLikedByCurrentUser?: boolean
+  isAuthorFollowed?: boolean
 }
 
 export interface CreatePostDto {

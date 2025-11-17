@@ -27,6 +27,7 @@ export interface PostResponse {
     avatarUrl: string | null
   }
   isLikedByCurrentUser?: boolean
+  isAuthorFollowed?: boolean
 }
 
 export interface CommentResponse {

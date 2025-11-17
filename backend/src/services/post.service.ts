@@ -54,13 +54,20 @@ export const postService = {
       where.userId = userId
     }
 
+    let followingUsers: { followingId: string }[] = []
+
     if (following && currentUserId) {
-      const followingUsers = await prisma.follow.findMany({
+      followingUsers = await prisma.follow.findMany({
         where: { followerId: currentUserId },
         select: { followingId: true },
       })
+
+      // Kullanıcının kendi gönderilerinin de timeline'da görünmesi için kendisini ekle
+      const userIds = new Set(followingUsers.map((f) => f.followingId))
+      userIds.add(currentUserId)
+
       where.userId = {
-        in: followingUsers.map((f) => f.followingId),
+        in: Array.from(userIds),
       }
     }
 
@@ -83,7 +90,7 @@ export const postService = {
       },
     })
 
-    // Check if current user liked each post
+    // Check if current user liked/followed each post
     if (currentUserId) {
       const postIds = posts.map((p) => p.id)
       const likes = await prisma.like.findMany({
@@ -95,9 +102,29 @@ export const postService = {
       })
       const likedPostIds = new Set(likes.map((l) => l.postId))
 
+      let followedAuthorIds = new Set<string>()
+      if (following && currentUserId) {
+        followedAuthorIds = new Set(followingUsers.map((f) => f.followingId))
+      } else {
+        const authorIds = Array.from(new Set(posts.map((p) => p.userId)))
+        if (authorIds.length > 0) {
+          const followedAuthors = await prisma.follow.findMany({
+            where: {
+              followerId: currentUserId,
+              followingId: {
+                in: authorIds,
+              },
+            },
+            select: { followingId: true },
+          })
+          followedAuthorIds = new Set(followedAuthors.map((f) => f.followingId))
+        }
+      }
+
       return posts.map((post) => ({
         ...post,
         isLikedByCurrentUser: likedPostIds.has(post.id),
+        isAuthorFollowed: followedAuthorIds.has(post.userId),
       })) as PostResponse[]
     }
 
@@ -128,15 +155,29 @@ export const postService = {
 
     // Check if current user liked this post
     if (currentUserId) {
-      const like = await prisma.like.findUnique({
-        where: {
-          userId_postId: {
-            userId: currentUserId,
-            postId: post.id,
+      const [like, follow] = await Promise.all([
+        prisma.like.findUnique({
+          where: {
+            userId_postId: {
+              userId: currentUserId,
+              postId: post.id,
+            },
           },
-        },
-      })
-      return { ...post, isLikedByCurrentUser: !!like } as PostResponse
+        }),
+        prisma.follow.findUnique({
+          where: {
+            followerId_followingId: {
+              followerId: currentUserId,
+              followingId: post.userId,
+            },
+          },
+        }),
+      ])
+      return {
+        ...post,
+        isLikedByCurrentUser: !!like,
+        isAuthorFollowed: !!follow,
+      } as PostResponse
     }
 
     return post as PostResponse
