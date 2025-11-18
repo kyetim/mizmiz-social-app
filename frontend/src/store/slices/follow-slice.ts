@@ -26,6 +26,10 @@ export const followUser = createAsyncThunk(
             await usersApi.followUser(userId)
             return userId
         } catch (error: any) {
+            // If already following (409 Conflict), treat as success
+            if (error.response?.status === 409) {
+                return userId
+            }
             return rejectWithValue(error.response?.data?.message || 'Failed to follow user')
         }
     }
@@ -38,6 +42,10 @@ export const unfollowUser = createAsyncThunk(
             await usersApi.unfollowUser(userId)
             return userId
         } catch (error: any) {
+            // If not following (404), treat as success
+            if (error.response?.status === 404) {
+                return userId
+            }
             return rejectWithValue(error.response?.data?.message || 'Failed to unfollow user')
         }
     }

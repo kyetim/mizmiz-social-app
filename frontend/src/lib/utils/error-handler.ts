@@ -82,7 +82,7 @@ const errorMessages: Record<string, string> = {
 
     // Resource errors
     [ErrorCode.NOT_FOUND]: 'Aradığınız içerik bulunamadı.',
-    [ErrorCode.ALREADY_EXISTS]: 'Bu kayıt zaten mevcut.',
+    [ErrorCode.ALREADY_EXISTS]: 'Bu işlem zaten yapılmış.',
     [ErrorCode.CONFLICT]: 'İşlem çakışması oluştu.',
 
     // Business logic
@@ -134,6 +134,9 @@ export function extractErrorMessage(error: any): string {
         }
         if (status === 404) {
             return errorMessages[ErrorCode.NOT_FOUND]
+        }
+        if (status === 409) {
+            return errorMessages[ErrorCode.ALREADY_EXISTS] || errorMessages[ErrorCode.CONFLICT]
         }
         if (status === 429) {
             return errorMessages[ErrorCode.TOO_MANY_REQUESTS]
