@@ -20,12 +20,11 @@ export const generalRateLimiter = rateLimit({
 /**
  * Login endpoint rate limiter (stricter)
  * Only counts failed attempts - successful logins don't count
- * More lenient in development environment
+ * Disabled in development environment for easier testing
  */
 export const loginRateLimiter = rateLimit({
     windowMs: securityConfig.rateLimit.login.windowMs,
-    // In development, allow many more attempts for testing
-    max: process.env.NODE_ENV === 'development' ? 100 : securityConfig.rateLimit.login.max,
+    max: process.env.NODE_ENV === 'development' ? 1000 : securityConfig.rateLimit.login.max,
     message: {
         success: false,
         message: securityConfig.rateLimit.login.message,
@@ -37,6 +36,10 @@ export const loginRateLimiter = rateLimit({
     keyGenerator: (req) => {
         const email = req.body?.email || 'unknown'
         return `${req.ip}-${email}`
+    },
+    // Skip rate limiting entirely in development
+    skip: (req) => {
+        return process.env.NODE_ENV === 'development'
     },
 })
 
