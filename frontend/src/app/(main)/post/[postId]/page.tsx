@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAppSelector } from '@/store/hooks'
-import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ImageLightbox } from '@/components/ui/image-lightbox'
 import {
@@ -198,10 +197,11 @@ export default function PostDetailPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                <div className="container mx-auto px-4 sm:px-6">
-                    <div className="flex items-center justify-between h-16">
+            {/* Main Content */}
+            <main className="pt-6 pb-12 px-4 sm:px-6">
+                <div className="container mx-auto max-w-3xl space-y-6">
+                    {/* Header */}
+                    <div className="sticky top-4 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm px-4 sm:px-6 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => router.back()}
@@ -210,20 +210,14 @@ export default function PostDetailPage() {
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Gönderi</h1>
+                                <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Gönderi</h1>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
                                     {authorName} tarafından
                                 </p>
                             </div>
                         </div>
-                        <ThemeToggle />
                     </div>
-                </div>
-            </header>
 
-            {/* Main Content */}
-            <main className="pt-20 pb-12 px-4 sm:px-6">
-                <div className="container mx-auto max-w-3xl">
                     {/* Post */}
                     <GlassmorphismCard>
                         {/* Author Header */}

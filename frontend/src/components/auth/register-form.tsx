@@ -10,7 +10,8 @@ import { Loader2, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { authService } from '@/lib/api/auth'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { register as registerUser } from '@/store/slices/auth-slice'
 
 // Validation schema
 const registerSchema = z.object({
@@ -44,7 +45,8 @@ interface RegisterFormData {
 
 export function RegisterForm() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const dispatch = useAppDispatch()
+  const { isLoading } = useAppSelector((state) => state.auth)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -85,27 +87,17 @@ export function RegisterForm() {
   const passwordStrength = getPasswordStrength(password || '')
 
   async function onSubmit(data: RegisterFormData) {
-    setIsLoading(true)
     try {
-      const response = await authService.register({
+      await dispatch(registerUser({
         username: data.username,
         email: data.email,
         password: data.password,
-      })
-
-      // Automatically log in after successful registration
-      localStorage.setItem('token', response.token)
+      })).unwrap()
       toast.success('Kayıt başarılı! Hoş geldiniz 🎉')
-      
-      // Force navigation after short delay to ensure token is stored
-      setTimeout(() => {
-        router.push('/feed')
-        router.refresh()
-      }, 100)
+      router.push('/feed')
+      router.refresh()
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Kayıt başarısız. Lütfen tekrar deneyin.')
-    } finally {
-      setIsLoading(false)
+      toast.error(error || 'Kayıt başarısız. Lütfen tekrar deneyin.')
     }
   }
 

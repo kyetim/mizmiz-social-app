@@ -1,14 +1,14 @@
 import { Router } from 'express'
 import { postController } from '../controllers/post.controller'
 import { categoryController } from '../controllers/category.controller'
-import { authenticate } from '../middleware/auth.middleware'
+import { authenticate, optionalAuth } from '../middleware/auth.middleware'
 
 const router = Router()
 
 // Post routes
 router.post('/', authenticate, postController.createPost)
-router.get('/', postController.getPosts) // Public route, but returns more data if authenticated
-router.get('/:postId', postController.getPost)
+router.get('/', optionalAuth, postController.getPosts) // Public route, but returns more data if authenticated
+router.get('/:postId', optionalAuth, postController.getPost)
 router.put('/:postId', authenticate, postController.updatePost)
 router.delete('/:postId', authenticate, postController.deletePost)
 

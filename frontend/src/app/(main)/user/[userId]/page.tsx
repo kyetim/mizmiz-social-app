@@ -139,10 +139,11 @@ export default function UserProfilePage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                <div className="container mx-auto px-4 sm:px-6">
-                    <div className="flex items-center justify-between h-16">
+            {/* Main Content */}
+            <main className="pt-6 pb-12 px-4 sm:px-6">
+                <div className="container mx-auto max-w-4xl space-y-6">
+                    {/* Header */}
+                    <div className="sticky top-4 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm px-4 sm:px-6 py-3">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => router.back()}
@@ -151,17 +152,12 @@ export default function UserProfilePage() {
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <div>
-                                <h1 className="text-lg font-bold text-gray-900 dark:text-white">{userName}</h1>
+                                <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{userName}</h1>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">{posts.length} gönderi</p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </header>
 
-            {/* Main Content */}
-            <main className="pt-16">
-                <div className="container mx-auto max-w-4xl">
                     {/* Cover Photo */}
                     <div
                         className="relative h-48 sm:h-64 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
@@ -207,11 +203,10 @@ export default function UserProfilePage() {
                                     onClick={handleFollowToggle}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
-                                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${
-                                        following.includes(userId)
-                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                                            : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-green-500/30'
-                                    }`}
+                                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${following.includes(userId)
+                                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                        : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-green-500/30'
+                                        }`}
                                 >
                                     {following.includes(userId) ? (
                                         <>

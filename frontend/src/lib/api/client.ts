@@ -91,89 +91,90 @@ apiClient.interceptors.response.use(
       );
     }
     return response;
-    async (error: AxiosError) => {
-      const config = error.config as AxiosRequestConfig & {
-        metadata?: { retryCount: number; startTime: Date }
-      }
+  },
+  async (error: AxiosError) => {
+    const config = error.config as AxiosRequestConfig & {
+      metadata?: { retryCount: number; startTime: Date }
+    }
 
-      // Enhanced error logging for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.group('🔴 API Error Details')
-        console.log('URL:', config?.url)
-        console.log('Method:', config?.method)
-        console.log('Status:', error.response?.status)
-        console.log('Response Data:', error.response?.data)
-        console.log('Error Code:', error.code)
-        console.log('Error Message:', error.message)
-        console.log('Has Response:', !!error.response)
-        console.log('Has Request:', !!error.request)
-        console.groupEnd()
-      }
+    // Enhanced error logging for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.group('🔴 API Error Details')
+      console.log('URL:', config?.url)
+      console.log('Method:', config?.method)
+      console.log('Status:', error.response?.status)
+      console.log('Response Data:', error.response?.data)
+      console.log('Error Code:', error.code)
+      console.log('Error Message:', error.message)
+      console.log('Has Response:', !!error.response)
+      console.log('Has Request:', !!error.request)
+      console.groupEnd()
+    }
 
-      // Handle auth errors (401, 403)
-      if (error.response?.status === 401) {
-        // Try to refresh token on 401
-        if (!config._retry) {
-          config._retry = true
-          
-          try {
-            // Attempt to refresh access token
-            await apiClient.post('/auth/refresh')
-            
-            // Retry original request
-            return apiClient(config)
-          } catch (refreshError) {
-            // Refresh failed, redirect to login
-            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-              window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
-            }
-            logError(refreshError, 'Token Refresh Failed')
-            return Promise.reject(refreshError)
+    // Handle auth errors (401, 403)
+    if (error.response?.status === 401) {
+      // Try to refresh token on 401
+      if (!config._retry) {
+        config._retry = true
+
+        try {
+          // Attempt to refresh access token
+          await apiClient.post('/auth/refresh')
+
+          // Retry original request
+          return apiClient(config)
+        } catch (refreshError) {
+          // Refresh failed, redirect to login
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
           }
+          logError(refreshError, 'Token Refresh Failed')
+          return Promise.reject(refreshError)
         }
-        
-        // If retry already attempted, redirect to login
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
-        }
-        logError(error, 'Authentication Error')
-        return Promise.reject(error)
-      }
-      
-      // Handle forbidden (403)
-      if (error.response?.status === 403) {
-        logError(error, 'Authorization Error')
-        return Promise.reject(error)
       }
 
-      // Initialize retry count
-      if (!config.metadata) {
-        config.metadata = { retryCount: 0, startTime: new Date() }
+      // If retry already attempted, redirect to login
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
       }
-
-      // Check if should retry
-      if (shouldRetry(error, config.metadata.retryCount)) {
-        config.metadata.retryCount++
-
-        // Calculate delay with exponential backoff
-        const delay = RETRY_DELAY * Math.pow(2, config.metadata.retryCount - 1)
-
-        console.log(
-          `🔄 Retrying request (${config.metadata.retryCount}/${MAX_RETRIES}) after ${delay}ms...`
-        )
-
-        await sleep(delay)
-
-        // Retry request
-        return apiClient(config)
-      }
-
-      // Log error
-      logError(error, 'API Error')
-
+      logError(error, 'Authentication Error')
       return Promise.reject(error)
     }
-  })
+
+    // Handle forbidden (403)
+    if (error.response?.status === 403) {
+      logError(error, 'Authorization Error')
+      return Promise.reject(error)
+    }
+
+    // Initialize retry count
+    if (!config.metadata) {
+      config.metadata = { retryCount: 0, startTime: new Date() }
+    }
+
+    // Check if should retry
+    if (shouldRetry(error, config.metadata.retryCount)) {
+      config.metadata.retryCount++
+
+      // Calculate delay with exponential backoff
+      const delay = RETRY_DELAY * Math.pow(2, config.metadata.retryCount - 1)
+
+      console.log(
+        `🔄 Retrying request (${config.metadata.retryCount}/${MAX_RETRIES}) after ${delay}ms...`
+      )
+
+      await sleep(delay)
+
+      // Retry request
+      return apiClient(config)
+    }
+
+    // Log error
+    logError(error, 'API Error')
+
+    return Promise.reject(error)
+  }
+)
 
 /**
  * Helper function to handle API errors consistently
