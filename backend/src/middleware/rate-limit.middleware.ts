@@ -20,10 +20,12 @@ export const generalRateLimiter = rateLimit({
 /**
  * Login endpoint rate limiter (stricter)
  * Only counts failed attempts - successful logins don't count
+ * More lenient in development environment
  */
 export const loginRateLimiter = rateLimit({
     windowMs: securityConfig.rateLimit.login.windowMs,
-    max: securityConfig.rateLimit.login.max,
+    // In development, allow many more attempts for testing
+    max: process.env.NODE_ENV === 'development' ? 100 : securityConfig.rateLimit.login.max,
     message: {
         success: false,
         message: securityConfig.rateLimit.login.message,
