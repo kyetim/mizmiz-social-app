@@ -171,8 +171,9 @@ export class UserService {
         search?: string
         limit?: number
         offset?: number
+        currentUserId?: string // Optional: to check if current user is following each user
     }) {
-        const { search, limit = 20, offset = 0 } = params || {}
+        const { search, limit = 20, offset = 0, currentUserId } = params || {}
 
         const where = search
             ? {
@@ -202,6 +203,28 @@ export class UserService {
             skip: offset,
             orderBy: [{ followersCount: 'desc' }, { postsCount: 'desc' }]
         })
+
+        // If currentUserId is provided, check follow status for each user
+        if (currentUserId) {
+            const userIds = users.map(u => u.id)
+            const followRelations = await prisma.follow.findMany({
+                where: {
+                    followerId: currentUserId,
+                    followingId: { in: userIds }
+                },
+                select: {
+                    followingId: true
+                }
+            })
+
+            const followingIds = new Set(followRelations.map(f => f.followingId))
+
+            // Add isFollowing property to each user
+            return users.map(user => ({
+                ...user,
+                isFollowing: followingIds.has(user.id)
+            }))
+        }
 
         return users
     }

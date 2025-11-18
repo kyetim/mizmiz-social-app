@@ -116,11 +116,13 @@ export const userController = {
     // Get users list
     getUsers: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
         const { search, limit, offset } = req.query
+        const currentUserId = req.user?.userId // Get current user ID if authenticated
 
         const users = await UserService.getUsers({
             search: search as string,
             limit: limit ? parseInt(limit as string) : undefined,
-            offset: offset ? parseInt(offset as string) : undefined
+            offset: offset ? parseInt(offset as string) : undefined,
+            currentUserId: currentUserId // Pass current user ID to check follow status
         })
 
         res.status(200).json({

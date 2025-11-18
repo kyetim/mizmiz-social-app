@@ -14,5 +14,6 @@ export interface UserInterface {
   followingCount: number
   postsCount: number
   createdAt: string
+  isFollowing?: boolean // Whether current user is following this user
 }
 

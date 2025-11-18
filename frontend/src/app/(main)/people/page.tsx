@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { followUser, unfollowUser } from '@/store/slices/follow-slice'
+import { followUser, unfollowUser, setFollowing } from '@/store/slices/follow-slice'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -59,6 +59,14 @@ export default function PeoplePage() {
             const otherUsers = usersData.filter(u => u.id !== currentUser?.id)
             setUsers(otherUsers)
             setFilteredUsers(otherUsers)
+            
+            // Update Redux state with following status from API
+            const followingIds = otherUsers
+                .filter(u => u.isFollowing)
+                .map(u => u.id)
+            if (followingIds.length > 0) {
+                dispatch(setFollowing([...following, ...followingIds.filter(id => !following.includes(id))]))
+            }
         } catch (error) {
             toast.error('Kullanıcılar yüklenemedi')
         } finally {
@@ -270,12 +278,12 @@ export default function PeoplePage() {
                                             onClick={() => handleFollow(user.id)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm ${following.includes(user.id)
+                                            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm ${(user.isFollowing || following.includes(user.id))
                                                 ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                                 : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-green-500/30'
                                                 }`}
                                         >
-                                            {following.includes(user.id) ? (
+                                            {(user.isFollowing || following.includes(user.id)) ? (
                                                 <span className="flex items-center gap-1">
                                                     <UserCheck className="w-4 h-4" />
                                                     Takip Ediliyor
