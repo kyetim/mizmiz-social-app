@@ -26,7 +26,8 @@ router.post(
 
 router.post(
     '/login',
-    loginRateLimiter,
+    // Skip rate limiting in development
+    ...(process.env.NODE_ENV === 'development' ? [] : [loginRateLimiter]),
     sanitizeInput,
     validateLogin,
     handleValidationErrors,
