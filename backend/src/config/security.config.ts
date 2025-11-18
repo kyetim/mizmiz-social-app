@@ -51,7 +51,7 @@ export const securityConfig = {
     // Login endpoint rate limit
     login: {
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 5, // 5 login attempts per window
+      max: 10, // 10 failed login attempts per window (successful logins don't count)
       message: 'Too many login attempts, please try again after 15 minutes',
     },
     // Register endpoint rate limit

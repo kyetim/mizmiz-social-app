@@ -8,7 +8,7 @@ import { extractErrorMessage, isAuthError, logError, isOnline } from '../utils/e
 // Retry configuration
 const MAX_RETRIES = 3
 const RETRY_DELAY = 1000 // 1 second
-const RETRY_STATUS_CODES = [408, 429, 500, 502, 503, 504]
+const RETRY_STATUS_CODES = [408, 500, 502, 503, 504] // 429 excluded - rate limiting shouldn't be retried
 
 // Create axios instance with cookie support
 const apiClient = axios.create({
@@ -113,7 +113,19 @@ apiClient.interceptors.response.use(
 
     // Handle auth errors (401, 403)
     if (error.response?.status === 401) {
-      // Try to refresh token on 401
+      // Don't try to refresh if the error is from the refresh endpoint itself
+      const isRefreshEndpoint = config?.url?.includes('/auth/refresh')
+
+      if (isRefreshEndpoint) {
+        // Refresh endpoint failed, redirect to login immediately
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+        }
+        logError(error, 'Token Refresh Endpoint Failed')
+        return Promise.reject(error)
+      }
+
+      // Try to refresh token on 401 (only once)
       if (!config._retry) {
         config._retry = true
 
@@ -123,13 +135,26 @@ apiClient.interceptors.response.use(
 
           // Retry original request
           return apiClient(config)
-        } catch (refreshError) {
-          // Refresh failed, redirect to login
+        } catch (refreshError: any) {
+          // Refresh failed - create a more descriptive error
+          const authError = new Error('Oturum süreniz doldu. Lütfen tekrar giriş yapın.')
+            ; (authError as any).response = refreshError.response || {
+              status: 401,
+              data: {
+                success: false,
+                error: {
+                  code: 'AUTH_003',
+                  message: 'Token refresh failed'
+                }
+              }
+            }
+
+          // Redirect to login
           if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
             window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
           }
           logError(refreshError, 'Token Refresh Failed')
-          return Promise.reject(refreshError)
+          return Promise.reject(authError)
         }
       }
 
@@ -138,6 +163,13 @@ apiClient.interceptors.response.use(
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
       }
       logError(error, 'Authentication Error')
+      return Promise.reject(error)
+    }
+
+    // Handle rate limiting (429)
+    if (error.response?.status === 429) {
+      logError(error, 'Rate Limit Exceeded')
+      // Don't retry rate limit errors - they will fail again
       return Promise.reject(error)
     }
 

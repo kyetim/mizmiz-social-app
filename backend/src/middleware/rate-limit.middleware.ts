@@ -19,6 +19,7 @@ export const generalRateLimiter = rateLimit({
 
 /**
  * Login endpoint rate limiter (stricter)
+ * Only counts failed attempts - successful logins don't count
  */
 export const loginRateLimiter = rateLimit({
     windowMs: securityConfig.rateLimit.login.windowMs,
@@ -29,7 +30,7 @@ export const loginRateLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    skipSuccessfulRequests: false, // Count all attempts
+    skipSuccessfulRequests: true, // Don't count successful logins - only failed attempts count
     // Store failed attempts by IP + email
     keyGenerator: (req) => {
         const email = req.body?.email || 'unknown'

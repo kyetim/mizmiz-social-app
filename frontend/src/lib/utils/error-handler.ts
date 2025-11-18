@@ -111,9 +111,12 @@ const errorMessages: Record<string, string> = {
  * Extract error from various error types
  */
 export function extractErrorMessage(error: any): string {
-    // Network/Axios error
+    // Network/Axios error with response
     if (error.response) {
         const data = error.response.data as ApiErrorResponse
+        const status = error.response.status
+
+        // Check for structured error response
         if (data?.error) {
             // Return user-friendly message if available
             if (data.error.code && errorMessages[data.error.code]) {
@@ -121,16 +124,40 @@ export function extractErrorMessage(error: any): string {
             }
             return data.error.message || 'Bir hata oluştu'
         }
+
+        // If no structured error, check status code
+        if (status === 401) {
+            return errorMessages[ErrorCode.UNAUTHORIZED]
+        }
+        if (status === 403) {
+            return errorMessages[ErrorCode.INSUFFICIENT_PERMISSIONS]
+        }
+        if (status === 404) {
+            return errorMessages[ErrorCode.NOT_FOUND]
+        }
+        if (status === 429) {
+            return errorMessages[ErrorCode.TOO_MANY_REQUESTS]
+        }
+        if (status >= 500) {
+            return errorMessages[ErrorCode.INTERNAL_ERROR]
+        }
+
+        // Fallback: use response data message if available
+        if ((data as any)?.message) {
+            return (data as any).message
+        }
+
+        return 'Bir hata oluştu'
+    }
+
+    // Network error (no response) - but check if it's a timeout
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        return errorMessages[ErrorCode.TIMEOUT_ERROR]
     }
 
     // Network error (no response)
     if (error.request) {
         return errorMessages[ErrorCode.NETWORK_ERROR]
-    }
-
-    // Timeout error
-    if (error.code === 'ECONNABORTED') {
-        return errorMessages[ErrorCode.TIMEOUT_ERROR]
     }
 
     // Generic error
