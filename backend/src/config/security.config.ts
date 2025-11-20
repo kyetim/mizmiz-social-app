@@ -3,6 +3,31 @@
  * Production-ready security settings
  */
 
+const sameSiteValues = ['strict', 'lax', 'none'] as const
+type SameSiteOption = (typeof sameSiteValues)[number]
+
+const isProduction = process.env.NODE_ENV === 'production'
+
+const resolveSameSite = (): SameSiteOption => {
+  const envValue = process.env.COOKIE_SAMESITE?.toLowerCase() as SameSiteOption | undefined
+
+  if (envValue && sameSiteValues.includes(envValue)) {
+    return envValue
+  }
+
+  // Cross-site deployments (e.g., Vercel frontend + separate API) require SameSite=None
+  return isProduction ? 'none' : 'lax'
+}
+
+const cookieDomain = process.env.COOKIE_DOMAIN?.trim() || undefined
+
+const baseCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: resolveSameSite(),
+  ...(cookieDomain ? { domain: cookieDomain } : {}),
+}
+
 export const securityConfig = {
   // JWT Configuration
   jwt: {
@@ -16,16 +41,12 @@ export const securityConfig = {
   cookie: {
     accessToken: {
       name: 'accessToken',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only HTTPS in production
-      sameSite: 'strict' as const,
+      ...baseCookieOptions,
       maxAge: 15 * 60 * 1000, // 15 minutes
     },
     refreshToken: {
       name: 'refreshToken',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      ...baseCookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   },

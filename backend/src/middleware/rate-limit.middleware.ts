@@ -13,8 +13,8 @@ export const generalRateLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    // Skip rate limit for successful requests in development
-    skip: (req) => process.env.NODE_ENV === 'development' && req.path === '/health',
+    // Disable general limiter entirely in development for smoother DX
+    skip: () => process.env.NODE_ENV === 'development',
 })
 
 /**

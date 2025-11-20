@@ -1,0 +1,162 @@
+import { createApi, BaseQueryFn } from '@reduxjs/toolkit/query/react'
+import type { AxiosError, AxiosRequestConfig } from 'axios'
+import apiClient from '@/lib/api/client'
+import type { UserInterface } from '@/interfaces/user.interface'
+import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/category.interface'
+
+type AxiosBaseQueryArgs = {
+  url: string
+  method?: AxiosRequestConfig['method']
+  data?: AxiosRequestConfig['data']
+  params?: AxiosRequestConfig['params']
+}
+
+type AxiosBaseQueryError = {
+  status?: number | string
+  data?: unknown
+}
+
+const axiosBaseQuery =
+  (): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> =>
+    async ({ url, method = 'get', data, params }) => {
+      try {
+        const result = await apiClient.request({
+          url,
+          method,
+          data,
+          params,
+        })
+
+        return { data: result.data?.data ?? result.data }
+      } catch (error) {
+        const err = error as AxiosError
+        return {
+          error: {
+            status: err.response?.status ?? err.code ?? 'FETCH_ERROR',
+            data: err.response?.data ?? err.message,
+          },
+        }
+      }
+    }
+
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: axiosBaseQuery(),
+  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed'],
+  endpoints: (builder) => ({
+    getCurrentUser: builder.query<UserInterface, void>({
+      query: () => ({ url: '/auth/me', method: 'get' }),
+      providesTags: ['Auth'],
+    }),
+    getUnreadNotificationsCount: builder.query<{ count: number }, void>({
+      query: () => ({ url: '/notifications/unread-count', method: 'get' }),
+      providesTags: ['Notifications'],
+    }),
+    getCategories: builder.query<Category[], { type?: string; isActive?: boolean } | void>({
+      query: (params) => ({ url: '/categories', method: 'get', params }),
+      providesTags: ['Categories'],
+    }),
+    getTrendingCategories: builder.query<Category[], { limit?: number } | void>({
+      query: (params) => ({ url: '/categories/trending', method: 'get', params }),
+      providesTags: ['Categories'],
+    }),
+    getPostCategories: builder.query<PostCategory[], string>({
+      query: (postId) => ({ url: `/posts/${postId}/categories`, method: 'get' }),
+      providesTags: (result, error, postId) => [
+        { type: 'Categories', id: `post-${postId}` },
+      ],
+    }),
+    addCategoryToPost: builder.mutation<PostCategory, { postId: string; categoryId: string }>({
+      query: ({ postId, categoryId }) => ({
+        url: `/posts/${postId}/categories`,
+        method: 'post',
+        data: { categoryId },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Categories', id: `post-${postId}` },
+      ],
+    }),
+    removeCategoryFromPost: builder.mutation<void, { postId: string; categoryId: string }>({
+      query: ({ postId, categoryId }) => ({
+        url: `/posts/${postId}/categories/${categoryId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Categories', id: `post-${postId}` },
+      ],
+    }),
+    voteOnCategory: builder.mutation<
+      void,
+      { postCategoryId: string; voteType: 'UPVOTE' | 'DOWNVOTE'; postId: string }
+    >({
+      query: ({ postCategoryId, voteType }) => ({
+        url: `/post-categories/${postCategoryId}/vote`,
+        method: 'post',
+        data: { voteType },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Categories', id: `post-${postId}` },
+      ],
+    }),
+    getVibes: builder.query<Vibe[], { isActive?: boolean } | void>({
+      query: (params) => ({ url: '/vibes', method: 'get', params }),
+      providesTags: ['Vibes'],
+    }),
+    getPostVibes: builder.query<PostVibe[], string>({
+      query: (postId) => ({ url: `/posts/${postId}/vibes`, method: 'get' }),
+      providesTags: (result, error, postId) => [
+        { type: 'Vibes', id: `post-${postId}` },
+      ],
+    }),
+    addVibeToPost: builder.mutation<PostVibe, { postId: string; vibeId: string }>({
+      query: ({ postId, vibeId }) => ({
+        url: `/posts/${postId}/vibes`,
+        method: 'post',
+        data: { vibeId },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Vibes', id: `post-${postId}` },
+      ],
+    }),
+    removeVibeFromPost: builder.mutation<void, { postId: string; vibeId: string }>({
+      query: ({ postId, vibeId }) => ({
+        url: `/posts/${postId}/vibes/${vibeId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Vibes', id: `post-${postId}` },
+      ],
+    }),
+    voteOnVibe: builder.mutation<
+      void,
+      { postVibeId: string; voteType: 'UPVOTE' | 'DOWNVOTE'; postId: string }
+    >({
+      query: ({ postVibeId, voteType }) => ({
+        url: `/post-vibes/${postVibeId}/vote`,
+        method: 'post',
+        data: { voteType },
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Vibes', id: `post-${postId}` },
+      ],
+    }),
+  }),
+})
+
+export const {
+  useGetCurrentUserQuery,
+  useGetUnreadNotificationsCountQuery,
+  useGetCategoriesQuery,
+  useGetTrendingCategoriesQuery,
+  useGetPostCategoriesQuery,
+  useAddCategoryToPostMutation,
+  useRemoveCategoryFromPostMutation,
+  useVoteOnCategoryMutation,
+  useGetVibesQuery,
+  useGetPostVibesQuery,
+  useAddVibeToPostMutation,
+  useRemoveVibeFromPostMutation,
+  useVoteOnVibeMutation,
+} = api
+
+

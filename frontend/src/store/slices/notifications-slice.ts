@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { NotificationInterface } from '@/interfaces/notification.interface'
 import { notificationsApi } from '@/lib/api/notifications'
+import { api } from '@/store/api/api'
 
 interface NotificationsState {
     notifications: NotificationInterface[]
@@ -25,14 +26,6 @@ export const fetchNotifications = createAsyncThunk(
             params.offset
         )
         return notifications
-    }
-)
-
-export const fetchUnreadCount = createAsyncThunk(
-    'notifications/fetchUnreadCount',
-    async () => {
-        const count = await notificationsApi.getUnreadCount()
-        return count
     }
 )
 
@@ -91,11 +84,6 @@ const notificationsSlice = createSlice({
             state.error = action.error.message || 'Failed to fetch notifications'
         })
 
-        // Fetch unread count
-        builder.addCase(fetchUnreadCount.fulfilled, (state, action) => {
-            state.unreadCount = action.payload
-        })
-
         // Mark as read
         builder.addCase(markNotificationAsRead.fulfilled, (state, action) => {
             const notification = state.notifications.find(n => n.id === action.payload.id)
@@ -121,6 +109,14 @@ const notificationsSlice = createSlice({
             }
             state.notifications = state.notifications.filter(n => n.id !== action.payload)
         })
+
+        // RTK Query integration
+        builder.addMatcher(
+            api.endpoints.getUnreadNotificationsCount.matchFulfilled,
+            (state, action) => {
+                state.unreadCount = action.payload?.count ?? 0
+            }
+        )
     }
 })
 

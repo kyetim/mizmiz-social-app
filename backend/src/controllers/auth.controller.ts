@@ -1,8 +1,22 @@
-import { Request, Response } from 'express'
+import { Request, Response, CookieOptions } from 'express'
 import { AuthService } from '../services/auth.service'
 import { RegisterDto, LoginDto } from '../interfaces/auth.interface'
 import { asyncHandler } from '../middleware/error.middleware'
 import { securityConfig } from '../config/security.config'
+
+const getCookieClearOptions = (
+    cookieConfig: typeof securityConfig.cookie.accessToken
+): CookieOptions => {
+    const { httpOnly, secure, sameSite, domain } = cookieConfig
+    const options: CookieOptions = { httpOnly, secure, sameSite }
+    if (domain) {
+        options.domain = domain
+    }
+    return options
+}
+
+const accessTokenClearOptions = getCookieClearOptions(securityConfig.cookie.accessToken)
+const refreshTokenClearOptions = getCookieClearOptions(securityConfig.cookie.refreshToken)
 
 export class AuthController {
     /**
@@ -107,8 +121,8 @@ export class AuthController {
         }
 
         // Clear cookies
-        res.clearCookie(securityConfig.cookie.accessToken.name)
-        res.clearCookie(securityConfig.cookie.refreshToken.name)
+        res.clearCookie(securityConfig.cookie.accessToken.name, accessTokenClearOptions)
+        res.clearCookie(securityConfig.cookie.refreshToken.name, refreshTokenClearOptions)
 
         res.status(200).json({
             success: true,
@@ -125,8 +139,8 @@ export class AuthController {
         await AuthService.logoutAllDevices(userId)
 
         // Clear cookies
-        res.clearCookie(securityConfig.cookie.accessToken.name)
-        res.clearCookie(securityConfig.cookie.refreshToken.name)
+        res.clearCookie(securityConfig.cookie.accessToken.name, accessTokenClearOptions)
+        res.clearCookie(securityConfig.cookie.refreshToken.name, refreshTokenClearOptions)
 
         res.status(200).json({
             success: true,

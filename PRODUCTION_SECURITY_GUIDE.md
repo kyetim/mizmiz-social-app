@@ -147,6 +147,10 @@ FRONTEND_URL=https://yourdomain.com
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Cookie settings (Vercel frontend + separate API gibi cross-site kurulumlar için kritik)
+COOKIE_DOMAIN=.yourdomain.com
+COOKIE_SAMESITE=none
 ```
 
 ### Frontend `.env.local` Dosyası
@@ -160,8 +164,9 @@ NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api
 
 1. **JWT_SECRET** - ASLA default değerleri production'da kullanmayın!
 2. **FRONTEND_URL** - CORS için doğru domain'i belirtin
-3. **NODE_ENV** - Production'da mutlaka `production` olmalı
-4. **DATABASE_URL** - Production database credentials'ları güvenli tutun
+3. **COOKIE_DOMAIN / COOKIE_SAMESITE** - Frontend ve backend farklı domain'lerdeyse zorunlu
+4. **NODE_ENV** - Production'da mutlaka `production` olmalı
+5. **DATABASE_URL** - Production database credentials'ları güvenli tutun
 
 ---
 

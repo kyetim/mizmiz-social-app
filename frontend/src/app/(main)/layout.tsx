@@ -3,15 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { logout, getCurrentUser } from '@/store/slices/auth-slice'
+import { logout } from '@/store/slices/auth-slice'
 import { addPost } from '@/store/slices/posts-slice'
-import { fetchUnreadCount } from '@/store/slices/notifications-slice'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { CreatePostModal } from '@/components/post/create-post-modal'
 import { PostInterface } from '@/interfaces/post.interface'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, TrendingUp, Users, Bell, User, LogOut, Plus, Search, Menu, X } from 'lucide-react'
+import { useGetUnreadNotificationsCountQuery } from '@/store/api/api'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter()
@@ -25,32 +25,23 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false)
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.replace('/login')
+        if (isLoading) {
             return
         }
 
-        if (token && !user && !isLoading) {
-            dispatch(getCurrentUser())
-        }
-
         setIsInitialized(true)
-    }, [router, user, isLoading, dispatch])
 
-    // Fetch unread notifications count
-    useEffect(() => {
-        if (user) {
-            dispatch(fetchUnreadCount())
-            
-            // Poll for new notifications every 30 seconds
-            const interval = setInterval(() => {
-                dispatch(fetchUnreadCount())
-            }, 30000)
-
-            return () => clearInterval(interval)
+        if (!user) {
+            router.replace('/login')
         }
-    }, [user, dispatch])
+    }, [router, user, isLoading])
+
+    useGetUnreadNotificationsCountQuery(undefined, {
+        skip: !user,
+        pollingInterval: 30000,
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
+    })
 
     function handleLogout() {
         dispatch(logout())
@@ -331,8 +322,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         <motion.div
                                             whileTap={{ scale: 0.98 }}
                                             className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors ${isActive('/feed')
-                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 }`}
                                         >
                                             <Home className="w-6 h-6" />
@@ -344,8 +335,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         <motion.div
                                             whileTap={{ scale: 0.98 }}
                                             className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors ${isActive('/explore')
-                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 }`}
                                         >
                                             <TrendingUp className="w-6 h-6" />
@@ -357,8 +348,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         <motion.div
                                             whileTap={{ scale: 0.98 }}
                                             className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors ${isActive('/people')
-                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 }`}
                                         >
                                             <Users className="w-6 h-6" />
@@ -370,8 +361,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         <motion.div
                                             whileTap={{ scale: 0.98 }}
                                             className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors relative ${isActive('/notifications')
-                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 }`}
                                         >
                                             <Bell className="w-6 h-6" />
@@ -388,8 +379,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                         <motion.div
                                             whileTap={{ scale: 0.98 }}
                                             className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors ${isActive('/profile')
-                                                    ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                ? 'text-gray-900 dark:text-white bg-green-50 dark:bg-green-900/20 font-semibold'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 }`}
                                         >
                                             <User className="w-6 h-6" />
@@ -571,8 +562,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors ${isActive('/feed')
-                                    ? 'text-green-600 dark:text-green-400'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-gray-600 dark:text-gray-400'
                                 }`}
                         >
                             <Home className={`w-6 h-6 ${isActive('/feed') ? 'fill-current' : ''}`} />
@@ -584,8 +575,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors ${isActive('/explore')
-                                    ? 'text-green-600 dark:text-green-400'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-gray-600 dark:text-gray-400'
                                 }`}
                         >
                             <TrendingUp className={`w-6 h-6 ${isActive('/explore') ? 'fill-current' : ''}`} />
@@ -609,8 +600,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors ${isActive('/people')
-                                    ? 'text-green-600 dark:text-green-400'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-gray-600 dark:text-gray-400'
                                 }`}
                         >
                             <Users className={`w-6 h-6 ${isActive('/people') ? 'fill-current' : ''}`} />
@@ -622,8 +613,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <motion.div
                             whileTap={{ scale: 0.9 }}
                             className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors ${isActive('/profile')
-                                    ? 'text-green-600 dark:text-green-400'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-gray-600 dark:text-gray-400'
                                 }`}
                         >
                             <User className={`w-6 h-6 ${isActive('/profile') ? 'fill-current' : ''}`} />

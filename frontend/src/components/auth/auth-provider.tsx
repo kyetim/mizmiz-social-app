@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { getCurrentUser } from '@/store/slices/auth-slice'
+import { logout, setCredentials } from '@/store/slices/auth-slice'
+import { useGetCurrentUserQuery } from '@/store/api/api'
 
 interface AuthProviderProps {
     children: React.ReactNode
@@ -19,12 +20,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const dispatch = useAppDispatch()
     const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth)
 
+    const {
+        data: currentUser,
+        error: currentUserError,
+    } = useGetCurrentUserQuery(undefined, {
+        refetchOnFocus: true,
+        refetchOnReconnect: true,
+    })
+
     useEffect(() => {
-        // Try to fetch user data on mount (cookie will be sent automatically)
-        if (!user && !isLoading) {
-            dispatch(getCurrentUser())
+        if (currentUser && currentUser.id !== user?.id) {
+            dispatch(setCredentials({ user: currentUser }))
         }
-    }, [dispatch, user, isLoading])
+    }, [currentUser, dispatch, user?.id])
+
+    useEffect(() => {
+        if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
+            dispatch(logout())
+        }
+    }, [currentUserError, dispatch])
 
     useEffect(() => {
         const isPublicRoute = publicRoutes.includes(pathname)

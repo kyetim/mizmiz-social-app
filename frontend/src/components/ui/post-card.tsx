@@ -8,9 +8,6 @@ import { GlassmorphismCard } from './glassmorphism-card'
 import { ImageLightbox } from './image-lightbox'
 import { PostInterface } from '@/interfaces/post.interface'
 import { postsApi } from '@/lib/api/posts'
-import { categoriesApi } from '@/lib/api/categories'
-import { vibesApi } from '@/lib/api/vibes'
-import { PostCategory, PostVibe } from '@/interfaces/category.interface'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { followUser } from '@/store/slices/follow-slice'
 import { toast } from 'react-hot-toast'
@@ -19,6 +16,10 @@ import { CategoryVotingModal } from '@/components/post/category-voting-modal'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Link from 'next/link'
+import {
+  useGetPostCategoriesQuery,
+  useGetPostVibesQuery,
+} from '@/store/api/api'
 
 interface PostCardProps {
   post: PostInterface
@@ -37,17 +38,18 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const [categories, setCategories] = useState<PostCategory[]>([])
-  const [vibes, setVibes] = useState<PostVibe[]>([])
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   const [isAuthorFollowed, setIsAuthorFollowed] = useState(
     post.isAuthorFollowed ?? following.includes(post.userId)
   )
-
-  useEffect(() => {
-    loadCategoriesAndVibes()
-  }, [post.id])
+  const {
+    data: categories = [],
+    refetch: refetchPostCategories,
+  } = useGetPostCategoriesQuery(post.id)
+  const {
+    data: vibes = [],
+  } = useGetPostVibesQuery(post.id)
 
   useEffect(() => {
     setIsLiked(post.isLikedByCurrentUser || false)
@@ -58,19 +60,6 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   useEffect(() => {
     setIsAuthorFollowed(post.isAuthorFollowed ?? following.includes(post.userId))
   }, [post.isAuthorFollowed, post.userId, following])
-
-  async function loadCategoriesAndVibes() {
-    try {
-      const [cats, vbs] = await Promise.all([
-        categoriesApi.getPostCategories(post.id),
-        vibesApi.getPostVibes(post.id),
-      ])
-      setCategories(cats)
-      setVibes(vbs)
-    } catch (error) {
-      console.error('Failed to load categories/vibes:', error)
-    }
-  }
 
   const isOwnPost = user?.id === post.userId
 
@@ -380,7 +369,7 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
         isOpen={isCategoryModalOpen}
         onClose={() => {
           setIsCategoryModalOpen(false)
-          loadCategoriesAndVibes()
+          refetchPostCategories()
         }}
         postId={post.id}
       />

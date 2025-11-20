@@ -18,13 +18,11 @@ import {
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { postsApi } from '@/lib/api/posts'
-import { categoriesApi } from '@/lib/api/categories'
-import { vibesApi } from '@/lib/api/vibes'
 import { PostInterface, CommentInterface } from '@/interfaces/post.interface'
-import { PostCategory, PostVibe } from '@/interfaces/category.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { useGetPostCategoriesQuery, useGetPostVibesQuery } from '@/store/api/api'
 
 export default function PostDetailPage() {
     const router = useRouter()
@@ -34,8 +32,6 @@ export default function PostDetailPage() {
 
     const [post, setPost] = useState<PostInterface | null>(null)
     const [comments, setComments] = useState<CommentInterface[]>([])
-    const [categories, setCategories] = useState<PostCategory[]>([])
-    const [vibes, setVibes] = useState<PostVibe[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isLiked, setIsLiked] = useState(false)
     const [likesCount, setLikesCount] = useState(0)
@@ -45,6 +41,15 @@ export default function PostDetailPage() {
     const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false)
     const [commentContent, setCommentContent] = useState('')
     const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+
+    const {
+        data: categories = [],
+        isFetching: isFetchingCategories,
+    } = useGetPostCategoriesQuery(postId ?? '', { skip: !postId })
+    const {
+        data: vibes = [],
+        isFetching: isFetchingVibes,
+    } = useGetPostVibesQuery(postId ?? '', { skip: !postId })
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -60,18 +65,13 @@ export default function PostDetailPage() {
     async function loadPostDetails() {
         setIsLoading(true)
         try {
-            // Load post, comments, categories, and vibes in parallel
-            const [postData, commentsData, categoriesData, vibesData] = await Promise.all([
+            const [postData, commentsData] = await Promise.all([
                 postsApi.getPost(postId),
                 postsApi.getComments(postId),
-                categoriesApi.getPostCategories(postId),
-                vibesApi.getPostVibes(postId)
             ])
 
             setPost(postData)
             setComments(commentsData)
-            setCategories(categoriesData)
-            setVibes(vibesData)
             setIsLiked(postData.isLikedByCurrentUser || false)
             setLikesCount(postData.likesCount)
             setCommentsCount(postData.commentsCount)

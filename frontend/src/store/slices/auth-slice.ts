@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { authService } from '@/lib/api/auth'
 import { UserInterface } from '@/interfaces/user.interface'
+import { api } from '@/store/api/api'
 
 interface AuthState {
   user: UserInterface | null
@@ -58,17 +59,6 @@ export const register = createAsyncThunk(
   }
 )
 
-export const getCurrentUser = createAsyncThunk(
-  'auth/getCurrentUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await authService.getCurrentUser()
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to get user')
-    }
-  }
-)
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -120,17 +110,18 @@ const authSlice = createSlice({
         state.error = action.payload as string
       })
 
-    // Get current user
+    // RTK Query integration
     builder
-      .addCase(getCurrentUser.pending, (state) => {
+      .addMatcher(api.endpoints.getCurrentUser.matchPending, (state) => {
         state.isLoading = true
+        state.error = null
       })
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
+      .addMatcher(api.endpoints.getCurrentUser.matchFulfilled, (state, action) => {
         state.isLoading = false
         state.user = action.payload
         state.isAuthenticated = true
       })
-      .addCase(getCurrentUser.rejected, (state) => {
+      .addMatcher(api.endpoints.getCurrentUser.matchRejected, (state) => {
         state.isLoading = false
         state.isAuthenticated = false
         state.user = null

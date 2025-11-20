@@ -2,19 +2,23 @@
 
 import React, { useState, useEffect } from 'react'
 import { Sliders, X, Lock } from 'lucide-react'
-import { categoriesApi } from '@/lib/api/categories'
 import { preferencesApi } from '@/lib/api/preferences'
 import { Category, UserCategoryPreference } from '@/interfaces/category.interface'
+import { useGetCategoriesQuery } from '@/store/api/api'
 
 export function FeedMixerSettings() {
   const [isOpen, setIsOpen] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
   const [preferences, setPreferences] = useState<
     Map<string, { weight: number; isBlocked: boolean }>
   >(new Map())
   const [mode, setMode] = useState<'normal' | 'soft' | 'focus'>('normal')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const {
+    data: categories = [],
+    isFetching: isFetchingCategories,
+    refetch: refetchCategories,
+  } = useGetCategoriesQuery({ isActive: true }, { skip: !isOpen })
 
   useEffect(() => {
     if (isOpen) {
@@ -25,12 +29,8 @@ export function FeedMixerSettings() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [cats, prefs] = await Promise.all([
-        categoriesApi.getCategories({ isActive: true }),
-        preferencesApi.getCategoryPreferences(),
-      ])
-
-      setCategories(cats)
+      await refetchCategories()
+      const prefs = await preferencesApi.getCategoryPreferences()
 
       const prefMap = new Map<string, { weight: number; isBlocked: boolean }>()
       prefs.forEach((pref) => {
@@ -117,7 +117,7 @@ export function FeedMixerSettings() {
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(85vh-180px)]">
-          {loading ? (
+          {loading || (isFetchingCategories && categories.length === 0) ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
@@ -153,11 +153,10 @@ export function FeedMixerSettings() {
                       key={m.value}
                       type="button"
                       onClick={() => setMode(m.value as any)}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        mode === m.value
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
-                      }`}
+                      className={`p-4 rounded-xl border-2 transition-all ${mode === m.value
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                        }`}
                     >
                       <div className="text-3xl mb-2">{m.icon}</div>
                       <div className="font-semibold text-gray-900 dark:text-white">
@@ -187,11 +186,10 @@ export function FeedMixerSettings() {
                     return (
                       <div
                         key={cat.id}
-                        className={`p-4 rounded-xl border ${
-                          isBlocked
-                            ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10'
-                            : 'border-gray-200 dark:border-gray-800'
-                        }`}
+                        className={`p-4 rounded-xl border ${isBlocked
+                          ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10'
+                          : 'border-gray-200 dark:border-gray-800'
+                          }`}
                       >
                         <div className="flex items-center gap-3 mb-2">
                           <span className="text-2xl">{cat.icon}</span>
@@ -202,11 +200,10 @@ export function FeedMixerSettings() {
                           </div>
                           <button
                             onClick={() => toggleBlock(cat.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isBlocked
-                                ? 'bg-red-100 dark:bg-red-900/30 text-red-600'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 hover:text-red-600'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${isBlocked
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-600'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 hover:text-red-600'
+                              }`}
                             title={isBlocked ? 'Engeli Kaldır' : 'Engelle'}
                           >
                             <Lock className="w-4 h-4" />

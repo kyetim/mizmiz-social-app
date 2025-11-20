@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { fetchExplorePosts } from '@/store/slices/posts-slice'
-import { fetchTrendingCategories } from '@/store/slices/categories-slice'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -17,23 +16,22 @@ import {
     X
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PostInterface } from '@/interfaces/post.interface'
-import { Category } from '@/interfaces/category.interface'
 import { toast } from 'react-hot-toast'
+import { useGetTrendingCategoriesQuery } from '@/store/api/api'
 
 export default function ExplorePage() {
     const router = useRouter()
     const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
     const { explorePosts, isLoading: isLoadingPosts } = useAppSelector((state) => state.posts)
-    const { trendingCategories, isLoading: isLoadingCategories } = useAppSelector((state) => state.categories)
+    const {
+        data: trendingCategories = [],
+        isFetching: isFetchingCategories,
+        refetch: refetchTrendingCategories,
+    } = useGetTrendingCategoriesQuery({ limit: 10 })
     const [activeTab, setActiveTab] = useState<'trending' | 'categories' | 'popular'>('trending')
     const [searchQuery, setSearchQuery] = useState('')
-    const [filteredPosts, setFilteredPosts] = useState<PostInterface[]>([])
-    const [filteredCategories, setFilteredCategories] = useState<Category[]>([])
-    const [isSearching, setIsSearching] = useState(false)
-
-    const isLoading = isLoadingPosts || isLoadingCategories
+    const isLoading = isLoadingPosts || isFetchingCategories
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -44,16 +42,40 @@ export default function ExplorePage() {
         loadData()
     }, [router, activeTab])
 
-    // Search effect
-    useEffect(() => {
-        if (searchQuery.trim()) {
-            performSearch()
-        } else {
-            setFilteredPosts(explorePosts)
-            setFilteredCategories(trendingCategories)
-            setIsSearching(false)
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const isSearching = normalizedQuery.length > 0
+
+    const filteredPosts = useMemo(() => {
+        if (!isSearching) {
+            return explorePosts
         }
-    }, [searchQuery, explorePosts, trendingCategories])
+
+        return explorePosts.filter((post) => {
+            const content = post.content.toLowerCase()
+            const username = post.user?.username?.toLowerCase() ?? ''
+            const firstName = post.user?.firstName?.toLowerCase() ?? ''
+            const lastName = post.user?.lastName?.toLowerCase() ?? ''
+
+            return (
+                content.includes(normalizedQuery) ||
+                username.includes(normalizedQuery) ||
+                firstName.includes(normalizedQuery) ||
+                lastName.includes(normalizedQuery)
+            )
+        })
+    }, [isSearching, normalizedQuery, explorePosts])
+
+    const filteredCategories = useMemo(() => {
+        if (!isSearching) {
+            return trendingCategories
+        }
+
+        return trendingCategories.filter((category) => {
+            const name = category.name.toLowerCase()
+            const description = category.description?.toLowerCase() ?? ''
+            return name.includes(normalizedQuery) || description.includes(normalizedQuery)
+        })
+    }, [isSearching, normalizedQuery, trendingCategories])
 
     async function loadData(forceRefresh = false) {
         try {
@@ -61,7 +83,9 @@ export default function ExplorePage() {
                 await dispatch(fetchExplorePosts({ limit: 20, forceRefresh })).unwrap()
             }
 
-            await dispatch(fetchTrendingCategories({ limit: 10, forceRefresh })).unwrap()
+            if (forceRefresh) {
+                await refetchTrendingCategories()
+            }
         } catch (error) {
             toast.error('Veriler yüklenemedi')
         }
@@ -71,31 +95,8 @@ export default function ExplorePage() {
         loadData(true)
     }
 
-    function performSearch() {
-        setIsSearching(true)
-        const query = searchQuery.toLowerCase().trim()
-
-        // Filter posts by content or username
-        const searchedPosts = explorePosts.filter(post =>
-            post.content.toLowerCase().includes(query) ||
-            post.user?.username?.toLowerCase().includes(query) ||
-            post.user?.firstName?.toLowerCase().includes(query) ||
-            post.user?.lastName?.toLowerCase().includes(query)
-        )
-
-        // Filter categories by name or description
-        const searchedCategories = trendingCategories.filter(category =>
-            category.name.toLowerCase().includes(query) ||
-            category.description?.toLowerCase().includes(query)
-        )
-
-        setFilteredPosts(searchedPosts)
-        setFilteredCategories(searchedCategories)
-    }
-
-    // Get display posts based on search
-    const displayPosts = searchQuery.trim() ? filteredPosts : explorePosts
-    const displayCategories = searchQuery.trim() ? filteredCategories : trendingCategories
+    const displayPosts = filteredPosts
+    const displayCategories = filteredCategories
 
     if (!user) {
         return null

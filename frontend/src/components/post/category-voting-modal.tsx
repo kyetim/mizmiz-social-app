@@ -1,9 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { X, ThumbsUp, ThumbsDown, Plus } from 'lucide-react'
-import { categoriesApi } from '@/lib/api/categories'
-import { Category, PostCategory } from '@/interfaces/category.interface'
+import {
+  useGetPostCategoriesQuery,
+  useGetCategoriesQuery,
+  useVoteOnCategoryMutation,
+  useAddCategoryToPostMutation,
+} from '@/store/api/api'
 
 interface CategoryVotingModalProps {
   postId: string
@@ -16,75 +20,44 @@ export function CategoryVotingModal({
   isOpen,
   onClose,
 }: CategoryVotingModalProps) {
-  const [postCategories, setPostCategories] = useState<PostCategory[]>([])
-  const [allCategories, setAllCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
   const [showAddCategory, setShowAddCategory] = useState(false)
+  const {
+    data: postCategories = [],
+    isFetching: isFetchingPostCategories,
+  } = useGetPostCategoriesQuery(postId, { skip: !isOpen })
+  const {
+    data: allCategories = [],
+    isFetching: isFetchingAllCategories,
+  } = useGetCategoriesQuery({ isActive: true }, { skip: !isOpen })
+  const [voteOnCategory, { isLoading: isVoting }] = useVoteOnCategoryMutation()
+  const [addCategoryToPost, { isLoading: isAdding }] = useAddCategoryToPostMutation()
 
-  useEffect(() => {
-    if (isOpen) {
-      loadData()
-    }
-  }, [isOpen, postId])
+  if (!isOpen) return null
 
-  const loadData = async () => {
+  const loading = isFetchingPostCategories || isFetchingAllCategories
+  const availableCategories = allCategories.filter(
+    (cat) => !postCategories.find((pc) => pc.categoryId === cat.id)
+  )
+
+  const handleVote = async (postCategoryId: string, voteType: 'UPVOTE' | 'DOWNVOTE') => {
     try {
-      setLoading(true)
-      const [postCats, allCats] = await Promise.all([
-        categoriesApi.getPostCategories(postId),
-        categoriesApi.getCategories({ isActive: true }),
-      ])
-      setPostCategories(postCats)
-      setAllCategories(allCats)
-    } catch (error) {
-      console.error('Failed to load categories:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleVote = async (
-    postCategoryId: string,
-    voteType: 'UPVOTE' | 'DOWNVOTE'
-  ) => {
-    try {
-      console.log('Voting on postCategoryId:', postCategoryId, 'voteType:', voteType)
-      await categoriesApi.voteOnCategory(postCategoryId, voteType)
-      // Refresh data
-      const updated = await categoriesApi.getPostCategories(postId)
-      setPostCategories(updated)
-      // Show success message
-      const voteText = voteType === 'UPVOTE' ? '👍 Beğendiniz' : '👎 Beğenmediniz'
-      alert(`Oyunuz kaydedildi: ${voteText}`)
+      await voteOnCategory({ postCategoryId, voteType, postId }).unwrap()
     } catch (error) {
       console.error('Failed to vote:', error)
-      if (error && typeof error === 'object' && 'response' in error) {
-        console.error('Error details:', (error as any).response?.data)
-      }
       alert('Oylama sırasında hata oluştu. Lütfen tekrar deneyin.')
     }
   }
 
   const handleAddCategory = async (categoryId: string) => {
     try {
-      await categoriesApi.addCategoryToPost(postId, categoryId)
-      const updated = await categoriesApi.getPostCategories(postId)
-      setPostCategories(updated)
+      await addCategoryToPost({ postId, categoryId }).unwrap()
       setShowAddCategory(false)
-      // Show success message
       alert('Kategori başarıyla eklendi! 🎉')
     } catch (error) {
       console.error('Failed to add category:', error)
       alert('Kategori eklenirken hata oluştu. Lütfen tekrar deneyin.')
     }
   }
-
-  if (!isOpen) return null
-
-  // Available categories to add (not already on post)
-  const availableCategories = allCategories.filter(
-    (cat) => !postCategories.find((pc) => pc.categoryId === cat.id)
-  )
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -160,9 +133,10 @@ export function CategoryVotingModal({
                         <button
                           onClick={() => handleVote(pc.id, 'UPVOTE')}
                           className={`p-2 rounded-lg transition-colors ${pc.userVote === 'UPVOTE'
-                              ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                              : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
                             }`}
+                          disabled={isVoting}
                         >
                           <ThumbsUp className="w-5 h-5" />
                         </button>
@@ -173,9 +147,10 @@ export function CategoryVotingModal({
                         <button
                           onClick={() => handleVote(pc.id, 'DOWNVOTE')}
                           className={`p-2 rounded-lg transition-colors ${pc.userVote === 'DOWNVOTE'
-                              ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                              : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
                             }`}
+                          disabled={isVoting}
                         >
                           <ThumbsDown className="w-5 h-5" />
                         </button>
@@ -218,6 +193,7 @@ export function CategoryVotingModal({
                           onClick={() => handleAddCategory(cat.id)}
                           className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors text-left"
                           style={{ borderColor: cat.color + '30' }}
+                          disabled={isAdding}
                         >
                           <span className="text-2xl">{cat.icon}</span>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
