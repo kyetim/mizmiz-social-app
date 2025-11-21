@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { usersApi } from '@/lib/api/users'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { UserInterface } from '@/interfaces/user.interface'
+import { api } from '@/store/api/api'
 
 interface FollowState {
     following: string[] // User IDs that current user is following
@@ -18,74 +18,8 @@ const initialState: FollowState = {
     error: null
 }
 
-// Async thunks
-export const followUser = createAsyncThunk(
-    'follow/followUser',
-    async (userId: string, { rejectWithValue }) => {
-        try {
-            await usersApi.followUser(userId)
-            return userId
-        } catch (error: any) {
-            // If already following (409 Conflict), treat as success
-            if (error.response?.status === 409) {
-                return userId
-            }
-            return rejectWithValue(error.response?.data?.message || 'Failed to follow user')
-        }
-    }
-)
-
-export const unfollowUser = createAsyncThunk(
-    'follow/unfollowUser',
-    async (userId: string, { rejectWithValue }) => {
-        try {
-            await usersApi.unfollowUser(userId)
-            return userId
-        } catch (error: any) {
-            // If not following (404), treat as success
-            if (error.response?.status === 404) {
-                return userId
-            }
-            return rejectWithValue(error.response?.data?.message || 'Failed to unfollow user')
-        }
-    }
-)
-
-export const checkIsFollowing = createAsyncThunk(
-    'follow/checkIsFollowing',
-    async (userId: string, { rejectWithValue }) => {
-        try {
-            const result = await usersApi.isFollowing(userId)
-            return { userId, isFollowing: result }
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to check follow status')
-        }
-    }
-)
-
-export const fetchFollowers = createAsyncThunk(
-    'follow/fetchFollowers',
-    async (userId: string, { rejectWithValue }) => {
-        try {
-            const followers = await usersApi.getFollowers(userId)
-            return followers
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch followers')
-        }
-    }
-)
-
-export const fetchFollowing = createAsyncThunk(
-    'follow/fetchFollowing',
-    async (userId: string, { rejectWithValue }) => {
-        try {
-            const following = await usersApi.getFollowing(userId)
-            return following
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to fetch following')
-        }
-    }
-)
+// Note: followUser and unfollowUser are now RTK Query mutations
+// This slice is kept for backward compatibility and local state management
 
 const followSlice = createSlice({
     name: 'follow',
@@ -99,78 +33,30 @@ const followSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        // Follow user
+        // Sync with RTK Query follow/unfollow mutations
         builder
-            .addCase(followUser.pending, (state) => {
-                state.isLoading = true
-                state.error = null
-            })
-            .addCase(followUser.fulfilled, (state, action) => {
-                state.isLoading = false
-                if (!state.following.includes(action.payload)) {
-                    state.following.push(action.payload)
+            .addMatcher(api.endpoints.followUser.matchFulfilled, (state, action) => {
+                const userId = action.meta.arg.originalArgs
+                if (!state.following.includes(userId)) {
+                    state.following.push(userId)
                 }
             })
-            .addCase(followUser.rejected, (state, action) => {
-                state.isLoading = false
-                state.error = action.payload as string
+            .addMatcher(api.endpoints.unfollowUser.matchFulfilled, (state, action) => {
+                const userId = action.meta.arg.originalArgs
+                state.following = state.following.filter(id => id !== userId)
             })
-
-        // Unfollow user
-        builder
-            .addCase(unfollowUser.pending, (state) => {
-                state.isLoading = true
-                state.error = null
-            })
-            .addCase(unfollowUser.fulfilled, (state, action) => {
-                state.isLoading = false
-                state.following = state.following.filter(id => id !== action.payload)
-            })
-            .addCase(unfollowUser.rejected, (state, action) => {
-                state.isLoading = false
-                state.error = action.payload as string
-            })
-
-        // Check is following
-        builder
-            .addCase(checkIsFollowing.fulfilled, (state, action) => {
-                if (action.payload.isFollowing) {
-                    if (!state.following.includes(action.payload.userId)) {
-                        state.following.push(action.payload.userId)
+            // Sync with getUserProfile query to update following state
+            .addMatcher(api.endpoints.getUserProfile.matchFulfilled, (state, action) => {
+                const user = action.payload
+                const userId = action.meta.arg.originalArgs
+                const isFollowing = user.isFollowedByCurrentUser ?? user.isFollowing ?? false
+                if (isFollowing) {
+                    if (!state.following.includes(userId)) {
+                        state.following.push(userId)
                     }
                 } else {
-                    state.following = state.following.filter(id => id !== action.payload.userId)
+                    state.following = state.following.filter(id => id !== userId)
                 }
-            })
-
-        // Fetch followers
-        builder
-            .addCase(fetchFollowers.pending, (state) => {
-                state.isLoading = true
-                state.error = null
-            })
-            .addCase(fetchFollowers.fulfilled, (state, action) => {
-                state.isLoading = false
-                state.followers = action.payload
-            })
-            .addCase(fetchFollowers.rejected, (state, action) => {
-                state.isLoading = false
-                state.error = action.payload as string
-            })
-
-        // Fetch following
-        builder
-            .addCase(fetchFollowing.pending, (state) => {
-                state.isLoading = true
-                state.error = null
-            })
-            .addCase(fetchFollowing.fulfilled, (state, action) => {
-                state.isLoading = false
-                state.followingUsers = action.payload
-            })
-            .addCase(fetchFollowing.rejected, (state, action) => {
-                state.isLoading = false
-                state.error = action.payload as string
             })
     }
 })

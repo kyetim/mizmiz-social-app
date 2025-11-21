@@ -43,7 +43,7 @@ const axiosBaseQuery =
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed', 'Posts', 'Comments'],
+  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed', 'Posts', 'Comments', 'Users'],
   endpoints: (builder) => ({
     getCurrentUser: builder.query<UserInterface, void>({
       query: () => ({ url: '/auth/me', method: 'get' }),
@@ -259,6 +259,68 @@ export const api = createApi({
         'Posts',
       ],
     }),
+    // Users endpoints
+    getUserProfile: builder.query<UserInterface, string>({
+      query: (userId) => ({ url: `/users/${userId}`, method: 'get' }),
+      providesTags: (result, error, userId) => [
+        { type: 'Users', id: userId },
+      ],
+    }),
+    getUserPosts: builder.query<
+      PostInterface[],
+      { userId: string; limit?: number; cursor?: string }
+    >({
+      query: ({ userId, ...params }) => ({
+        url: '/posts',
+        method: 'get',
+        params: { userId, ...params },
+      }),
+      providesTags: (result, error, { userId }) => [
+        { type: 'Posts', id: `user-${userId}` },
+      ],
+    }),
+    updateProfile: builder.mutation<
+      UserInterface,
+      {
+        firstName?: string
+        lastName?: string
+        bio?: string
+        avatarUrl?: string
+        coverImageUrl?: string
+        location?: string
+        website?: string
+      }
+    >({
+      query: (data) => ({
+        url: '/users/me',
+        method: 'put',
+        data,
+      }),
+      invalidatesTags: ['Auth', 'Users'],
+    }),
+    // Follow endpoints
+    followUser: builder.mutation<void, string>({
+      query: (userId) => ({
+        url: `/users/${userId}/follow`,
+        method: 'post',
+      }),
+      invalidatesTags: (result, error, userId) => [
+        { type: 'Users', id: userId },
+        'Users',
+        'Auth',
+      ],
+    }),
+    unfollowUser: builder.mutation<void, string>({
+      query: (userId) => ({
+        url: `/users/${userId}/follow`,
+        method: 'delete',
+      }),
+      invalidatesTags: (result, error, userId) => [
+        { type: 'Users', id: userId },
+        'Users',
+        'Auth',
+      ],
+    }),
   }),
 })
 
@@ -287,6 +349,11 @@ export const {
   useGetCommentsQuery,
   useCreateCommentMutation,
   useDeleteCommentMutation,
+  useGetUserProfileQuery,
+  useGetUserPostsQuery,
+  useUpdateProfileMutation,
+  useFollowUserMutation,
+  useUnfollowUserMutation,
 } = api
 
 

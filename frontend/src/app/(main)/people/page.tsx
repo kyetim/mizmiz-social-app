@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { followUser, unfollowUser, setFollowing } from '@/store/slices/follow-slice'
+import { setFollowing } from '@/store/slices/follow-slice'
+import { useFollowUserMutation, useUnfollowUserMutation } from '@/store/api/api'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -28,6 +29,8 @@ export default function PeoplePage() {
     const dispatch = useAppDispatch()
     const { user: currentUser } = useAppSelector((state) => state.auth)
     const { following } = useAppSelector((state) => state.follow)
+    const [followUser] = useFollowUserMutation()
+    const [unfollowUser] = useUnfollowUserMutation()
     const [users, setUsers] = useState<UserInterface[]>([])
     const [filteredUsers, setFilteredUsers] = useState<UserInterface[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -88,14 +91,15 @@ export default function PeoplePage() {
     async function handleFollow(userId: string) {
         try {
             if (following.includes(userId)) {
-                await dispatch(unfollowUser(userId)).unwrap()
+                await unfollowUser(userId).unwrap()
                 toast.success('Takibi bıraktınız')
             } else {
-                await dispatch(followUser(userId)).unwrap()
+                await followUser(userId).unwrap()
                 toast.success('Takip ediyorsunuz! 🎉')
             }
+            // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
-            toast.error(error || 'İşlem başarısız')
+            toast.error(error.data?.message || 'İşlem başarısız')
         }
     }
 

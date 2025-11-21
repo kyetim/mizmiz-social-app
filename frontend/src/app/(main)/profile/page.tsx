@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { logout, updateUser } from '@/store/slices/auth-slice'
+import { useGetUserPostsQuery, useUpdateProfileMutation } from '@/store/api/api'
 import { usersApi } from '@/lib/api/users'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
@@ -29,7 +30,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { postsApi } from '@/lib/api/posts'
 import { PostInterface } from '@/interfaces/post.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
@@ -40,9 +40,7 @@ export default function ProfilePage() {
     const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
     const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'media'>('posts')
-    const [posts, setPosts] = useState<PostInterface[]>([])
     const [likedPosts, setLikedPosts] = useState<PostInterface[]>([])
-    const [isLoading, setIsLoading] = useState(true)
     const [showEditModal, setShowEditModal] = useState(false)
     const [showAvatarModal, setShowAvatarModal] = useState(false)
     const [showCoverModal, setShowCoverModal] = useState(false)
@@ -51,6 +49,16 @@ export default function ProfilePage() {
     const [avatarUrl, setAvatarUrl] = useState('')
     const [coverUrl, setCoverUrl] = useState('')
 
+    const {
+        data: posts = [],
+        isLoading: isLoadingPosts,
+        refetch: refetchUserPosts,
+    } = useGetUserPostsQuery(
+        { userId: user?.id ?? '', limit: 50 },
+        { skip: !user?.id }
+    )
+    const [updateProfile] = useUpdateProfileMutation()
+
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!token) {
@@ -58,7 +66,8 @@ export default function ProfilePage() {
             return
         }
         if (user) {
-            loadUserPosts()
+            // Load liked posts (not yet in RTK Query)
+            loadLikedPosts()
             // Set initial avatar and cover from user data
             if (user.avatarUrl) {
                 setAvatarUrl(user.avatarUrl)
@@ -69,27 +78,22 @@ export default function ProfilePage() {
         }
     }, [router, user])
 
-    async function loadUserPosts() {
+    async function loadLikedPosts() {
         if (!user) return
-
-        setIsLoading(true)
         try {
-            const [userPosts, userLikedPosts] = await Promise.all([
-                postsApi.getPosts({ userId: user.id, limit: 50 }),
-                usersApi.getUserLikedPosts(user.id, 50)
-            ])
-            setPosts(userPosts)
+            const userLikedPosts = await usersApi.getUserLikedPosts(user.id, 50)
             setLikedPosts(userLikedPosts)
         } catch (error) {
-            toast.error('Gönderiler yüklenemedi')
-        } finally {
-            setIsLoading(false)
+            console.error('Failed to load liked posts:', error)
         }
     }
 
     function handlePostUpdated() {
-        loadUserPosts()
+        // RTK Query will automatically invalidate and refetch
+        refetchUserPosts()
     }
+
+    const isLoading = isLoadingPosts
 
     function handleLogout() {
         dispatch(logout())
@@ -98,25 +102,23 @@ export default function ProfilePage() {
 
     async function handleAvatarUploaded(url: string) {
         try {
-            const updatedUser = await usersApi.updateAvatar(url)
+            const updatedUser = await updateProfile({ avatarUrl: url }).unwrap()
             setAvatarUrl(url)
             dispatch(updateUser(updatedUser))
             toast.success('Profil fotoğrafı güncellendi!')
-        } catch (error) {
-            toast.error('Profil fotoğrafı güncellenemedi')
-            console.error('Avatar update error:', error)
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Profil fotoğrafı güncellenemedi')
         }
     }
 
     async function handleCoverUploaded(url: string) {
         try {
-            const updatedUser = await usersApi.updateCoverImage(url)
+            const updatedUser = await updateProfile({ coverImageUrl: url }).unwrap()
             setCoverUrl(url)
             dispatch(updateUser(updatedUser))
             toast.success('Kapak fotoğrafı güncellendi!')
-        } catch (error) {
-            toast.error('Kapak fotoğrafı güncellenemedi')
-            console.error('Cover update error:', error)
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Kapak fotoğrafı güncellenemedi')
         }
     }
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Loader2, MapPin, Link as LinkIcon, FileText } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { updateUser } from '@/store/slices/auth-slice'
-import { usersApi } from '@/lib/api/users'
+import { useUpdateProfileMutation } from '@/store/api/api'
 import { toast } from 'react-hot-toast'
 
 interface EditProfileModalProps {
@@ -16,8 +16,8 @@ interface EditProfileModalProps {
 export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
     const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
-    const [isLoading, setIsLoading] = useState(false)
-    
+    const [updateProfile, { isLoading }] = useUpdateProfileMutation()
+
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -84,17 +84,15 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
             }
         }
 
-        setIsLoading(true)
         try {
-            const updatedUser = await usersApi.updateProfile(formData)
+            const updatedUser = await updateProfile(formData).unwrap()
             dispatch(updateUser(updatedUser))
             toast.success('Profiliniz güncellendi!')
             onClose()
+            // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
             console.error('Profile update error:', error)
-            toast.error(error.response?.data?.error?.message || 'Profil güncellenemedi')
-        } finally {
-            setIsLoading(false)
+            toast.error(error.data?.error?.message || error.data?.message || 'Profil güncellenemedi')
         }
     }
 

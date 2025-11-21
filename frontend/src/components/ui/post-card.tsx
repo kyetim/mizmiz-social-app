@@ -8,7 +8,6 @@ import { GlassmorphismCard } from './glassmorphism-card'
 import { ImageLightbox } from './image-lightbox'
 import { PostInterface } from '@/interfaces/post.interface'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { followUser } from '@/store/slices/follow-slice'
 import { toast } from 'react-hot-toast'
 import { CommentModal } from '@/components/post/comment-modal'
 import { CategoryVotingModal } from '@/components/post/category-voting-modal'
@@ -21,6 +20,7 @@ import {
   useLikePostMutation,
   useUnlikePostMutation,
   useDeletePostMutation,
+  useFollowUserMutation,
 } from '@/store/api/api'
 
 interface PostCardProps {
@@ -52,6 +52,7 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const [likePost] = useLikePostMutation()
   const [unlikePost] = useUnlikePostMutation()
   const [deletePost] = useDeletePostMutation()
+  const [followUser] = useFollowUserMutation()
 
   useEffect(() => {
     setIsAuthorFollowed(post.isAuthorFollowed ?? following.includes(post.userId))
@@ -65,11 +66,12 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
 
     setIsFollowLoading(true)
     try {
-      await dispatch(followUser(post.userId)).unwrap()
+      await followUser(post.userId).unwrap()
       setIsAuthorFollowed(true)
       toast.success('Takip edildi')
+      // RTK Query will automatically invalidate and refetch
     } catch (error: any) {
-      toast.error(error || 'İşlem başarısız')
+      toast.error(error.data?.message || 'İşlem başarısız')
     } finally {
       setIsFollowLoading(false)
     }

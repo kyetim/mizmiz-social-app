@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { followUser, unfollowUser, checkIsFollowing } from '@/store/slices/follow-slice'
+import { useAppSelector } from '@/store/hooks'
+import {
+    useGetUserProfileQuery,
+    useGetUserPostsQuery,
+    useFollowUserMutation,
+    useUnfollowUserMutation,
+} from '@/store/api/api'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ImageLightbox } from '@/components/ui/image-lightbox'
@@ -21,28 +26,36 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { postsApi } from '@/lib/api/posts'
 import { usersApi } from '@/lib/api/users'
 import { PostInterface } from '@/interfaces/post.interface'
-import { UserInterface } from '@/interfaces/user.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 
 export default function UserProfilePage() {
     const router = useRouter()
-    const dispatch = useAppDispatch()
     const params = useParams()
     const userId = params.userId as string
     const { user: currentUser } = useAppSelector((state) => state.auth)
-    const { following } = useAppSelector((state) => state.follow)
     const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'media'>('posts')
-    const [posts, setPosts] = useState<PostInterface[]>([])
     const [likedPosts, setLikedPosts] = useState<PostInterface[]>([])
-    const [profileUser, setProfileUser] = useState<UserInterface | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
     const [showAvatarLightbox, setShowAvatarLightbox] = useState(false)
     const [showCoverLightbox, setShowCoverLightbox] = useState(false)
+
+    const {
+        data: profileUser,
+        isLoading: isLoadingProfile,
+    } = useGetUserProfileQuery(userId, { skip: !userId })
+    const {
+        data: posts = [],
+        isLoading: isLoadingPosts,
+        refetch: refetchUserPosts,
+    } = useGetUserPostsQuery(
+        { userId, limit: 50 },
+        { skip: !userId }
+    )
+    const [followUser] = useFollowUserMutation()
+    const [unfollowUser] = useUnfollowUserMutation()
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -51,52 +64,45 @@ export default function UserProfilePage() {
             return
         }
         if (userId) {
-            loadUserProfile()
+            // Load liked posts (not yet in RTK Query)
+            loadLikedPosts()
         }
     }, [router, userId])
 
-    async function loadUserProfile() {
-        setIsLoading(true)
+    async function loadLikedPosts() {
+        if (!userId) return
         try {
-            // Load user profile, posts, and liked posts
-            const [user, userPosts, userLikedPosts] = await Promise.all([
-                usersApi.getUser(userId),
-                postsApi.getPosts({ userId, limit: 50 }),
-                usersApi.getUserLikedPosts(userId, 50)
-            ])
-            setProfileUser(user)
-            setPosts(userPosts)
+            const userLikedPosts = await usersApi.getUserLikedPosts(userId, 50)
             setLikedPosts(userLikedPosts)
-
-            // Check if following this user
-            if (userId !== currentUser?.id) {
-                dispatch(checkIsFollowing(userId))
-            }
         } catch (error) {
-            toast.error('Kullanıcı profili yüklenemedi')
-            console.error('Load user profile error:', error)
-        } finally {
-            setIsLoading(false)
+            console.error('Failed to load liked posts:', error)
         }
     }
 
     async function handleFollowToggle() {
+        if (!profileUser) return
+        const isFollowing = profileUser.isFollowedByCurrentUser ?? false
+
         try {
-            if (following.includes(userId)) {
-                await dispatch(unfollowUser(userId)).unwrap()
+            if (isFollowing) {
+                await unfollowUser(userId).unwrap()
                 toast.success('Takibi bıraktınız')
             } else {
-                await dispatch(followUser(userId)).unwrap()
+                await followUser(userId).unwrap()
                 toast.success('Takip ediyorsunuz! 🎉')
             }
+            // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
-            toast.error(error || 'İşlem başarısız')
+            toast.error(error.data?.message || 'İşlem başarısız')
         }
     }
 
     function handlePostUpdated() {
-        loadUserProfile()
+        // RTK Query will automatically invalidate and refetch
+        refetchUserPosts()
     }
+
+    const isLoading = isLoadingProfile || isLoadingPosts
 
     const isOwnProfile = currentUser?.id === userId
 
@@ -203,12 +209,12 @@ export default function UserProfilePage() {
                                     onClick={handleFollowToggle}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
-                                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${following.includes(userId)
+                                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${profileUser?.isFollowedByCurrentUser
                                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                         : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-green-500/30'
                                         }`}
                                 >
-                                    {following.includes(userId) ? (
+                                    {profileUser?.isFollowedByCurrentUser ? (
                                         <>
                                             <UserMinus className="w-4 h-4" />
                                             Takipten Çık
