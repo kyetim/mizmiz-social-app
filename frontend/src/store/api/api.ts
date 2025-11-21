@@ -3,6 +3,7 @@ import type { AxiosError, AxiosRequestConfig } from 'axios'
 import apiClient from '@/lib/api/client'
 import type { UserInterface } from '@/interfaces/user.interface'
 import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/category.interface'
+import type { PostInterface, CommentInterface, CreatePostDto, CreateCommentDto } from '@/interfaces/post.interface'
 
 type AxiosBaseQueryArgs = {
   url: string
@@ -42,7 +43,7 @@ const axiosBaseQuery =
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed'],
+  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed', 'Posts', 'Comments'],
   endpoints: (builder) => ({
     getCurrentUser: builder.query<UserInterface, void>({
       query: () => ({ url: '/auth/me', method: 'get' }),
@@ -140,6 +141,124 @@ export const api = createApi({
         { type: 'Vibes', id: `post-${postId}` },
       ],
     }),
+    // Posts endpoints
+    getFeedPosts: builder.query<
+      PostInterface[],
+      { following?: boolean; limit?: number; cursor?: string } | void
+    >({
+      query: (params = {}) => ({
+        url: '/posts',
+        method: 'get',
+        params: { following: true, ...params },
+      }),
+      providesTags: ['Posts'],
+    }),
+    getExplorePosts: builder.query<
+      PostInterface[],
+      { limit?: number; cursor?: string } | void
+    >({
+      query: (params = {}) => ({
+        url: '/posts',
+        method: 'get',
+        params: { following: false, ...params },
+      }),
+      providesTags: ['Posts'],
+    }),
+    getPost: builder.query<PostInterface, string>({
+      query: (postId) => ({ url: `/posts/${postId}`, method: 'get' }),
+      providesTags: (result, error, postId) => [
+        { type: 'Posts', id: postId },
+      ],
+    }),
+    createPost: builder.mutation<PostInterface, CreatePostDto>({
+      query: (data) => ({
+        url: '/posts',
+        method: 'post',
+        data,
+      }),
+      invalidatesTags: ['Posts', 'Feed'],
+    }),
+    updatePost: builder.mutation<
+      PostInterface,
+      { postId: string; data: Partial<CreatePostDto> }
+    >({
+      query: ({ postId, data }) => ({
+        url: `/posts/${postId}`,
+        method: 'put',
+        data,
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Posts', id: postId },
+        'Posts',
+        'Feed',
+      ],
+    }),
+    deletePost: builder.mutation<void, string>({
+      query: (postId) => ({
+        url: `/posts/${postId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: ['Posts', 'Feed'],
+    }),
+    likePost: builder.mutation<void, string>({
+      query: (postId) => ({
+        url: `/posts/${postId}/like`,
+        method: 'post',
+      }),
+      invalidatesTags: (result, error, postId) => [
+        { type: 'Posts', id: postId },
+        'Posts',
+      ],
+    }),
+    unlikePost: builder.mutation<void, string>({
+      query: (postId) => ({
+        url: `/posts/${postId}/like`,
+        method: 'delete',
+      }),
+      invalidatesTags: (result, error, postId) => [
+        { type: 'Posts', id: postId },
+        'Posts',
+      ],
+    }),
+    // Comments endpoints
+    getComments: builder.query<CommentInterface[], string>({
+      query: (postId) => ({
+        url: `/posts/${postId}/comments`,
+        method: 'get',
+      }),
+      providesTags: (result, error, postId) => [
+        { type: 'Comments', id: postId },
+      ],
+    }),
+    createComment: builder.mutation<
+      CommentInterface,
+      { postId: string; data: CreateCommentDto }
+    >({
+      query: ({ postId, data }) => ({
+        url: `/posts/${postId}/comments`,
+        method: 'post',
+        data,
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Comments', id: postId },
+        { type: 'Posts', id: postId },
+        'Posts',
+      ],
+    }),
+    deleteComment: builder.mutation<
+      void,
+      { commentId: string; postId: string }
+    >({
+      query: ({ commentId }) => ({
+        url: `/posts/comments/${commentId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: 'Comments', id: postId },
+        { type: 'Posts', id: postId },
+        'Posts',
+      ],
+    }),
   }),
 })
 
@@ -157,6 +276,17 @@ export const {
   useAddVibeToPostMutation,
   useRemoveVibeFromPostMutation,
   useVoteOnVibeMutation,
+  useGetFeedPostsQuery,
+  useGetExplorePostsQuery,
+  useGetPostQuery,
+  useCreatePostMutation,
+  useUpdatePostMutation,
+  useDeletePostMutation,
+  useLikePostMutation,
+  useUnlikePostMutation,
+  useGetCommentsQuery,
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
 } = api
 
 

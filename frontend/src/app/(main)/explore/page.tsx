@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { fetchExplorePosts } from '@/store/slices/posts-slice'
+import { useAppSelector } from '@/store/hooks'
+import { useGetExplorePostsQuery, useGetTrendingCategoriesQuery } from '@/store/api/api'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -17,13 +17,15 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-import { useGetTrendingCategoriesQuery } from '@/store/api/api'
 
 export default function ExplorePage() {
     const router = useRouter()
-    const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
-    const { explorePosts, isLoading: isLoadingPosts } = useAppSelector((state) => state.posts)
+    const {
+        data: explorePosts = [],
+        isLoading: isLoadingPosts,
+        refetch: refetchExplorePosts,
+    } = useGetExplorePostsQuery({ limit: 20 })
     const {
         data: trendingCategories = [],
         isFetching: isFetchingCategories,
@@ -39,8 +41,7 @@ export default function ExplorePage() {
             router.replace('/login')
             return
         }
-        loadData()
-    }, [router, activeTab])
+    }, [router])
 
     const normalizedQuery = searchQuery.trim().toLowerCase()
     const isSearching = normalizedQuery.length > 0
@@ -77,22 +78,10 @@ export default function ExplorePage() {
         })
     }, [isSearching, normalizedQuery, trendingCategories])
 
-    async function loadData(forceRefresh = false) {
-        try {
-            if (activeTab === 'trending' || activeTab === 'popular') {
-                await dispatch(fetchExplorePosts({ limit: 20, forceRefresh })).unwrap()
-            }
-
-            if (forceRefresh) {
-                await refetchTrendingCategories()
-            }
-        } catch (error) {
-            toast.error('Veriler yüklenemedi')
-        }
-    }
-
     function handlePostUpdated() {
-        loadData(true)
+        // RTK Query will automatically invalidate and refetch
+        refetchExplorePosts()
+        refetchTrendingCategories()
     }
 
     const displayPosts = filteredPosts

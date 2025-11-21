@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Trash2, MessageCircle, Heart } from 'lucide-react'
 import { useAppSelector } from '@/store/hooks'
-import { postsApi } from '@/lib/api/posts'
+import { useGetCommentsQuery, useCreateCommentMutation, useDeleteCommentMutation } from '@/store/api/api'
 import { toast } from 'react-hot-toast'
-import { CommentInterface } from '@/interfaces/post.interface'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Link from 'next/link'
@@ -22,26 +21,13 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
   const { user } = useAppSelector((state) => state.auth)
   const [content, setContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [comments, setComments] = useState<CommentInterface[]>([])
-  const [isLoadingComments, setIsLoadingComments] = useState(true)
 
-  useEffect(() => {
-    if (isOpen) {
-      loadComments()
-    }
-  }, [isOpen, postId])
-
-  async function loadComments() {
-    setIsLoadingComments(true)
-    try {
-      const data = await postsApi.getComments(postId)
-      setComments(data)
-    } catch (error) {
-      toast.error('Yorumlar yüklenemedi')
-    } finally {
-      setIsLoadingComments(false)
-    }
-  }
+  const {
+    data: comments = [],
+    isLoading: isLoadingComments,
+  } = useGetCommentsQuery(postId, { skip: !isOpen || !postId })
+  const [createComment] = useCreateCommentMutation()
+  const [deleteComment] = useDeleteCommentMutation()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -59,13 +45,16 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
     setIsLoading(true)
 
     try {
-      const newComment = await postsApi.createComment(postId, { content: content.trim() })
-      setComments([newComment, ...comments])
+      await createComment({
+        postId,
+        data: { content: content.trim() },
+      }).unwrap()
       setContent('')
       toast.success('Yorum eklendi! 💬')
       onCommentAdded()
+      // RTK Query will automatically refetch comments
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Yorum eklenemedi')
+      toast.error(error.data?.message || 'Yorum eklenemedi')
     } finally {
       setIsLoading(false)
     }
@@ -75,12 +64,12 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
     if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return
 
     try {
-      await postsApi.deleteComment(commentId)
-      setComments(comments.filter((c) => c.id !== commentId))
+      await deleteComment({ commentId, postId }).unwrap()
       toast.success('Yorum silindi')
       onCommentAdded()
-    } catch (error) {
-      toast.error('Yorum silinemedi')
+      // RTK Query will automatically refetch comments
+    } catch (error: any) {
+      toast.error(error.data?.message || 'Yorum silinemedi')
     }
   }
 
@@ -163,14 +152,14 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
                     >
                       <div className="flex gap-3">
                         {/* Avatar with online indicator */}
-                        <Link 
+                        <Link
                           href={`/user/${comment.userId}`}
                           className="relative flex-shrink-0 hover:opacity-80 transition-opacity"
                         >
                           <div className="w-11 h-11 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md ring-2 ring-white dark:ring-gray-800 overflow-hidden">
                             {comment.user.avatarUrl ? (
-                              <img 
-                                src={comment.user.avatarUrl} 
+                              <img
+                                src={comment.user.avatarUrl}
                                 alt={comment.user.username}
                                 className="w-full h-full object-cover"
                               />
@@ -186,7 +175,7 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
                         <div className="flex-1 min-w-0">
                           {/* User Info */}
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Link 
+                            <Link
                               href={`/user/${comment.userId}`}
                               className="font-bold text-gray-900 dark:text-white text-sm hover:underline"
                             >
@@ -194,7 +183,7 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
                                 ? `${comment.user.firstName} ${comment.user.lastName}`
                                 : comment.user.username}
                             </Link>
-                            <Link 
+                            <Link
                               href={`/user/${comment.userId}`}
                               className="text-xs text-gray-500 dark:text-gray-400 font-medium hover:underline"
                             >
@@ -289,13 +278,12 @@ export function CommentModal({ isOpen, onClose, postId, onCommentAdded }: Commen
                     </div>
                     <div className="flex items-center justify-between mt-2 px-1">
                       <span
-                        className={`text-xs font-semibold transition-colors ${
-                          content.length > 270
-                            ? 'text-red-600 dark:text-red-400'
-                            : content.length > 250
+                        className={`text-xs font-semibold transition-colors ${content.length > 270
+                          ? 'text-red-600 dark:text-red-400'
+                          : content.length > 250
                             ? 'text-yellow-600 dark:text-yellow-400'
                             : 'text-gray-400 dark:text-gray-500'
-                        }`}
+                          }`}
                       >
                         {content.length > 0 && `${content.length}/300 karakter`}
                       </span>

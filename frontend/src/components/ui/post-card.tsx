@@ -7,7 +7,6 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Edit, Tag } from 
 import { GlassmorphismCard } from './glassmorphism-card'
 import { ImageLightbox } from './image-lightbox'
 import { PostInterface } from '@/interfaces/post.interface'
-import { postsApi } from '@/lib/api/posts'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { followUser } from '@/store/slices/follow-slice'
 import { toast } from 'react-hot-toast'
@@ -19,6 +18,9 @@ import Link from 'next/link'
 import {
   useGetPostCategoriesQuery,
   useGetPostVibesQuery,
+  useLikePostMutation,
+  useUnlikePostMutation,
+  useDeletePostMutation,
 } from '@/store/api/api'
 
 interface PostCardProps {
@@ -31,10 +33,6 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const { following } = useAppSelector((state) => state.follow)
-  const [isLiked, setIsLiked] = useState(post.isLikedByCurrentUser || false)
-  const [likesCount, setLikesCount] = useState(post.likesCount)
-  const [commentsCount, setCommentsCount] = useState(post.commentsCount)
-  const [isLiking, setIsLiking] = useState(false)
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -51,11 +49,9 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
     data: vibes = [],
   } = useGetPostVibesQuery(post.id)
 
-  useEffect(() => {
-    setIsLiked(post.isLikedByCurrentUser || false)
-    setLikesCount(post.likesCount)
-    setCommentsCount(post.commentsCount)
-  }, [post.isLikedByCurrentUser, post.likesCount, post.commentsCount])
+  const [likePost] = useLikePostMutation()
+  const [unlikePost] = useUnlikePostMutation()
+  const [deletePost] = useDeletePostMutation()
 
   useEffect(() => {
     setIsAuthorFollowed(post.isAuthorFollowed ?? following.includes(post.userId))
@@ -80,29 +76,17 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
   }
 
   async function handleLike() {
-    if (!user || isLiking) return
-
-    setIsLiking(true)
-    const previousLiked = isLiked
-    const previousCount = likesCount
-
-    // Optimistic update
-    setIsLiked(!isLiked)
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1)
+    if (!user) return
 
     try {
-      if (isLiked) {
-        await postsApi.unlikePost(post.id)
+      if (post.isLikedByCurrentUser) {
+        await unlikePost(post.id).unwrap()
       } else {
-        await postsApi.likePost(post.id)
+        await likePost(post.id).unwrap()
       }
+      // RTK Query will automatically invalidate and refetch
     } catch (error: any) {
-      // Revert on error
-      setIsLiked(previousLiked)
-      setLikesCount(previousCount)
-      toast.error(error.response?.data?.message || 'İşlem başarısız')
-    } finally {
-      setIsLiking(false)
+      toast.error(error.data?.message || 'İşlem başarısız')
     }
   }
 
@@ -110,16 +94,17 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
     if (!confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return
 
     try {
-      await postsApi.deletePost(post.id)
+      await deletePost(post.id).unwrap()
       toast.success('Gönderi silindi')
       onPostUpdated()
-    } catch (error) {
-      toast.error('Gönderi silinemedi')
+      // RTK Query will automatically invalidate and refetch
+    } catch (error: any) {
+      toast.error(error.data?.message || 'Gönderi silinemedi')
     }
   }
 
   function handleCommentAdded() {
-    setCommentsCount(commentsCount + 1)
+    // RTK Query will automatically invalidate and refetch
     onPostUpdated()
   }
 
@@ -297,17 +282,17 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2 }}
-              disabled={isLiking || !user}
-              className={`flex items-center gap-2 transition-colors duration-200 group ${isLiked
+              disabled={!user}
+              className={`flex items-center gap-2 transition-colors duration-200 group ${post.isLikedByCurrentUser
                 ? 'text-red-500'
                 : 'text-muted-foreground hover:text-red-500'
                 }`}
             >
               <Heart
-                className={`w-5 h-5 transition-all duration-200 ${isLiked ? 'fill-red-500' : 'group-hover:fill-red-500'
+                className={`w-5 h-5 transition-all duration-200 ${post.isLikedByCurrentUser ? 'fill-red-500' : 'group-hover:fill-red-500'
                   }`}
               />
-              <span className="text-sm font-medium">{likesCount}</span>
+              <span className="text-sm font-medium">{post.likesCount}</span>
             </motion.button>
 
             <motion.button
@@ -322,7 +307,7 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
               className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               <MessageCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{commentsCount}</span>
+              <span className="text-sm font-medium">{post.commentsCount}</span>
             </motion.button>
 
             <motion.button

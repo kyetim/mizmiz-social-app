@@ -17,12 +17,20 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { postsApi } from '@/lib/api/posts'
-import { PostInterface, CommentInterface } from '@/interfaces/post.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { useGetPostCategoriesQuery, useGetPostVibesQuery } from '@/store/api/api'
+import {
+    useGetPostQuery,
+    useGetCommentsQuery,
+    useGetPostCategoriesQuery,
+    useGetPostVibesQuery,
+    useLikePostMutation,
+    useUnlikePostMutation,
+    useDeletePostMutation,
+    useCreateCommentMutation,
+    useDeleteCommentMutation,
+} from '@/store/api/api'
 
 export default function PostDetailPage() {
     const router = useRouter()
@@ -30,18 +38,16 @@ export default function PostDetailPage() {
     const postId = params.postId as string
     const { user } = useAppSelector((state) => state.auth)
 
-    const [post, setPost] = useState<PostInterface | null>(null)
-    const [comments, setComments] = useState<CommentInterface[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [isLiked, setIsLiked] = useState(false)
-    const [likesCount, setLikesCount] = useState(0)
-    const [commentsCount, setCommentsCount] = useState(0)
-    const [isLiking, setIsLiking] = useState(false)
-    const [showMenu, setShowMenu] = useState(false)
-    const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false)
-    const [commentContent, setCommentContent] = useState('')
-    const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-
+    const {
+        data: post,
+        isLoading: isLoadingPost,
+        error: postError,
+    } = useGetPostQuery(postId, { skip: !postId })
+    const {
+        data: comments = [],
+        isLoading: isLoadingComments,
+        refetch: refetchComments,
+    } = useGetCommentsQuery(postId, { skip: !postId })
     const {
         data: categories = [],
         isFetching: isFetchingCategories,
@@ -51,62 +57,38 @@ export default function PostDetailPage() {
         isFetching: isFetchingVibes,
     } = useGetPostVibesQuery(postId ?? '', { skip: !postId })
 
+    const [likePost] = useLikePostMutation()
+    const [unlikePost] = useUnlikePostMutation()
+    const [deletePost] = useDeletePostMutation()
+    const [createComment] = useCreateCommentMutation()
+    const [deleteComment] = useDeleteCommentMutation()
+
+    const [showMenu, setShowMenu] = useState(false)
+    const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false)
+    const [commentContent, setCommentContent] = useState('')
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!token) {
             router.replace('/login')
             return
         }
-        if (postId) {
-            loadPostDetails()
-        }
-    }, [router, postId])
+    }, [router])
 
-    async function loadPostDetails() {
-        setIsLoading(true)
-        try {
-            const [postData, commentsData] = await Promise.all([
-                postsApi.getPost(postId),
-                postsApi.getComments(postId),
-            ])
-
-            setPost(postData)
-            setComments(commentsData)
-            setIsLiked(postData.isLikedByCurrentUser || false)
-            setLikesCount(postData.likesCount)
-            setCommentsCount(postData.commentsCount)
-        } catch (error) {
-            toast.error('Post yüklenemedi')
-            console.error('Load post error:', error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const isLoading = isLoadingPost || isLoadingComments
 
     async function handleLike() {
-        if (!user || !post || isLiking) return
-
-        setIsLiking(true)
-        const previousLiked = isLiked
-        const previousCount = likesCount
-
-        // Optimistic update
-        setIsLiked(!isLiked)
-        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1)
+        if (!user || !post) return
 
         try {
-            if (isLiked) {
-                await postsApi.unlikePost(post.id)
+            if (post.isLikedByCurrentUser) {
+                await unlikePost(post.id).unwrap()
             } else {
-                await postsApi.likePost(post.id)
+                await likePost(post.id).unwrap()
             }
         } catch (error: any) {
-            // Revert on error
-            setIsLiked(previousLiked)
-            setLikesCount(previousCount)
-            toast.error(error.response?.data?.message || 'İşlem başarısız')
-        } finally {
-            setIsLiking(false)
+            toast.error(error.data?.message || 'İşlem başarısız')
         }
     }
 
@@ -114,11 +96,11 @@ export default function PostDetailPage() {
         if (!post || !confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return
 
         try {
-            await postsApi.deletePost(post.id)
+            await deletePost(post.id).unwrap()
             toast.success('Gönderi silindi')
             router.push('/feed')
-        } catch (error) {
-            toast.error('Gönderi silinemedi')
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Gönderi silinemedi')
         }
     }
 
@@ -138,13 +120,15 @@ export default function PostDetailPage() {
         setIsSubmittingComment(true)
 
         try {
-            const newComment = await postsApi.createComment(postId, { content: commentContent.trim() })
-            setComments([newComment, ...comments])
-            setCommentsCount(commentsCount + 1)
+            await createComment({
+                postId,
+                data: { content: commentContent.trim() },
+            }).unwrap()
             setCommentContent('')
             toast.success('Yorum eklendi! 💬')
+            // RTK Query will automatically refetch comments
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Yorum eklenemedi')
+            toast.error(error.data?.message || 'Yorum eklenemedi')
         } finally {
             setIsSubmittingComment(false)
         }
@@ -154,12 +138,11 @@ export default function PostDetailPage() {
         if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return
 
         try {
-            await postsApi.deleteComment(commentId)
-            setComments(comments.filter((c) => c.id !== commentId))
-            setCommentsCount(commentsCount - 1)
+            await deleteComment({ commentId, postId }).unwrap()
             toast.success('Yorum silindi')
-        } catch (error) {
-            toast.error('Yorum silinemedi')
+            // RTK Query will automatically refetch comments
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Yorum silinemedi')
         }
     }
 
@@ -343,11 +326,11 @@ export default function PostDetailPage() {
                         {/* Stats */}
                         <div className="flex items-center gap-6 py-4 border-y border-border text-sm">
                             <div>
-                                <span className="font-bold text-foreground">{likesCount}</span>
+                                <span className="font-bold text-foreground">{post.likesCount}</span>
                                 <span className="text-muted-foreground ml-1">Beğeni</span>
                             </div>
                             <div>
-                                <span className="font-bold text-foreground">{commentsCount}</span>
+                                <span className="font-bold text-foreground">{post.commentsCount}</span>
                                 <span className="text-muted-foreground ml-1">Yorum</span>
                             </div>
                         </div>
@@ -358,11 +341,10 @@ export default function PostDetailPage() {
                                 onClick={handleLike}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.97 }}
-                                disabled={isLiking}
-                                className={`flex items-center gap-2 transition-colors duration-200 group ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+                                className={`flex items-center gap-2 transition-colors duration-200 group ${post.isLikedByCurrentUser ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
                                     }`}
                             >
-                                <Heart className={`w-6 h-6 ${isLiked ? 'fill-red-500' : 'group-hover:fill-red-500'}`} />
+                                <Heart className={`w-6 h-6 ${post.isLikedByCurrentUser ? 'fill-red-500' : 'group-hover:fill-red-500'}`} />
                             </motion.button>
 
                             <motion.button

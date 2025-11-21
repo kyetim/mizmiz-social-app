@@ -4,16 +4,14 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Image, Smile } from 'lucide-react'
 import { useAppSelector } from '@/store/hooks'
-import { postsApi } from '@/lib/api/posts'
+import { useCreatePostMutation } from '@/store/api/api'
 import { toast } from 'react-hot-toast'
 import { ImageUpload } from '@/components/upload/image-upload'
-
-import { PostInterface } from '@/interfaces/post.interface'
 
 interface CreatePostModalProps {
   isOpen: boolean
   onClose: () => void
-  onPostCreated: (post?: PostInterface) => void
+  onPostCreated: () => void
 }
 
 export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostModalProps) {
@@ -21,7 +19,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
   const [content, setContent] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [showImageUpload, setShowImageUpload] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [createPost, { isLoading }] = useCreatePostMutation()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -36,23 +34,19 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
       return
     }
 
-    setIsLoading(true)
-
     try {
-      const newPost = await postsApi.createPost({
+      await createPost({
         content: content.trim(),
         imageUrl: imageUrl || undefined
-      })
+      }).unwrap()
       toast.success('Gönderi başarıyla oluşturuldu! 🎉')
       setContent('')
       setImageUrl('')
       setShowImageUpload(false)
       onClose()
-      onPostCreated(newPost) // Pass the new post to parent
+      onPostCreated() // RTK Query will automatically invalidate and refetch
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Gönderi oluşturulamadı')
-    } finally {
-      setIsLoading(false)
+      toast.error(error.data?.message || 'Gönderi oluşturulamadı')
     }
   }
 

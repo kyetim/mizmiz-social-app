@@ -1,57 +1,34 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { fetchFeedPosts, addPost } from '@/store/slices/posts-slice'
+import { useAppSelector } from '@/store/hooks'
+import { useGetFeedPostsQuery } from '@/store/api/api'
 import { Button } from '@/components/ui/button'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { CreatePostModal } from '@/components/post/create-post-modal'
-import { Plus, RefreshCw, Home } from 'lucide-react'
+import { RefreshCw, Home } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { PostInterface } from '@/interfaces/post.interface'
-import { toast } from 'react-hot-toast'
 
 export default function FeedPage() {
     const router = useRouter()
-    const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
-    const { feedPosts, isLoading: isLoadingPosts } = useAppSelector((state) => state.posts)
+    const {
+        data: feedPosts = [],
+        isLoading: isLoadingPosts,
+        refetch: refetchFeedPosts,
+    } = useGetFeedPostsQuery({ limit: 50 })
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-    // Load posts from Redux (with cache) - Timeline only shows following posts
-    useEffect(() => {
-        if (user) {
-            loadPosts()
-        }
-    }, [user])
-
-    async function loadPosts(forceRefresh = false) {
-        try {
-            await dispatch(fetchFeedPosts({
-                following: true, // Timeline always shows only followed users' posts
-                limit: 50,
-                forceRefresh
-            })).unwrap()
-        } catch (error: any) {
-            toast.error('Gönderiler yüklenemedi')
-        }
-    }
-
-    function handlePostCreated(newPost?: PostInterface) {
-        if (newPost) {
-            // Optimistic update: Add new post immediately to Redux
-            dispatch(addPost(newPost))
-        } else {
-            // Fallback: Force refresh if post not provided
-            loadPosts(true)
-        }
+    function handlePostCreated() {
+        // RTK Query will automatically invalidate and refetch
+        refetchFeedPosts()
     }
 
     function handlePostUpdated() {
-        // Force refresh to get latest data
-        loadPosts(true)
+        // RTK Query will automatically invalidate and refetch
+        refetchFeedPosts()
     }
 
     if (!user) {
@@ -98,7 +75,7 @@ export default function FeedPage() {
             {/* Refresh Button */}
             <div className="flex justify-end">
                 <motion.button
-                    onClick={() => loadPosts(true)}
+                    onClick={() => refetchFeedPosts()}
                     whileHover={{ scale: 1.05, rotate: 180 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.3 }}
