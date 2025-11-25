@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { register as registerUser } from '@/store/slices/auth-slice'
+import { formatValidationErrors, showErrorToast } from '@/lib/utils/error-handler'
 
 // Validation schema
 const registerSchema = z.object({
@@ -53,6 +54,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
     watch,
   } = useForm<RegisterFormData>({
@@ -97,7 +99,17 @@ export function RegisterForm() {
       router.push('/feed')
       router.refresh()
     } catch (error: any) {
-      toast.error(error || 'Kayıt başarısız. Lütfen tekrar deneyin.')
+      showErrorToast(error)
+
+      const validationErrors = formatValidationErrors(error)
+      Object.entries(validationErrors).forEach(([field, message]) => {
+        if (field === 'username' || field === 'email' || field === 'password') {
+          setError(field as 'username' | 'email' | 'password', { message })
+        }
+        if (field === 'confirmPassword') {
+          setError('confirmPassword', { message })
+        }
+      })
     }
   }
 

@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { logout, updateUser } from '@/store/slices/auth-slice'
-import { useGetUserPostsQuery, useUpdateProfileMutation } from '@/store/api/api'
-import { usersApi } from '@/lib/api/users'
+import { useGetUserPostsQuery, useGetUserLikedPostsQuery, useUpdateProfileMutation } from '@/store/api/api'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import { ImageLightbox } from '@/components/ui/image-lightbox'
@@ -30,7 +29,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PostInterface } from '@/interfaces/post.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
@@ -40,7 +38,6 @@ export default function ProfilePage() {
     const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
     const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'media'>('posts')
-    const [likedPosts, setLikedPosts] = useState<PostInterface[]>([])
     const [showEditModal, setShowEditModal] = useState(false)
     const [showAvatarModal, setShowAvatarModal] = useState(false)
     const [showCoverModal, setShowCoverModal] = useState(false)
@@ -57,6 +54,14 @@ export default function ProfilePage() {
         { userId: user?.id ?? '', limit: 50 },
         { skip: !user?.id }
     )
+    const {
+        data: likedPosts = [],
+        isLoading: isLoadingLikedPosts,
+        refetch: refetchLikedPosts,
+    } = useGetUserLikedPostsQuery(
+        { userId: user?.id ?? '', limit: 50 },
+        { skip: !user?.id }
+    )
     const [updateProfile] = useUpdateProfileMutation()
 
     useEffect(() => {
@@ -66,9 +71,6 @@ export default function ProfilePage() {
             return
         }
         if (user) {
-            // Load liked posts (not yet in RTK Query)
-            loadLikedPosts()
-            // Set initial avatar and cover from user data
             if (user.avatarUrl) {
                 setAvatarUrl(user.avatarUrl)
             }
@@ -78,22 +80,12 @@ export default function ProfilePage() {
         }
     }, [router, user])
 
-    async function loadLikedPosts() {
-        if (!user) return
-        try {
-            const userLikedPosts = await usersApi.getUserLikedPosts(user.id, 50)
-            setLikedPosts(userLikedPosts)
-        } catch (error) {
-            console.error('Failed to load liked posts:', error)
-        }
-    }
-
     function handlePostUpdated() {
-        // RTK Query will automatically invalidate and refetch
         refetchUserPosts()
+        refetchLikedPosts()
     }
 
-    const isLoading = isLoadingPosts
+    const isLoading = isLoadingPosts || isLoadingLikedPosts
 
     function handleLogout() {
         dispatch(logout())

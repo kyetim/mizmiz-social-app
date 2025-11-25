@@ -7,7 +7,7 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Edit, Tag } from 
 import { GlassmorphismCard } from './glassmorphism-card'
 import { ImageLightbox } from './image-lightbox'
 import { PostInterface } from '@/interfaces/post.interface'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { useAppSelector } from '@/store/hooks'
 import { toast } from 'react-hot-toast'
 import { CommentModal } from '@/components/post/comment-modal'
 import { CategoryVotingModal } from '@/components/post/category-voting-modal'
@@ -30,7 +30,6 @@ interface PostCardProps {
 
 export function PostCard({ post, onPostUpdated }: PostCardProps) {
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   const { following } = useAppSelector((state) => state.follow)
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)

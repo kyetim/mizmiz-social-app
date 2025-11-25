@@ -4,6 +4,7 @@ import apiClient from '@/lib/api/client'
 import type { UserInterface } from '@/interfaces/user.interface'
 import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/category.interface'
 import type { PostInterface, CommentInterface, CreatePostDto, CreateCommentDto } from '@/interfaces/post.interface'
+import type { UpdateUserProfileDto } from '@/lib/api/users'
 
 type AxiosBaseQueryArgs = {
   url: string
@@ -279,24 +280,31 @@ export const api = createApi({
         { type: 'Posts', id: `user-${userId}` },
       ],
     }),
-    updateProfile: builder.mutation<
-      UserInterface,
-      {
-        firstName?: string
-        lastName?: string
-        bio?: string
-        avatarUrl?: string
-        coverImageUrl?: string
-        location?: string
-        website?: string
-      }
-    >({
+    updateProfile: builder.mutation<UserInterface, UpdateUserProfileDto>({
       query: (data) => ({
         url: '/users/me',
         method: 'put',
         data,
       }),
       invalidatesTags: ['Auth', 'Users'],
+    }),
+    getUsers: builder.query<UserInterface[], { search?: string; limit?: number; offset?: number } | void>({
+      query: (params) => ({
+        url: '/users',
+        method: 'get',
+        params,
+      }),
+      providesTags: ['Users'],
+    }),
+    getUserLikedPosts: builder.query<PostInterface[], { userId: string; limit?: number }>({
+      query: ({ userId, ...params }) => ({
+        url: `/users/${userId}/liked-posts`,
+        method: 'get',
+        params,
+      }),
+      providesTags: (result, error, { userId }) => [
+        { type: 'Posts', id: `user-liked-${userId}` },
+      ],
     }),
     // Follow endpoints
     followUser: builder.mutation<void, string>({
@@ -354,6 +362,8 @@ export const {
   useUpdateProfileMutation,
   useFollowUserMutation,
   useUnfollowUserMutation,
+  useGetUsersQuery,
+  useGetUserLikedPostsQuery,
 } = api
 
 

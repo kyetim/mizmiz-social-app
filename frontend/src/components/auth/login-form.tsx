@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
+import { formatValidationErrors, showErrorToast } from '@/lib/utils/error-handler'
 
 // Validation schema
 const loginSchema = z.object({
@@ -41,6 +42,7 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -54,14 +56,21 @@ export function LoginForm() {
     try {
       const result = await dispatch(login(data)).unwrap()
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
-      
+
       // Force navigation after short delay to ensure token is stored
       setTimeout(() => {
         router.push(redirectTo)
         router.refresh()
       }, 100)
     } catch (error: any) {
-      toast.error(error || 'Giriş başarısız. Lütfen tekrar deneyin.')
+      showErrorToast(error)
+
+      const validationErrors = formatValidationErrors(error)
+      Object.entries(validationErrors).forEach(([field, message]) => {
+        if (field === 'email' || field === 'password') {
+          setError(field, { message })
+        }
+      })
     }
   }
 

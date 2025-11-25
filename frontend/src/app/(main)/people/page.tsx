@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { setFollowing } from '@/store/slices/follow-slice'
-import { useFollowUserMutation, useUnfollowUserMutation } from '@/store/api/api'
+import { useFollowUserMutation, useUnfollowUserMutation, useGetUsersQuery } from '@/store/api/api'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -20,9 +20,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { usersApi } from '@/lib/api/users'
-import { UserInterface } from '@/interfaces/user.interface'
 import { toast } from 'react-hot-toast'
+import { UserInterface } from '@/interfaces/user.interface'
+import { getReadableErrorMessage, showErrorToast } from '@/lib/utils/error-handler'
 
 export default function PeoplePage() {
     const router = useRouter()
@@ -31,62 +31,49 @@ export default function PeoplePage() {
     const { following } = useAppSelector((state) => state.follow)
     const [followUser] = useFollowUserMutation()
     const [unfollowUser] = useUnfollowUserMutation()
-    const [users, setUsers] = useState<UserInterface[]>([])
-    const [filteredUsers, setFilteredUsers] = useState<UserInterface[]>([])
-    const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [activeTab, setActiveTab] = useState<'all' | 'suggested'>('all')
+    const {
+        data: usersData = [],
+        isLoading: isFetchingUsers,
+        isError: isUsersError,
+        error: usersError,
+        refetch: refetchUsers,
+    } = useGetUsersQuery({ limit: 50 })
+    const otherUsers = useMemo(
+        () => usersData.filter((user) => user.id !== currentUser?.id),
+        [usersData, currentUser?.id]
+    )
 
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (!token) {
             router.replace('/login')
-            return
         }
-        loadUsers()
     }, [router])
 
     useEffect(() => {
-        if (searchQuery.trim()) {
-            performSearch()
-        } else {
-            setFilteredUsers(users)
-        }
-    }, [searchQuery, users])
-
-    async function loadUsers() {
-        setIsLoading(true)
-        try {
-            const usersData = await usersApi.getUsers({ limit: 50 })
-            // Filter out current user
-            const otherUsers = usersData.filter(u => u.id !== currentUser?.id)
-            setUsers(otherUsers)
-            setFilteredUsers(otherUsers)
-            
-            // Update Redux state with following status from API
-            const followingIds = otherUsers
-                .filter(u => u.isFollowing)
-                .map(u => u.id)
-            if (followingIds.length > 0) {
-                dispatch(setFollowing([...following, ...followingIds.filter(id => !following.includes(id))]))
+        const followingIds = otherUsers
+            .filter((user) => user.isFollowedByCurrentUser ?? user.isFollowing)
+            .map((user) => user.id)
+        if (followingIds.length > 0) {
+            const newIds = followingIds.filter((id) => !following.includes(id))
+            if (newIds.length > 0) {
+                dispatch(setFollowing([...following, ...newIds]))
             }
-        } catch (error) {
-            toast.error('Kullanıcılar yüklenemedi')
-        } finally {
-            setIsLoading(false)
         }
-    }
+    }, [otherUsers, following, dispatch])
 
-    function performSearch() {
+    const filteredUsers = useMemo(() => {
+        if (!searchQuery.trim()) return otherUsers
         const query = searchQuery.toLowerCase().trim()
-        const searched = users.filter(user =>
+        return otherUsers.filter(user =>
             user.username?.toLowerCase().includes(query) ||
             user.firstName?.toLowerCase().includes(query) ||
             user.lastName?.toLowerCase().includes(query) ||
             user.email?.toLowerCase().includes(query)
         )
-        setFilteredUsers(searched)
-    }
+    }, [searchQuery, otherUsers])
 
     async function handleFollow(userId: string) {
         try {
@@ -99,9 +86,15 @@ export default function PeoplePage() {
             }
             // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
-            toast.error(error.data?.message || 'İşlem başarısız')
+            showErrorToast(error)
         }
     }
+
+    const isLoading = isFetchingUsers && !isUsersError
+    const usersErrorMessage = useMemo(
+        () => (usersError ? getReadableErrorMessage(usersError, 'Kullanıcılar yüklenemedi') : ''),
+        [usersError]
+    )
 
     const displayUsers = activeTab === 'suggested'
         ? filteredUsers.slice(0, 10) // Show top 10 as suggestions
@@ -201,6 +194,30 @@ export default function PeoplePage() {
                             <p className="text-sm text-gray-600 dark:text-gray-400">Kullanıcılar yükleniyor...</p>
                         </div>
                     </div>
+                ) : isUsersError ? (
+                    <GlassmorphismCard>
+                        <div className="py-10 text-center space-y-4">
+                            <div className="w-12 h-12 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                <X className="w-6 h-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Bir sorun oluştu
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {usersErrorMessage || 'Kullanıcılar yüklenemedi. Lütfen tekrar deneyin.'}
+                                </p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    onClick={() => refetchUsers()}
+                                    className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
+                                >
+                                    Tekrar Dene
+                                </button>
+                            </div>
+                        </div>
+                    </GlassmorphismCard>
                 ) : displayUsers.length > 0 ? (
                     <motion.div
                         key={activeTab}

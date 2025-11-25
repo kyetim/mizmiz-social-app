@@ -1,3 +1,5 @@
+import toast, { ToastOptions } from 'react-hot-toast'
+
 /**
  * Frontend Error Handling Utilities
  * Provides consistent error handling across the application
@@ -169,6 +171,49 @@ export function extractErrorMessage(error: any): string {
     }
 
     return 'Bilinmeyen bir hata oluştu'
+}
+
+/**
+ * Get best-effort human readable message from RTK Query/axios error objects
+ */
+export function getReadableErrorMessage(
+    error: unknown,
+    fallbackMessage = 'Bir hata oluştu'
+): string {
+    if (!error) return fallbackMessage
+
+    // RTK Query FetchBaseQueryError shape
+    if (typeof error === 'object' && (error as any).data) {
+        const payload = (error as any).data
+        if (typeof payload === 'string') {
+            return payload
+        }
+        if (payload?.message) {
+            return payload.message
+        }
+        if (payload?.error) {
+            return payload.error.message || fallbackMessage
+        }
+    }
+
+    if (typeof error === 'string') {
+        return error
+    }
+
+    // Try axios-style extraction as fallback
+    return extractErrorMessage(error) || fallbackMessage
+}
+
+/**
+ * Show a toast that uses the shared error messaging strategy
+ */
+export function showErrorToast(error: unknown, options?: ToastOptions) {
+    const message = getReadableErrorMessage(error)
+    toast.error(message, {
+        duration: 5000,
+        ...options,
+    })
+    return message
 }
 
 /**

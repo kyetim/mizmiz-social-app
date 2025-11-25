@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { logout } from '@/store/slices/auth-slice'
-import { addPost } from '@/store/slices/posts-slice'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { CreatePostModal } from '@/components/post/create-post-modal'
-import { PostInterface } from '@/interfaces/post.interface'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, TrendingUp, Users, Bell, User, LogOut, Plus, Search, Menu, X } from 'lucide-react'
@@ -48,13 +46,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         router.push('/login')
     }
 
-    function handlePostCreated(newPost?: PostInterface) {
+    function handlePostCreated() {
         setIsCreateModalOpen(false)
-
-        if (newPost) {
-            // Optimistic update: Add new post immediately to Redux
-            dispatch(addPost(newPost))
-        }
 
         // Refresh the current page if on feed (for other updates)
         if (pathname === '/feed') {

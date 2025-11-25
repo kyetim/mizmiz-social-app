@@ -6,6 +6,7 @@ import { useAppSelector } from '@/store/hooks'
 import {
     useGetUserProfileQuery,
     useGetUserPostsQuery,
+    useGetUserLikedPostsQuery,
     useFollowUserMutation,
     useUnfollowUserMutation,
 } from '@/store/api/api'
@@ -26,8 +27,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { usersApi } from '@/lib/api/users'
-import { PostInterface } from '@/interfaces/post.interface'
 import { toast } from 'react-hot-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
@@ -38,7 +37,6 @@ export default function UserProfilePage() {
     const userId = params.userId as string
     const { user: currentUser } = useAppSelector((state) => state.auth)
     const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'media'>('posts')
-    const [likedPosts, setLikedPosts] = useState<PostInterface[]>([])
     const [showAvatarLightbox, setShowAvatarLightbox] = useState(false)
     const [showCoverLightbox, setShowCoverLightbox] = useState(false)
 
@@ -54,6 +52,10 @@ export default function UserProfilePage() {
         { userId, limit: 50 },
         { skip: !userId }
     )
+    const {
+        data: likedPosts = [],
+        isLoading: isLoadingLikedPosts,
+    } = useGetUserLikedPostsQuery({ userId, limit: 50 }, { skip: !userId })
     const [followUser] = useFollowUserMutation()
     const [unfollowUser] = useUnfollowUserMutation()
 
@@ -61,23 +63,8 @@ export default function UserProfilePage() {
         const token = localStorage.getItem('token')
         if (!token) {
             router.replace('/login')
-            return
         }
-        if (userId) {
-            // Load liked posts (not yet in RTK Query)
-            loadLikedPosts()
-        }
-    }, [router, userId])
-
-    async function loadLikedPosts() {
-        if (!userId) return
-        try {
-            const userLikedPosts = await usersApi.getUserLikedPosts(userId, 50)
-            setLikedPosts(userLikedPosts)
-        } catch (error) {
-            console.error('Failed to load liked posts:', error)
-        }
-    }
+    }, [router])
 
     async function handleFollowToggle() {
         if (!profileUser) return
@@ -98,11 +85,10 @@ export default function UserProfilePage() {
     }
 
     function handlePostUpdated() {
-        // RTK Query will automatically invalidate and refetch
         refetchUserPosts()
     }
 
-    const isLoading = isLoadingProfile || isLoadingPosts
+    const isLoading = isLoadingProfile || isLoadingPosts || isLoadingLikedPosts
 
     const isOwnProfile = currentUser?.id === userId
 

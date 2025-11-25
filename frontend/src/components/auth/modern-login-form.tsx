@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
-import { extractErrorMessage, formatValidationErrors } from '@/lib/utils/error-handler'
+import { formatValidationErrors, showErrorToast } from '@/lib/utils/error-handler'
 
 // Validation schema
 const loginSchema = z.object({
@@ -68,13 +68,8 @@ export function ModernLoginForm() {
         router.refresh()
       }, 500)
     } catch (error: any) {
-      // Extract user-friendly error message
-      const errorMessage = extractErrorMessage(error)
-
-      // Show error toast
-      toast.error(errorMessage, {
+      showErrorToast(error, {
         icon: <AlertCircle className="w-5 h-5" />,
-        duration: 5000,
       })
 
       // Handle validation errors
