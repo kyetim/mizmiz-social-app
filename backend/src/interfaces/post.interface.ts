@@ -1,6 +1,8 @@
 export interface CreatePostDTO {
   content: string
   imageUrl?: string
+  categoryIds?: string[]
+  vibeIds?: string[]
 }
 
 export interface UpdatePostDTO {
@@ -56,5 +58,7 @@ export interface PostFilters {
   following?: boolean
   limit?: number
   cursor?: string
+  categoryId?: string
+  vibeId?: string
 }
 

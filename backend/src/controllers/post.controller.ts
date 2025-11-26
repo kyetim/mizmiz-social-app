@@ -41,11 +41,13 @@ export const postController = {
     const following = req.query.following === 'true'
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20
     const cursor = req.query.cursor as string | undefined
+    const categoryId = req.query.categoryId as string | undefined
+    const vibeId = req.query.vibeId as string | undefined
 
     const currentUserId = req.user?.userId
 
     const posts = await postService.getPosts(
-      { userId, following, limit, cursor },
+      { userId, following, limit, cursor, categoryId, vibeId },
       currentUserId
     )
     res.json({

@@ -14,11 +14,27 @@ import { NotificationService } from './notification.service'
 export const postService = {
   // Create a new post
   async createPost(userId: string, data: CreatePostDTO): Promise<PostResponse> {
+    const { content, imageUrl, categoryIds, vibeIds } = data
+
     const post = await prisma.post.create({
       data: {
         userId,
-        content: data.content,
-        imageUrl: data.imageUrl,
+        content,
+        imageUrl,
+        postCategories: categoryIds && categoryIds.length > 0 ? {
+          create: categoryIds.map(categoryId => ({
+            categoryId,
+            voteCount: 1, // Initial vote
+            confidence: 1.0, // User explicitly selected it
+          }))
+        } : undefined,
+        postVibes: vibeIds && vibeIds.length > 0 ? {
+          create: vibeIds.map(vibeId => ({
+            vibeId,
+            voteCount: 1,
+            confidence: 1.0,
+          }))
+        } : undefined,
       },
       include: {
         user: {
@@ -30,6 +46,16 @@ export const postService = {
             avatarUrl: true,
           },
         },
+        postCategories: {
+          include: {
+            category: true
+          }
+        },
+        postVibes: {
+          include: {
+            vibe: true
+          }
+        }
       },
     })
 
@@ -39,12 +65,12 @@ export const postService = {
       data: { postsCount: { increment: 1 } },
     })
 
-    return post as PostResponse
+    return post as unknown as PostResponse
   },
 
   // Get all posts with filters
   async getPosts(filters: PostFilters, currentUserId?: string): Promise<PostResponse[]> {
-    const { userId, following, limit = 20, cursor } = filters
+    const { userId, following, limit = 20, cursor, categoryId, vibeId } = filters
 
     const where: any = {
       isDeleted: false,
@@ -52,6 +78,22 @@ export const postService = {
 
     if (userId) {
       where.userId = userId
+    }
+
+    if (categoryId) {
+      where.postCategories = {
+        some: {
+          categoryId
+        }
+      }
+    }
+
+    if (vibeId) {
+      where.postVibes = {
+        some: {
+          vibeId
+        }
+      }
     }
 
     let followingUsers: { followingId: string }[] = []
@@ -87,6 +129,16 @@ export const postService = {
             avatarUrl: true,
           },
         },
+        postCategories: {
+          include: {
+            category: true
+          }
+        },
+        postVibes: {
+          include: {
+            vibe: true
+          }
+        }
       },
     })
 
@@ -148,6 +200,16 @@ export const postService = {
             avatarUrl: true,
           },
         },
+        postCategories: {
+          include: {
+            category: true
+          }
+        },
+        postVibes: {
+          include: {
+            vibe: true
+          }
+        }
       },
     })
 

@@ -33,7 +33,8 @@ export class UserService {
                 followersCount: true,
                 followingCount: true,
                 postsCount: true,
-                createdAt: true
+                createdAt: true,
+                gamification: true
             }
         })
 
@@ -88,7 +89,8 @@ export class UserService {
                 followingCount: true,
                 postsCount: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                gamification: true
             }
         })
 
@@ -124,7 +126,8 @@ export class UserService {
                 followingCount: true,
                 postsCount: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                gamification: true
             }
         })
 
@@ -157,7 +160,8 @@ export class UserService {
                 followingCount: true,
                 postsCount: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                gamification: true
             }
         })
 
@@ -177,12 +181,12 @@ export class UserService {
 
         const where = search
             ? {
-                  OR: [
-                      { username: { contains: search, mode: 'insensitive' as const } },
-                      { firstName: { contains: search, mode: 'insensitive' as const } },
-                      { lastName: { contains: search, mode: 'insensitive' as const } }
-                  ]
-              }
+                OR: [
+                    { username: { contains: search, mode: 'insensitive' as const } },
+                    { firstName: { contains: search, mode: 'insensitive' as const } },
+                    { lastName: { contains: search, mode: 'insensitive' as const } }
+                ]
+            }
             : {}
 
         const users = await prisma.user.findMany({
