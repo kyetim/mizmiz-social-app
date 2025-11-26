@@ -245,7 +245,7 @@ export function FeedMixerSettings() {
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            💡 Engellenmiş kategoriler feed'de görünmez
+            💡 Engellenmiş kategoriler feed&apos;de görünmez
           </span>
           <div className="flex gap-3">
             <button

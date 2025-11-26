@@ -41,12 +41,16 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
     post.isAuthorFollowed ?? following.includes(post.userId)
   )
   const {
-    data: categories = [],
+    data: fetchedCategories,
     refetch: refetchPostCategories,
   } = useGetPostCategoriesQuery(post.id)
+
   const {
-    data: vibes = [],
+    data: fetchedVibes,
   } = useGetPostVibesQuery(post.id)
+
+  const categories = fetchedCategories || post.postCategories || []
+  const vibes = fetchedVibes || post.postVibes || []
 
   const [likePost] = useLikePostMutation()
   const [unlikePost] = useUnlikePostMutation()

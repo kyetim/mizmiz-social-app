@@ -1,293 +1,475 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, Zap, Shield, Heart } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import {
+  ArrowRight,
+  Sparkles,
+  Shield,
+  MousePointerClick,
+  Zap,
+  Globe,
+  Heart,
+  Users,
+  Waves,
+  type LucideIcon,
+} from 'lucide-react'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
+import { AmbientBackground } from '@/components/layout/ambient-background'
+
+type Metric = {
+  value: string
+  label: string
+  detail: string
+}
+
+type BentoCard = {
+  title: string
+  description: string
+  detail: string
+  icon: LucideIcon
+  className: string
+  accent: string
+  cta?: string
+}
+
+type TimelineItem = {
+  badge: string
+  title: string
+  copy: string
+}
+
+const heroMetrics: Metric[] = [
+  { value: '12K+', label: 'aktif kullanıcı', detail: 'Topluluk canlı verilerle yenileniyor' },
+  { value: '60fps', label: 'scroll animasyonu', detail: 'Lenis + GSAP ile akışkan geçişler' },
+  { value: '∞', label: 'dark/light mod', detail: 'Neon vurgular iki moda da uyumlu' },
+]
+
+const bentoGrid: BentoCard[] = [
+  {
+    title: 'Bento Grid Layout',
+    description: 'Asimetrik kartlar Apple tarzı deneyim sunuyor.',
+    detail: 'Aceternity + Magic UI yaklaşımı ile tamamen özelleştirilebilir.',
+    icon: Sparkles,
+    className: 'md:col-span-3 lg:col-span-4 row-span-2',
+    accent: 'from-emerald-400/20 to-cyan-400/10',
+    cta: 'Explore feed',
+  },
+  {
+    title: 'Glassmorphism Cards',
+    description: 'Frosted glass yüzeyler neon sınırlar ile birleşti.',
+    detail: 'Light & dark modlarda otomatik kontrast.',
+    icon: Shield,
+    className: 'md:col-span-3 lg:col-span-2',
+    accent: 'from-white/40 to-emerald-200/10 dark:from-slate-800/60 dark:to-emerald-500/10',
+  },
+  {
+    title: 'Spotlight Effect',
+    description: 'Mouse hareketine yanıt veren spotlight ile etkileşim artıyor.',
+    detail: 'Framer Motion + custom shader benzeri gradientler.',
+    icon: MousePointerClick,
+    className: 'md:col-span-2 lg:col-span-2',
+    accent: 'from-emerald-500/10 via-cyan-500/10 to-transparent',
+  },
+  {
+    title: 'Scroll-driven Animations',
+    description: 'GSAP ScrollTrigger ile sahne sahne hikaye anlatımı.',
+    detail: 'Bölümler arası keskin sınırlar yerine renk geçişleri.',
+    icon: Zap,
+    className: 'md:col-span-2 lg:col-span-3 row-span-2',
+    accent: 'from-amber-400/10 to-pink-500/10',
+  },
+  {
+    title: 'Dark Mode with Neon Accents',
+    description: 'Siyah zemin üzerinde neon yeşilleri, mor auroralar.',
+    detail: 'WCAG AA kontrastı koruyan renk sistemi.',
+    icon: Globe,
+    className: 'md:col-span-2 lg:col-span-2',
+    accent: 'from-emerald-500/20 via-lime-400/20 to-transparent',
+  },
+  {
+    title: 'Radial Gradient Mesh',
+    description: 'Yumuşak geçişli arka planlar immersive hissi güçlendirir.',
+    detail: 'Cihaz başına GPU dostu blur seviyeleri.',
+    icon: Waves,
+    className: 'md:col-span-2 lg:col-span-3',
+    accent: 'from-cyan-500/15 via-purple-500/15 to-pink-500/10',
+  },
+]
+
+const immersiveTimeline: TimelineItem[] = [
+  {
+    badge: '01 • Dikey akış',
+    title: 'Hero sonrası boşluk yok, içerik hemen başlıyor',
+    copy: 'Yukarıdan aşağı akan bloklar Lenis sayesinde kesintisiz, her bölümde radial mesh ile renkler birbirine akıyor.',
+  },
+  {
+    badge: '02 • Scroll-driven',
+    title: 'GSAP sahne geçişleri',
+    copy: 'Kartlar viewport’a girdiğinde parlayıp yerine oturuyor, timeline çizgisi scroll’a göre büyüyor.',
+  },
+  {
+    badge: '03 • Immersive CTA',
+    title: 'Neon çerçeveli çağrı',
+    copy: 'Kullanıcıyı kayıt akışına yönlendiren aurora arka planlı CTA, dark & light modlarda aynı etkiyi veriyor.',
+  },
+]
+
+let gsapRegistered = false
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      {/* Header/Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-xl flex items-center justify-center shadow-sm ring-2 ring-primary/20"
-              >
-                <span className="text-white font-bold text-lg sm:text-xl">M</span>
-              </motion.div>
-              <span className="text-xl sm:text-2xl font-bold text-foreground transition-colors">MIZMIZ</span>
-            </div>
+  const bentoRef = useRef<HTMLDivElement | null>(null)
+  const timelineRef = useRef<HTMLDivElement | null>(null)
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50 })
 
-            {/* CTA Buttons */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeToggle />
-              <Link
-                href="/login"
-                className="hidden sm:inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Giriş Yap
-              </Link>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link
-                  href="/register"
-                  className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-1 shadow-sm min-h-[44px]"
-                >
-                  <span className="hidden sm:inline">Başla</span>
-                  <span className="sm:hidden">Kayıt Ol</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </motion.div>
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!gsapRegistered) {
+      gsap.registerPlugin(ScrollTrigger)
+      gsapRegistered = true
+    }
+
+    const contexts: gsap.Context[] = []
+
+    if (bentoRef.current) {
+      contexts.push(
+        gsap.context(() => {
+          const cards = gsap.utils.toArray<HTMLElement>('.feature-card')
+          cards.forEach((card, index) => {
+            gsap.fromTo(
+              card,
+              { opacity: 0, y: 80, scale: 0.95 },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 1.1,
+                delay: index * 0.05,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'top 85%',
+                  once: true,
+                },
+              },
+            )
+          })
+        }, bentoRef),
+      )
+    }
+
+    if (timelineRef.current) {
+      contexts.push(
+        gsap.context(() => {
+          gsap.fromTo(
+            '.timeline-line',
+            { scaleY: 0 },
+            {
+              scaleY: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: timelineRef.current,
+                start: 'top 85%',
+                end: 'bottom 20%',
+                scrub: true,
+              },
+            },
+          )
+        }, timelineRef),
+      )
+    }
+
+    return () => {
+      contexts.forEach((ctx) => ctx.revert())
+    }
+  }, [])
+
+  const handleSpotlight = (event: React.PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width) * 100
+    const y = ((event.clientY - rect.top) / rect.height) * 100
+    setSpotlight({ x, y })
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-background via-background/95 to-background text-foreground">
+      <AmbientBackground />
+
+      {/* Header */}
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <motion.div
+              whileHover={{ rotate: 8, scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/40"
+            >
+              M
+            </motion.div>
+            <div className="flex flex-col">
+              <span className="text-sm uppercase tracking-[0.3em] text-emerald-500">MIZMIZ</span>
+              <span className="text-base font-medium text-muted-foreground">Immersive social layer</span>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              className="hidden rounded-full border border-white/40 px-4 py-2 text-sm font-medium text-foreground/80 transition hover:border-emerald-400/60 hover:text-foreground md:inline-flex"
+            >
+              Giriş Yap
+            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/register"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30"
+              >
+                Başla
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </motion.div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-50 dark:bg-green-900/20 rounded-full mb-4 sm:mb-6"
-            >
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400">
-                1,234 kullanıcı aktif
-              </span>
-            </motion.div>
+      <main className="relative mt-28 space-y-24 px-4 pb-24 pt-10 sm:px-6 lg:px-0">
+        {/* Hero */}
+        <section className="mx-auto max-w-6xl">
+          <div
+            className="relative overflow-hidden rounded-[32px] border border-white/20 bg-white/80 p-6 text-left shadow-2xl shadow-emerald-500/10 transition dark:border-white/5 dark:bg-gray-900/80"
+            onPointerMove={handleSpotlight}
+            onPointerLeave={() => setSpotlight({ x: 50, y: 50 })}
+          >
+            <div className="pointer-events-none absolute inset-0 aurora-trace" />
+            <div
+              className="pointer-events-none absolute inset-0 transition duration-500"
+              style={{
+                background: `radial-gradient(circle at ${spotlight.x}% ${spotlight.y}%, rgba(16, 185, 129, 0.25), transparent 55%)`,
+              }}
+            />
+            <div className="relative z-10 grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="space-y-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Dark Mode with Neon Accents
+                </motion.div>
 
-            {/* Heading */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight tracking-tight px-4"
-            >
-              Modern sosyal<br />
-              <span className="text-green-600 dark:text-green-400">deneyim</span>
-            </motion.h1>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="space-y-6"
+                >
+                  <h1 className="text-4xl leading-tight text-gray-900 dark:text-white md:text-6xl lg:text-7xl">
+                    Dikey, immersive ve <span className="text-emerald-500">scroll-driven</span> sosyal deneyim
+                  </h1>
+                  <p className="text-lg text-muted-foreground">
+                    Bento grid layout, glassmorphism yüzeyler, spotlight efektleri ve Lenis destekli smooth scroll ile
+                    modern web’in tasarım sözlüğündeki tüm anahtar kelimeleri tek yerde topladık.
+                  </p>
+                </motion.div>
 
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base sm:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 leading-relaxed px-4"
-            >
-              Düşüncelerini paylaş, insanlarla bağlantı kur ve ilham verici
-              bir topluluğun parçası ol. Tamamen ücretsiz.
-            </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="flex flex-col gap-4 sm:flex-row"
+                >
+                  <Link
+                    href="/register"
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-4 text-base font-semibold text-white shadow-xl shadow-emerald-600/40 transition hover:shadow-emerald-400/50 sm:w-auto"
+                  >
+                    Ücretsiz Başla
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/40 px-6 py-4 text-base font-semibold text-foreground/80 backdrop-blur-md transition hover:border-emerald-400/60 sm:w-auto"
+                  >
+                    Giriş Yap
+                  </Link>
+                </motion.div>
 
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-4"
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+                <div className="grid gap-4 md:grid-cols-3">
+                  {heroMetrics.map((metric) => (
+                    <GlassmorphismCard key={metric.label} className="bg-white/50 p-4 dark:bg-black/30">
+                      <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{metric.label}</p>
+                      <p className="text-3xl font-semibold text-foreground">{metric.value}</p>
+                      <p className="text-xs text-muted-foreground">{metric.detail}</p>
+                    </GlassmorphismCard>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 blur-3xl">
+                  <div className="radial-gradient-mesh h-full w-full opacity-80 dark:opacity-60" />
+                </div>
+                <div className="relative grid gap-4">
+                  <GlassmorphismCard className="bg-white/60 p-6 dark:bg-slate-900/70">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Realtime vibe</span>
+                      <Users className="h-4 w-4 text-emerald-400" />
+                    </div>
+                    <p className="mt-4 text-4xl font-semibold text-foreground">+342</p>
+                    <p className="text-xs text-muted-foreground">dakikada topluluğa katılan yeni kişi</p>
+                  </GlassmorphismCard>
+                  <GlassmorphismCard className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 p-6 shadow-xl shadow-emerald-500/20 dark:from-emerald-500/30 dark:to-cyan-500/10">
+                    <p className="text-xs uppercase tracking-[0.4em] text-white/80">Magic UI vibes</p>
+                    <p className="mt-2 text-3xl font-bold text-white">Aurora background</p>
+                    <p className="text-sm text-white/80">Aurora & spotlight aynı anda çalışır.</p>
+                  </GlassmorphismCard>
+                  <GlassmorphismCard className="bg-white/70 p-6 dark:bg-slate-900/60">
+                    <div className="flex items-center gap-3">
+                      <Heart className="h-6 w-6 text-rose-400" />
+                      <div>
+                        <p className="text-sm font-semibold">Topluluk modu</p>
+                        <p className="text-xs text-muted-foreground">Günlük 480K etkileşim</p>
+                      </div>
+                    </div>
+                  </GlassmorphismCard>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bento Grid */}
+        <section className="mx-auto max-w-6xl space-y-10">
+          <div className="space-y-3">
+            <p className="text-sm uppercase tracking-[0.5em] text-emerald-500">Bento Grid Layout</p>
+            <h2 className="text-3xl font-semibold text-foreground md:text-5xl">
+              Kartların boyutları ve animasyonları Magic UI ve shadcn tabanlı sistemle yönetiliyor
+            </h2>
+            <p className="max-w-3xl text-lg text-muted-foreground">
+              Radial gradient mesh, glassmorphism ve spotlight efektleri aynı ızgara üzerinde harmanlandı. Her kart kendi
+              mikro animasyonuna sahip.
+            </p>
+          </div>
+
+          <div
+            ref={bentoRef}
+            className="grid auto-rows-[220px] gap-4 md:grid-cols-4 lg:auto-rows-[260px] lg:grid-cols-6"
+          >
+            {bentoGrid.map((card) => {
+              const Icon = card.icon
+              return (
+                <div
+                  key={card.title}
+                  className={`feature-card group relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-br ${card.accent} p-6 text-left backdrop-blur-xl dark:border-white/10 ${card.className}`}
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
+                    <div className="aurora-trace h-full w-full" />
+                  </div>
+                  <div className="relative z-10 flex h-full flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 text-xs font-semibold text-foreground/90 dark:bg-white/10 dark:text-white">
+                        <Icon className="h-4 w-4" />
+                        {card.title}
+                      </div>
+                      <p className="text-lg font-semibold text-foreground">{card.description}</p>
+                      <p className="text-sm text-muted-foreground">{card.detail}</p>
+                    </div>
+                    {card.cta ? (
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                        {card.cta}
+                        <ArrowRight className="h-4 w-4" />
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Scroll-driven narrative */}
+        <section className="mx-auto max-w-5xl space-y-12" ref={timelineRef}>
+          <div className="space-y-4 text-center">
+            <p className="text-sm uppercase tracking-[0.4em] text-emerald-500">Scroll-driven Animations</p>
+            <h2 className="text-3xl font-semibold md:text-5xl">Lenis ile akışkan, GSAP ile anlatan dikey akış</h2>
+            <p className="text-lg text-muted-foreground">
+              Bölümler arası keskin çizgiler yok; renkler birbirine karışıyor, timeline çizgisi scroll sırasında
+              büyüyor.
+            </p>
+          </div>
+
+          <div className="relative pl-10">
+            <span className="timeline-line absolute left-4 top-0 h-full w-px origin-top bg-gradient-to-b from-emerald-400 via-cyan-400 to-transparent" />
+            <div className="space-y-10">
+              {immersiveTimeline.map((item) => (
+                <div key={item.badge} className="relative rounded-3xl border border-white/10 bg-white/70 p-6 shadow-lg dark:bg-gray-900/70">
+                  <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-500">
+                    {item.badge}
+                  </span>
+                  <h3 className="text-2xl font-semibold text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{item.copy}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="mx-auto max-w-5xl">
+          <div className="relative overflow-hidden rounded-[36px] border border-emerald-500/30 bg-gradient-to-br from-gray-900 via-emerald-900/40 to-gray-900 p-10 text-center text-white shadow-emerald-500/30 dark:border-emerald-500/50">
+            <div className="absolute inset-0 aurora-trace opacity-70" />
+            <div className="relative z-10 space-y-6">
+              <p className="text-sm uppercase tracking-[0.6em] text-emerald-200">Immersive CTA</p>
+              <h2 className="text-3xl font-semibold md:text-5xl">Scroll’un sonunda bile enerjisi düşmeyen çağrı</h2>
+              <p className="text-lg text-emerald-100">
+                Lenis, GSAP, Framer Motion, shadcn/ui ve Magic UI esintileri ile modern sosyal deneyime giriş yap.
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                 <Link
                   href="/register"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2 group min-h-[48px]"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-full bg-white px-8 py-3 text-base font-semibold text-emerald-600 shadow-xl shadow-white/20 hover:bg-emerald-50"
                 >
-                  Ücretsiz Başla
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Hesap Oluştur
+                  <ArrowRight className="h-5 w-5" />
                 </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <Link
                   href="/login"
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all border-2 border-gray-300 dark:border-gray-700 inline-flex items-center justify-center gap-2 shadow-sm min-h-[48px]"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-full border border-white/40 px-8 py-3 text-base font-semibold text-white backdrop-blur-lg hover:border-white"
                 >
-                  Giriş Yap
+                  Zaten üyeyim
                 </Link>
-              </motion.div>
-            </motion.div>
-
-            {/* Trust Indicators */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-4"
-            >
-              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span>Güvenli</span>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span>Ücretsiz</span>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span>1K+ Kullanıcı</span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 transition-colors duration-300">
-        <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-8 sm:mb-16"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 px-4">
-              Neden MIZMIZ?
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4">
-              Modern, hızlı ve kullanıcı dostu bir platform
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
-            {[
-              {
-                icon: <Zap className="w-6 h-6" />,
-                title: 'Hızlı ve Modern',
-                description: 'Son teknoloji ile geliştirilmiş, hızlı ve akıcı bir deneyim',
-              },
-              {
-                icon: <Shield className="w-6 h-6" />,
-                title: 'Güvenli ve Gizli',
-                description: 'Verileriniz güvende, gizliliğiniz bizim için öncelik',
-              },
-              {
-                icon: <Users className="w-6 h-6" />,
-                title: 'Topluluk Odaklı',
-                description: 'Gerçek insanlarla gerçek bağlantılar kur',
-              },
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-green-200 dark:hover:border-green-700 hover:shadow-lg transition-all group"
-              >
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400 mb-4"
-                >
-                  {feature.icon}
-                </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="bg-gradient-to-br from-green-600 to-green-700 dark:from-green-700 dark:to-green-800 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center relative overflow-hidden shadow-2xl"
-          >
-            {/* Decorative Elements */}
-            <motion.div
-              animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.15, 0.1] }}
-              transition={{ duration: 8, repeat: Infinity }}
-              className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl"
-            />
-            <motion.div
-              animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.15, 0.1] }}
-              transition={{ duration: 8, repeat: Infinity, delay: 2 }}
-              className="absolute bottom-0 left-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl"
-            />
-
-            <div className="relative z-10">
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4"
-              >
-                Hemen katıl, ücretsiz başla
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-base sm:text-xl text-green-50 mb-6 sm:mb-8 max-w-2xl mx-auto px-2"
-              >
-                Binlerce kullanıcının deneyimlediği modern sosyal platformu sen de keşfet
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href="/register"
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-xl group min-h-[48px] w-full sm:w-auto"
-                >
-                  Ücretsiz Hesap Oluştur
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-300">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div className="flex items-center gap-2">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 360 }}
-                transition={{ duration: 0.5 }}
-                className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-sm"
-              >
-                <span className="text-white font-bold">M</span>
-              </motion.div>
-              <span className="font-bold text-gray-900 dark:text-white transition-colors">MIZMIZ</span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              <a href="/terms" className="hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] flex items-center">Kullanım Koşulları</a>
-              <a href="/privacy" className="hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] flex items-center">Gizlilik</a>
-              <a href="/contact" className="hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] flex items-center">İletişim</a>
-            </div>
-
-            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center md:text-right">
-              © 2025 MIZMIZ. Tüm hakları saklıdır.
+              </div>
             </div>
           </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-white/10 bg-white/70 px-4 py-10 text-sm text-muted-foreground backdrop-blur-xl dark:bg-gray-900/70">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white">M</div>
+            <div>
+              <p className="font-semibold text-foreground">MIZMIZ</p>
+              <p className="text-xs uppercase tracking-[0.4em] text-emerald-500">Modern sosyal deneyim</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/terms" className="hover:text-foreground">
+              Kullanım Koşulları
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              Gizlilik
+            </Link>
+            <Link href="/contact" className="hover:text-foreground">
+              İletişim
+            </Link>
+          </div>
+          <p>© 2025 MIZMIZ. Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

@@ -86,6 +86,15 @@ export default function PeoplePage() {
             }
             // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
+            // 409 Conflict - İşlem zaten yapılmış (race condition veya state senkronizasyon sorunu)
+            if (error.status === 409 || error.data?.status === 409) {
+                const message = error.data?.message || 'Bu işlem zaten yapılmış'
+                if (message.includes('zaten') || message.includes('already')) {
+                    // Sessizce handle et, toast gösterme
+                    return
+                }
+            }
+            // Diğer hatalar için toast göster
             showErrorToast(error)
         }
     }
@@ -114,12 +123,16 @@ export default function PeoplePage() {
     return (
         <div className="space-y-3 sm:space-y-4 lg:pt-2">
             {/* Page Title */}
-            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6"
+            >
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40 ring-2 ring-blue-500/20">
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">İnsanlar</h1>
-            </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">İnsanlar</h1>
+            </motion.div>
             {/* Search Bar */}
             <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -133,7 +146,7 @@ export default function PeoplePage() {
                         placeholder="Kullanıcı ara..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 sm:pl-12 pr-10 sm:pr-16 py-3 sm:py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 transition-all shadow-sm"
+                        className="w-full pl-10 sm:pl-12 pr-10 sm:pr-16 py-3 sm:py-3.5 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm sm:text-base text-foreground placeholder-muted-foreground transition-all shadow-sm backdrop-blur-sm"
                     />
                     {searchQuery && (
                         <button
@@ -150,7 +163,7 @@ export default function PeoplePage() {
                         animate={{ opacity: 1 }}
                         className="text-center mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400"
                     >
-                        "{searchQuery}" için {filteredUsers.length} kullanıcı bulundu
+                        &quot;{searchQuery}&quot; için {filteredUsers.length} kullanıcı bulundu
                     </motion.p>
                 )}
             </motion.div>
@@ -161,9 +174,9 @@ export default function PeoplePage() {
                     onClick={() => setActiveTab('all')}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'all'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-2xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'all'
+                        ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
+                        : 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
                         }`}
                 >
                     <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -175,9 +188,9 @@ export default function PeoplePage() {
                     onClick={() => setActiveTab('suggested')}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'suggested'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 rounded-2xl font-semibold text-sm sm:text-base transition-all shadow-sm min-h-[44px] ${activeTab === 'suggested'
+                        ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
+                        : 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
                         }`}
                 >
                     <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -277,7 +290,7 @@ export default function PeoplePage() {
                                             </Link>
                                             {user.bio && (
                                                 <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 line-clamp-2">
-                                                    {user.bio}
+                                                    &quot;{user.bio}&quot;
                                                 </p>
                                             )}
 
@@ -299,9 +312,9 @@ export default function PeoplePage() {
                                             onClick={() => handleFollow(user.id)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm ${(user.isFollowing || following.includes(user.id))
-                                                ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                                                : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-green-500/30'
+                                            className={`flex-shrink-0 px-4 py-2 rounded-xl font-semibold text-sm transition-all shadow-sm ${(user.isFollowing || following.includes(user.id))
+                                                ? 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
+                                                : 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white hover:shadow-lg shadow-blue-500/30'
                                                 }`}
                                         >
                                             {(user.isFollowing || following.includes(user.id)) ? (
@@ -331,7 +344,7 @@ export default function PeoplePage() {
                                         Kullanıcı bulunamadı
                                     </h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                        "{searchQuery}" ile eşleşen kullanıcı yok
+                                        &quot;{searchQuery}&quot; ile eşleşen kullanıcı yok
                                     </p>
                                     <button
                                         onClick={() => setSearchQuery('')}

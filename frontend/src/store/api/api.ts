@@ -5,6 +5,7 @@ import type { UserInterface } from '@/interfaces/user.interface'
 import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/category.interface'
 import type { PostInterface, CommentInterface, CreatePostDto, CreateCommentDto } from '@/interfaces/post.interface'
 import type { UpdateUserProfileDto } from '@/lib/api/users'
+import type { NotificationInterface } from '@/interfaces/notification.interface'
 
 type AxiosBaseQueryArgs = {
   url: string
@@ -53,6 +54,31 @@ export const api = createApi({
     getUnreadNotificationsCount: builder.query<{ count: number }, void>({
       query: () => ({ url: '/notifications/unread-count', method: 'get' }),
       providesTags: ['Notifications'],
+    }),
+    getNotifications: builder.query<NotificationInterface[], { limit?: number; offset?: number } | void>({
+      query: (params) => ({ url: '/notifications', method: 'get', params }),
+      providesTags: ['Notifications'],
+    }),
+    markNotificationAsRead: builder.mutation<NotificationInterface, string>({
+      query: (notificationId) => ({
+        url: `/notifications/${notificationId}/read`,
+        method: 'patch',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+    markAllNotificationsAsRead: builder.mutation<void, void>({
+      query: () => ({
+        url: '/notifications/read-all',
+        method: 'patch',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+    deleteNotification: builder.mutation<void, string>({
+      query: (notificationId) => ({
+        url: `/notifications/${notificationId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: ['Notifications'],
     }),
     getCategories: builder.query<Category[], { type?: string; isActive?: boolean } | void>({
       query: (params) => ({ url: '/categories', method: 'get', params }),
@@ -145,7 +171,7 @@ export const api = createApi({
     // Posts endpoints
     getFeedPosts: builder.query<
       PostInterface[],
-      { following?: boolean; limit?: number; cursor?: string } | void
+      { following?: boolean; limit?: number; cursor?: string; categoryId?: string; vibeId?: string } | void
     >({
       query: (params = {}) => ({
         url: '/posts',
@@ -156,7 +182,7 @@ export const api = createApi({
     }),
     getExplorePosts: builder.query<
       PostInterface[],
-      { limit?: number; cursor?: string } | void
+      { limit?: number; cursor?: string; categoryId?: string; vibeId?: string } | void
     >({
       query: (params = {}) => ({
         url: '/posts',
@@ -329,6 +355,32 @@ export const api = createApi({
         'Auth',
       ],
     }),
+    // Notifications endpoints
+    getNotifications: builder.query<NotificationInterface[], { limit?: number; offset?: number } | void>({
+      query: (params) => ({ url: '/notifications', method: 'get', params }),
+      providesTags: ['Notifications'],
+    }),
+    markNotificationAsRead: builder.mutation<NotificationInterface, string>({
+      query: (notificationId) => ({
+        url: `/notifications/${notificationId}/read`,
+        method: 'put',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+    markAllNotificationsAsRead: builder.mutation<void, void>({
+      query: () => ({
+        url: '/notifications/read-all',
+        method: 'put',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+    deleteNotification: builder.mutation<void, string>({
+      query: (notificationId) => ({
+        url: `/notifications/${notificationId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
   }),
 })
 
@@ -364,6 +416,10 @@ export const {
   useUnfollowUserMutation,
   useGetUsersQuery,
   useGetUserLikedPostsQuery,
+  useGetNotificationsQuery,
+  useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
+  useDeleteNotificationMutation,
 } = api
 
 

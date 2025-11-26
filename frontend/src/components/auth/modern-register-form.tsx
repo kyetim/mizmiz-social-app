@@ -285,7 +285,7 @@ export function ModernRegisterForm() {
           <a href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
             Gizlilik Politikası
           </a>
-          'nı kabul etmiş olursunuz
+          &apos;nı kabul etmiş olursunuz
         </p>
 
         {/* Submit Button */}

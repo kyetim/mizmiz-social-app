@@ -3,19 +3,21 @@
 import { ModernRegisterForm } from '@/components/auth/modern-register-form'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { AmbientBackground } from '@/components/layout/ambient-background'
 import { motion } from 'framer-motion'
 import { FloatingCubeCss } from '@/components/3d/floating-cube-css'
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className="relative min-h-screen flex overflow-hidden bg-gradient-to-br from-background via-background/95 to-background transition-colors duration-300">
+      <AmbientBackground intensity="subtle" />
       {/* Theme Toggle - Fixed Top Right */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
       </div>
 
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 items-center justify-center p-8 md:p-12 relative overflow-hidden transition-colors duration-300">
+      <div className="hidden lg:flex relative z-10 flex-1 items-center justify-center p-8 md:p-12 overflow-hidden">
         {/* 3D Floating Cube */}
         <div className="absolute inset-0 opacity-20">
           <FloatingCubeCss />
@@ -122,18 +124,18 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center mb-6 sm:mb-8">
             <motion.div
               whileHover={{ scale: 1.1, rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-md"
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/40 ring-2 ring-emerald-500/20"
             >
               <span className="text-white font-bold text-lg sm:text-xl">M</span>
             </motion.div>
-            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white transition-colors">
+            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-foreground transition-colors">
               MIZMIZ
             </span>
           </Link>

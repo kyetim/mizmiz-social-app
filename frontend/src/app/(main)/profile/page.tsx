@@ -11,20 +11,17 @@ import { ImageLightbox } from '@/components/ui/image-lightbox'
 import { AvatarUploadModal } from '@/components/profile/avatar-upload-modal'
 import { CoverUploadModal } from '@/components/profile/cover-upload-modal'
 import { EditProfileModal } from '@/components/profile/edit-profile-modal'
+import { GamificationStats } from '@/components/profile/gamification-stats'
 import {
-    ArrowLeft,
-    Settings,
     Camera,
     MapPin,
     Link as LinkIcon,
     Calendar,
     Edit3,
     LogOut,
-    TrendingUp,
     Heart,
     MessageCircle,
     Grid,
-    Bookmark,
     Image as ImageIcon
 } from 'lucide-react'
 import Link from 'next/link'
@@ -143,7 +140,7 @@ export default function ProfilePage() {
                 <div className="container mx-auto max-w-4xl">
                     {/* Cover Photo */}
                     <div
-                        className="relative h-48 sm:h-64 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 overflow-hidden cursor-pointer"
+                        className="relative h-48 sm:h-64 bg-gradient-to-br from-emerald-500 via-cyan-500 to-teal-500 overflow-hidden cursor-pointer rounded-2xl shadow-xl"
                         onClick={() => coverUrl && setShowCoverLightbox(true)}
                     >
                         {coverUrl && (
@@ -173,7 +170,7 @@ export default function ProfilePage() {
                             {/* Avatar */}
                             <div className="relative inline-block">
                                 <div
-                                    className="w-32 h-32 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl ring-4 ring-white dark:ring-gray-900 overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
+                                    className="w-32 h-32 bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 rounded-3xl flex items-center justify-center shadow-xl shadow-emerald-500/40 ring-4 ring-white dark:ring-gray-900 overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
                                     onClick={() => avatarUrl && setShowAvatarLightbox(true)}
                                 >
                                     {avatarUrl ? (
@@ -195,7 +192,7 @@ export default function ProfilePage() {
                                     }}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    className="absolute bottom-2 right-2 p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-colors z-10"
+                                    className="absolute bottom-2 right-2 p-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 transition-all z-10"
                                     title="Profil fotoğrafını değiştir"
                                 >
                                     <Camera className="w-4 h-4" />
@@ -209,7 +206,7 @@ export default function ProfilePage() {
                                 onClick={() => setShowEditModal(true)}
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/30 transition-all flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-teal-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-teal-600 text-white rounded-2xl font-semibold shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-2"
                             >
                                 <Edit3 className="w-4 h-4" />
                                 Profili Düzenle
@@ -228,19 +225,19 @@ export default function ProfilePage() {
 
                         {/* User Info */}
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                            <h2 className="text-2xl font-bold text-foreground mb-1">
                                 {userName}
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-400 mb-3">@{user.username}</p>
+                            <p className="text-muted-foreground mb-3">@{user.username}</p>
 
                             {user.bio && (
-                                <p className="text-gray-800 dark:text-gray-200 mb-3 leading-relaxed">
+                                <p className="text-foreground/90 mb-3 leading-relaxed">
                                     {user.bio}
                                 </p>
                             )}
 
                             {/* Meta Info */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
                                 {user.location && (
                                     <div className="flex items-center gap-1">
                                         <MapPin className="w-4 h-4" />
@@ -272,28 +269,33 @@ export default function ProfilePage() {
                             {/* Stats */}
                             <div className="flex items-center gap-6">
                                 <div>
-                                    <span className="font-bold text-gray-900 dark:text-white">{user.followingCount || 0}</span>
-                                    <span className="text-gray-600 dark:text-gray-400 ml-1">Takip</span>
+                                    <span className="font-bold text-foreground">{user.followingCount || 0}</span>
+                                    <span className="text-muted-foreground ml-1">Takip</span>
                                 </div>
                                 <div>
-                                    <span className="font-bold text-gray-900 dark:text-white">{user.followersCount || 0}</span>
-                                    <span className="text-gray-600 dark:text-gray-400 ml-1">Takipçi</span>
+                                    <span className="font-bold text-foreground">{user.followersCount || 0}</span>
+                                    <span className="text-muted-foreground ml-1">Takipçi</span>
                                 </div>
                                 <div>
-                                    <span className="font-bold text-gray-900 dark:text-white">{posts.length}</span>
-                                    <span className="text-gray-600 dark:text-gray-400 ml-1">Gönderi</span>
+                                    <span className="font-bold text-foreground">{posts.length}</span>
+                                    <span className="text-muted-foreground ml-1">Gönderi</span>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Gamification Stats */}
+                        <div className="mb-6">
+                            <GamificationStats stats={user.gamification} />
+                        </div>
+
                         {/* Tabs */}
-                        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <div className="border-b border-white/10 dark:border-white/5 mb-6">
                             <div className="flex items-center gap-1">
                                 <button
                                     onClick={() => setActiveTab('posts')}
                                     className={`flex-1 py-4 px-4 font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'posts'
-                                        ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'text-emerald-500 border-b-2 border-emerald-500'
+                                        : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
                                     <Grid className="w-4 h-4" />
@@ -303,8 +305,8 @@ export default function ProfilePage() {
                                 <button
                                     onClick={() => setActiveTab('media')}
                                     className={`flex-1 py-4 px-4 font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'media'
-                                        ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'text-emerald-500 border-b-2 border-emerald-500'
+                                        : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
                                     <ImageIcon className="w-4 h-4" />
@@ -314,8 +316,8 @@ export default function ProfilePage() {
                                 <button
                                     onClick={() => setActiveTab('likes')}
                                     className={`flex-1 py-4 px-4 font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'likes'
-                                        ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'text-emerald-500 border-b-2 border-emerald-500'
+                                        : 'text-muted-foreground hover:text-foreground'
                                         }`}
                                 >
                                     <Heart className="w-4 h-4" />

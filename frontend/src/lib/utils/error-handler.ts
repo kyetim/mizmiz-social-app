@@ -261,8 +261,17 @@ export function formatValidationErrors(error: any): Record<string, string> {
  */
 export function logError(error: any, context?: string) {
     if (process.env.NODE_ENV === 'development') {
+        // 409 Conflict hatalarını sessizce handle et (race condition veya state senkronizasyon)
+        const status = error.response?.status || error.status
+        const message = extractErrorMessage(error)
+        
+        if (status === 409 && (message.includes('zaten') || message.includes('already') || message.includes('Bu işlem zaten yapılmış'))) {
+            // Sessizce handle et, console'a yazma
+            return
+        }
+        
         console.group(`🔴 Error${context ? ` - ${context}` : ''}`)
-        console.error('Message:', extractErrorMessage(error))
+        console.error('Message:', message)
         console.error('Full error:', error)
         if (error.response) {
             console.error('Response:', error.response.data)
