@@ -55,31 +55,6 @@ export const api = createApi({
       query: () => ({ url: '/notifications/unread-count', method: 'get' }),
       providesTags: ['Notifications'],
     }),
-    getNotifications: builder.query<NotificationInterface[], { limit?: number; offset?: number } | void>({
-      query: (params) => ({ url: '/notifications', method: 'get', params }),
-      providesTags: ['Notifications'],
-    }),
-    markNotificationAsRead: builder.mutation<NotificationInterface, string>({
-      query: (notificationId) => ({
-        url: `/notifications/${notificationId}/read`,
-        method: 'patch',
-      }),
-      invalidatesTags: ['Notifications'],
-    }),
-    markAllNotificationsAsRead: builder.mutation<void, void>({
-      query: () => ({
-        url: '/notifications/read-all',
-        method: 'patch',
-      }),
-      invalidatesTags: ['Notifications'],
-    }),
-    deleteNotification: builder.mutation<void, string>({
-      query: (notificationId) => ({
-        url: `/notifications/${notificationId}`,
-        method: 'delete',
-      }),
-      invalidatesTags: ['Notifications'],
-    }),
     getCategories: builder.query<Category[], { type?: string; isActive?: boolean } | void>({
       query: (params) => ({ url: '/categories', method: 'get', params }),
       providesTags: ['Categories'],
