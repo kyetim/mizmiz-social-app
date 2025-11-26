@@ -121,10 +121,12 @@ const authSlice = createSlice({
         state.user = action.payload
         state.isAuthenticated = true
       })
-      .addMatcher(api.endpoints.getCurrentUser.matchRejected, (state) => {
+      .addMatcher(api.endpoints.getCurrentUser.matchRejected, (state, action) => {
         state.isLoading = false
-        state.isAuthenticated = false
-        state.user = null
+        if (action.payload?.status === 401) {
+          state.isAuthenticated = false
+          state.user = null
+        }
       })
   },
 })

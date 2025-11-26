@@ -267,7 +267,7 @@ export function RegisterForm() {
           <a href="/privacy" className="text-purple-600 hover:text-purple-700 font-medium transition-colors">
             Gizlilik Politikası
           </a>
-          'nı kabul etmiş olursunuz
+          &apos;nı kabul etmiş olursunuz
         </p>
 
         <Button

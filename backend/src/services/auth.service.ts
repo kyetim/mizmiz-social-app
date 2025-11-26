@@ -223,7 +223,8 @@ export class AuthService {
                 followersCount: true,
                 followingCount: true,
                 postsCount: true,
-                createdAt: true
+                createdAt: true,
+                gamification: true
             }
         })
 

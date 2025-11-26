@@ -1,4 +1,5 @@
 import { UserInterface } from './user.interface'
+import { PostCategory, PostVibe } from './category.interface'
 
 export interface PostInterface {
   id: string
@@ -20,11 +21,15 @@ export interface PostInterface {
   }
   isLikedByCurrentUser?: boolean
   isAuthorFollowed?: boolean
+  postCategories?: PostCategory[]
+  postVibes?: PostVibe[]
 }
 
 export interface CreatePostDto {
   content: string
   imageUrl?: string
+  categoryIds?: string[]
+  vibeIds?: string[]
 }
 
 export interface CommentInterface {

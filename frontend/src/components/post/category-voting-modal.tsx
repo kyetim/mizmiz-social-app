@@ -86,7 +86,7 @@ export function CategoryVotingModal({
               {/* Existing Categories */}
               <div className="space-y-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Bu post'un kategorilerini oylayarak doğruluğunu teyit edebilir veya
+                  Bu post&apos;un kategorilerini oylayarak doğruluğunu teyit edebilir veya
                   yanlış kategorileri işaretleyebilirsiniz.
                 </p>
 

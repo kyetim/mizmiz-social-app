@@ -97,23 +97,27 @@ export default function ExplorePage() {
                 {/* Main Content */}
                 <div className="space-y-3 sm:space-y-4 w-full">
                     {/* Page Title */}
-                    <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6"
+                    >
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 via-cyan-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/40 ring-2 ring-emerald-500/20">
                             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Keşfet</h1>
-                    </div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Keşfet</h1>
+                    </motion.div>
 
                     {/* Search Bar */}
-                    <GlassmorphismCard hover={false}>
+                    <GlassmorphismCard hover={false} tone="emerald">
                         <div className="relative">
-                            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Gönderi, kategori veya kullanıcı ara..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gray-100 dark:bg-gray-700 border-none rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 transition-all"
+                                className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 text-sm sm:text-base text-foreground placeholder-muted-foreground transition-all backdrop-blur-sm"
                             />
                             {searchQuery && (
                                 <button
@@ -126,21 +130,21 @@ export default function ExplorePage() {
                         </div>
                         {searchQuery && isSearching && (
                             <p className="text-center mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                "{searchQuery}" için {filteredPosts.length} gönderi, {filteredCategories.length} kategori bulundu
+                                &quot;{searchQuery}&quot; için {filteredPosts.length} gönderi, {filteredCategories.length} kategori bulundu
                             </p>
                         )}
                     </GlassmorphismCard>
 
                     {/* Tabs */}
-                    <GlassmorphismCard hover={false}>
+                    <GlassmorphismCard hover={false} tone="emerald">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <motion.button
                                 onClick={() => setActiveTab('trending')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'trending'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'trending'
+                                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
+                                    : 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
                                     }`}
                             >
                                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -152,9 +156,9 @@ export default function ExplorePage() {
                                 onClick={() => setActiveTab('categories')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'categories'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'categories'
+                                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
+                                    : 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
                                     }`}
                             >
                                 <Hash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -166,9 +170,9 @@ export default function ExplorePage() {
                                 onClick={() => setActiveTab('popular')}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'popular'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${activeTab === 'popular'
+                                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
+                                    : 'bg-white/50 dark:bg-black/30 text-foreground/80 hover:bg-white/70 dark:hover:bg-black/50 border border-white/20 dark:border-white/10'
                                     }`}
                             >
                                 <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -210,7 +214,7 @@ export default function ExplorePage() {
                                                         Arama sonucu bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" için gönderi bulunamadı
+                                                        &quot;{searchQuery}&quot; için gönderi bulunamadı
                                                     </p>
                                                     <button
                                                         onClick={() => setSearchQuery('')}
@@ -293,7 +297,7 @@ export default function ExplorePage() {
                                                         Kategori bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" ile eşleşen kategori yok
+                                                        &quot;{searchQuery}&quot; ile eşleşen kategori yok
                                                     </p>
                                                     <button
                                                         onClick={() => setSearchQuery('')}
@@ -343,7 +347,7 @@ export default function ExplorePage() {
                                                         Arama sonucu bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        "{searchQuery}" için popüler gönderi bulunamadı
+                                                        &quot;{searchQuery}&quot; için popüler gönderi bulunamadı
                                                     </p>
                                                     <button
                                                         onClick={() => setSearchQuery('')}

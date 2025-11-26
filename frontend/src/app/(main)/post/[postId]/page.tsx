@@ -179,37 +179,41 @@ export default function PostDetailPage() {
     const isOwnPost = user?.id === post.userId
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background transition-colors duration-300">
             {/* Main Content */}
             <main className="pt-6 pb-12 px-4 sm:px-6">
                 <div className="container mx-auto max-w-3xl space-y-6">
                     {/* Header */}
-                    <div className="sticky top-4 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm px-4 sm:px-6 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => router.back()}
-                                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            <div>
-                                <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Gönderi</h1>
-                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    {authorName} tarafından
-                                </p>
+                    <GlassmorphismCard hover={false} tone="emerald" className="sticky top-4 z-40">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <motion.button
+                                    onClick={() => router.back()}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-xl transition-colors"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </motion.button>
+                                <div>
+                                    <h1 className="text-lg font-bold text-foreground leading-tight">Gönderi</h1>
+                                    <p className="text-xs text-muted-foreground">
+                                        {authorName} tarafından
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </GlassmorphismCard>
 
                     {/* Post */}
-                    <GlassmorphismCard>
+                    <GlassmorphismCard tone="emerald">
                         {/* Author Header */}
                         <div className="flex items-center justify-between mb-6">
                             <Link
                                 href={post.userId ? `/user/${post.userId}` : '#'}
                                 className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                             >
-                                <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-full flex items-center justify-center shadow-sm ring-2 ring-primary/20 overflow-hidden">
+                                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-sm shadow-emerald-500/30 ring-2 ring-emerald-500/20 overflow-hidden">
                                     {post.user?.avatarUrl ? (
                                         <img
                                             src={post.user.avatarUrl}
@@ -262,7 +266,7 @@ export default function PostDetailPage() {
                         </div>
 
                         {/* Post Date */}
-                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
                             <Calendar className="w-4 h-4" />
                             <span>
                                 {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
@@ -368,10 +372,10 @@ export default function PostDetailPage() {
 
                     {/* Add Comment */}
                     {user && (
-                        <GlassmorphismCard className="mt-4">
+                        <GlassmorphismCard tone="emerald" className="mt-4">
                             <form onSubmit={handleSubmitComment}>
                                 <div className="flex gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm ring-2 ring-emerald-500/20">
                                         {user.avatarUrl ? (
                                             <img
                                                 src={user.avatarUrl}
@@ -389,12 +393,12 @@ export default function PostDetailPage() {
                                             value={commentContent}
                                             onChange={(e) => setCommentContent(e.target.value)}
                                             placeholder="Yorumunuzu yazın..."
-                                            className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg outline-none focus:ring-2 focus:ring-green-500 text-gray-900 dark:text-white placeholder-gray-500 resize-none"
+                                            className="w-full px-4 py-3 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 text-foreground placeholder-muted-foreground resize-none backdrop-blur-sm"
                                             rows={3}
                                             maxLength={300}
                                         />
                                         <div className="flex items-center justify-between mt-2">
-                                            <span className="text-xs text-gray-500">
+                                            <span className="text-xs text-muted-foreground">
                                                 {commentContent.length}/300
                                             </span>
                                             <motion.button
@@ -402,7 +406,7 @@ export default function PostDetailPage() {
                                                 whileHover={{ scale: 1.03 }}
                                                 whileTap={{ scale: 0.97 }}
                                                 disabled={isSubmittingComment || !commentContent.trim()}
-                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {isSubmittingComment ? 'Gönderiliyor...' : 'Yorum Yap'}
                                             </motion.button>
@@ -415,19 +419,19 @@ export default function PostDetailPage() {
 
                     {/* Comments */}
                     <div className="mt-6 space-y-4">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        <h2 className="text-xl font-bold text-foreground">
                             Yorumlar ({comments.length})
                         </h2>
 
                         {comments.length > 0 ? (
                             comments.map((comment) => (
-                                <GlassmorphismCard key={comment.id}>
+                                <GlassmorphismCard key={comment.id} tone="emerald">
                                     <div className="flex gap-3">
                                         <Link
                                             href={`/user/${comment.userId}`}
                                             className="flex-shrink-0"
                                         >
-                                            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center overflow-hidden">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-sm ring-2 ring-emerald-500/20">
                                                 {comment.user.avatarUrl ? (
                                                     <img
                                                         src={comment.user.avatarUrl}
