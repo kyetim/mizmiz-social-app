@@ -6,6 +6,7 @@ import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/catego
 import type { PostInterface, CommentInterface, CreatePostDto, CreateCommentDto } from '@/interfaces/post.interface'
 import type { UpdateUserProfileDto } from '@/lib/api/users'
 import type { NotificationInterface } from '@/interfaces/notification.interface'
+import type { MessageInterface, ConversationInterface, CreateMessageDto, CreateConversationDto } from '@/interfaces/message.interface'
 
 type AxiosBaseQueryArgs = {
   url: string
@@ -45,7 +46,7 @@ const axiosBaseQuery =
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed', 'Posts', 'Comments', 'Users'],
+  tagTypes: ['Auth', 'Notifications', 'Categories', 'Vibes', 'Feed', 'Posts', 'Comments', 'Users', 'Messages', 'Conversations'],
   endpoints: (builder) => ({
     getCurrentUser: builder.query<UserInterface, void>({
       query: () => ({ url: '/auth/me', method: 'get' }),
@@ -356,6 +357,74 @@ export const api = createApi({
       }),
       invalidatesTags: ['Notifications'],
     }),
+    // Messages endpoints
+    getConversations: builder.query<ConversationInterface[], void>({
+      query: () => ({ url: '/messages/conversations', method: 'get' }),
+      providesTags: ['Conversations'],
+    }),
+    getOrCreateConversation: builder.mutation<ConversationInterface, CreateConversationDto>({
+      query: (data) => ({
+        url: '/messages/conversations',
+        method: 'post',
+        data,
+      }),
+      invalidatesTags: ['Conversations'],
+    }),
+    getConversation: builder.query<ConversationInterface, string>({
+      query: (conversationId) => ({
+        url: `/messages/conversations/${conversationId}`,
+        method: 'get',
+      }),
+      providesTags: (result, error, conversationId) => [
+        { type: 'Conversations', id: conversationId },
+      ],
+    }),
+    getMessages: builder.query<
+      MessageInterface[],
+      { conversationId: string; limit?: number; cursor?: string }
+    >({
+      query: ({ conversationId, limit, cursor }) => ({
+        url: `/messages/conversations/${conversationId}/messages`,
+        method: 'get',
+        params: { limit, cursor },
+      }),
+      providesTags: (result, error, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+      ],
+    }),
+    sendMessage: builder.mutation<
+      MessageInterface,
+      { conversationId: string; data: CreateMessageDto }
+    >({
+      query: ({ conversationId, data }) => ({
+        url: `/messages/conversations/${conversationId}/messages`,
+        method: 'post',
+        data,
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+        { type: 'Conversations', id: conversationId },
+        'Conversations',
+      ],
+    }),
+    markMessagesAsRead: builder.mutation<void, string>({
+      query: (conversationId) => ({
+        url: `/messages/conversations/${conversationId}/read`,
+        method: 'put',
+      }),
+      invalidatesTags: (result, error, conversationId) => [
+        { type: 'Messages', id: conversationId },
+        { type: 'Conversations', id: conversationId },
+        'Conversations',
+      ],
+    }),
+    deleteMessage: builder.mutation<void, string>({
+      query: (messageId) => ({
+        url: `/messages/${messageId}`,
+        method: 'delete',
+      }),
+      invalidatesTags: ['Messages', 'Conversations'],
+    }),
   }),
 })
 
@@ -395,6 +464,13 @@ export const {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
+  useGetConversationsQuery,
+  useGetOrCreateConversationMutation,
+  useGetConversationQuery,
+  useGetMessagesQuery,
+  useSendMessageMutation,
+  useMarkMessagesAsReadMutation,
+  useDeleteMessageMutation,
 } = api
 
 

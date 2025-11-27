@@ -9,6 +9,7 @@ import {
     useGetUserLikedPostsQuery,
     useFollowUserMutation,
     useUnfollowUserMutation,
+    useGetOrCreateConversationMutation,
 } from '@/store/api/api'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
@@ -23,7 +24,8 @@ import {
     Image as ImageIcon,
     UserPlus,
     UserMinus,
-    Heart
+    Heart,
+    Send
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -58,6 +60,7 @@ export default function UserProfilePage() {
     } = useGetUserLikedPostsQuery({ userId, limit: 50 }, { skip: !userId })
     const [followUser] = useFollowUserMutation()
     const [unfollowUser] = useUnfollowUserMutation()
+    const [getOrCreateConversation] = useGetOrCreateConversationMutation()
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -95,6 +98,17 @@ export default function UserProfilePage() {
             if (errorMessage !== 'Bu işlem zaten yapılmış.') {
                 toast.error(errorMessage)
             }
+        }
+    }
+
+    async function handleSendMessage() {
+        if (!profileUser) return
+
+        try {
+            const result = await getOrCreateConversation({ userId }).unwrap()
+            router.push(`/messages?conversation=${result.id}`)
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Mesaj gönderilemedi')
         }
     }
 
@@ -195,27 +209,40 @@ export default function UserProfilePage() {
                         {/* Actions */}
                         <div className="flex items-center gap-2 mb-4">
                             {!isOwnProfile ? (
-                                <motion.button
-                                    onClick={handleFollowToggle}
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    className={`flex-1 px-4 py-2.5 rounded-2xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${profileUser?.isFollowedByCurrentUser
-                                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                                        : 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-teal-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-teal-600 text-white shadow-emerald-500/30'
-                                        }`}
-                                >
-                                    {profileUser?.isFollowedByCurrentUser ? (
-                                        <>
-                                            <UserMinus className="w-4 h-4" />
-                                            Takipten Çık
-                                        </>
-                                    ) : (
-                                        <>
-                                            <UserPlus className="w-4 h-4" />
-                                            Takip Et
-                                        </>
+                                <>
+                                    <motion.button
+                                        onClick={handleFollowToggle}
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        className={`flex-1 px-4 py-2.5 rounded-2xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${profileUser?.isFollowedByCurrentUser
+                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                            : 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-teal-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-teal-600 text-white shadow-emerald-500/30'
+                                            }`}
+                                    >
+                                        {profileUser?.isFollowedByCurrentUser ? (
+                                            <>
+                                                <UserMinus className="w-4 h-4" />
+                                                Takipten Çık
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UserPlus className="w-4 h-4" />
+                                                Takip Et
+                                            </>
+                                        )}
+                                    </motion.button>
+                                    {(profileUser?.isFollowedByCurrentUser || profileUser?.isFollowing) && (
+                                        <motion.button
+                                            onClick={handleSendMessage}
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            className="px-4 py-2.5 rounded-2xl font-semibold shadow-lg transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 text-white shadow-blue-500/30"
+                                        >
+                                            <Send className="w-4 h-4" />
+                                            Mesaj Gönder
+                                        </motion.button>
                                     )}
-                                </motion.button>
+                                </>
                             ) : (
                                 <Link href="/profile" className="flex-1">
                                     <motion.button

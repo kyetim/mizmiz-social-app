@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Home, TrendingUp, Users, Bell, User, LogOut, Plus } from 'lucide-react'
+import { Home, TrendingUp, Users, Bell, User, LogOut, Plus, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 
@@ -94,6 +94,17 @@ export function Sidebar({ user, unreadCount, onLogout, onCreatePost }: SidebarPr
                                 {unreadCount > 99 ? '99+' : unreadCount}
                             </span>
                         )}
+                    </motion.div>
+                </Link>
+
+                <Link href="/messages">
+                    <motion.div
+                        whileHover={{ opacity: 0.9 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(getNavClass('/messages'), 'overflow-hidden')}
+                    >
+                        <MessageCircle className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-lg">Mesajlar</span>
                     </motion.div>
                 </Link>
 

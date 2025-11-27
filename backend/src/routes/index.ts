@@ -7,6 +7,7 @@ import gamificationRoutes from './gamification.routes'
 import uploadRoutes from './upload.routes'
 import userRoutes from './user.routes'
 import notificationRoutes from './notification.routes'
+import messageRoutes from './message.routes'
 
 const router = Router()
 
@@ -27,7 +28,8 @@ router.get('/', (_req, res) => {
             vibes: '/api/vibes',
             preferences: '/api/preferences',
             feed: '/api/feed',
-            gamification: '/api/gamification'
+            gamification: '/api/gamification',
+            messages: '/api/messages'
         }
     })
 })
@@ -41,6 +43,7 @@ router.use('/', categoryRoutes) // Category routes are at root level
 router.use('/', preferenceRoutes) // Preference and feed routes
 router.use('/', gamificationRoutes) // Gamification routes
 router.use('/notifications', notificationRoutes)
+router.use('/messages', messageRoutes)
 // router.use('/comments', commentRoutes)
 
 export default router

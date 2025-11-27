@@ -15,7 +15,7 @@ export interface UpdateUserProfileDto {
 
 export class UserService {
     // Get user by ID
-    static async getUserById(userId: string) {
+    static async getUserById(userId: string, currentUserId?: string) {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -34,6 +34,7 @@ export class UserService {
                 followingCount: true,
                 postsCount: true,
                 createdAt: true,
+                lastLoginAt: true,
                 gamification: true
             }
         })
@@ -42,7 +43,33 @@ export class UserService {
             throw new NotFoundError('User not found')
         }
 
-        return user
+        // Check if current user is following this user
+        let isFollowedByCurrentUser = false
+        let isFollowing = false
+        if (currentUserId && currentUserId !== userId) {
+            const followRelation = await prisma.follow.findFirst({
+                where: {
+                    followerId: currentUserId,
+                    followingId: userId
+                }
+            })
+            isFollowedByCurrentUser = !!followRelation
+
+            // Check if this user is following current user (for mutual follow check)
+            const reverseFollowRelation = await prisma.follow.findFirst({
+                where: {
+                    followerId: userId,
+                    followingId: currentUserId
+                }
+            })
+            isFollowing = !!reverseFollowRelation
+        }
+
+        return {
+            ...user,
+            isFollowedByCurrentUser,
+            isFollowing
+        }
     }
 
     // Update user profile

@@ -10,8 +10,9 @@ export const userController = {
     // Get user by ID
     getUser: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
         const { userId } = req.params
+        const currentUserId = req.user?.userId
 
-        const user = await UserService.getUserById(userId)
+        const user = await UserService.getUserById(userId, currentUserId)
 
         res.status(200).json({
             success: true,

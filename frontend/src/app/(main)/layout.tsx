@@ -132,10 +132,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
             {/* Main Content Wrapper */}
             <main className="relative z-10 lg:ml-80 pt-14 lg:pt-0 pb-16 lg:pb-0 min-h-screen">
-                <div className={`mx-auto px-4 py-4 lg:py-6 ${pathname === '/explore' ? 'max-w-[1400px]' : 'max-w-7xl'}`}>
+                <div className={`mx-auto px-4 py-4 lg:py-6 ${pathname === '/explore' ? 'max-w-[1400px]' : pathname === '/messages' ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
                     {pathname === '/explore' ? (
                         // Explore page renders its own grid
                         children
+                    ) : pathname === '/messages' ? (
+                        // Messages page: wide layout without right sidebar
+                        <div className="w-full">
+                            {children}
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-6">
                             {/* Content Area */}

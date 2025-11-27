@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Home, TrendingUp, Users, User, Plus } from 'lucide-react'
+import { Home, TrendingUp, Users, User, Plus, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface BottomNavProps {
@@ -27,8 +27,8 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
                                 : 'text-white/60 hover:text-white',
                         )}
                     >
-                        <Home className={`w-6 h-6 ${isActive('/feed') ? 'fill-current' : ''}`} />
-                        <span className="text-xs font-medium">Timeline</span>
+                        <Home className={`w-5 h-5 ${isActive('/feed') ? 'fill-current' : ''}`} />
+                        <span className="text-[10px] font-medium">Timeline</span>
                     </motion.div>
                 </Link>
 
@@ -42,8 +42,8 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
                                 : 'text-white/60 hover:text-white',
                         )}
                     >
-                        <TrendingUp className={`w-6 h-6 ${isActive('/explore') ? 'fill-current' : ''}`} />
-                        <span className="text-xs font-medium">Keşfet</span>
+                        <TrendingUp className={`w-5 h-5 ${isActive('/explore') ? 'fill-current' : ''}`} />
+                        <span className="text-[10px] font-medium">Keşfet</span>
                     </motion.div>
                 </Link>
 
@@ -63,14 +63,29 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
                     <motion.div
                         whileTap={{ scale: 0.9 }}
                         className={cn(
-                            'flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all border border-transparent',
+                            'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all border border-transparent',
                             isActive('/people')
                                 ? 'text-white bg-white/10 border-white/20 shadow-[0_12px_35px_rgba(255,255,255,0.15)]'
                                 : 'text-white/60 hover:text-white',
                         )}
                     >
-                        <Users className={`w-6 h-6 ${isActive('/people') ? 'fill-current' : ''}`} />
-                        <span className="text-xs font-medium">İnsanlar</span>
+                        <Users className={`w-5 h-5 ${isActive('/people') ? 'fill-current' : ''}`} />
+                        <span className="text-[10px] font-medium">İnsanlar</span>
+                    </motion.div>
+                </Link>
+
+                <Link href="/messages" className="flex flex-col items-center justify-center flex-1 h-full">
+                    <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        className={cn(
+                            'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all border border-transparent',
+                            isActive('/messages')
+                                ? 'text-white bg-white/10 border-white/20 shadow-[0_12px_35px_rgba(255,255,255,0.15)]'
+                                : 'text-white/60 hover:text-white',
+                        )}
+                    >
+                        <MessageCircle className={`w-5 h-5 ${isActive('/messages') ? 'fill-current' : ''}`} />
+                        <span className="text-[10px] font-medium">Mesajlar</span>
                     </motion.div>
                 </Link>
 
@@ -84,8 +99,8 @@ export function BottomNav({ onCreatePost }: BottomNavProps) {
                                 : 'text-white/60 hover:text-white',
                         )}
                     >
-                        <User className={`w-6 h-6 ${isActive('/profile') ? 'fill-current' : ''}`} />
-                        <span className="text-xs font-medium">Profil</span>
+                        <User className={`w-5 h-5 ${isActive('/profile') ? 'fill-current' : ''}`} />
+                        <span className="text-[10px] font-medium">Profil</span>
                     </motion.div>
                 </Link>
             </div>
