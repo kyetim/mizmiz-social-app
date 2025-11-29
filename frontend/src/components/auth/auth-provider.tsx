@@ -27,8 +27,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } = useGetCurrentUserQuery(undefined, {
         refetchOnFocus: true,
         refetchOnReconnect: true,
-        // Skip if we're on a public route to avoid unnecessary calls
-        skip: publicRoutes.includes(pathname),
+        // Don't skip on auth routes - we need to verify auth after login
+        // Only skip on public non-auth routes
+        skip: publicRoutes.includes(pathname) && !authRoutes.includes(pathname),
     })
 
     useEffect(() => {
@@ -54,22 +55,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Redirect authenticated users away from auth pages
         // But only if we have a confirmed user (not just isAuthenticated flag)
+        // Add a small delay to ensure state is fully synced after login
         if (user && isAuthenticated && isAuthRoute) {
-            router.replace('/feed')
-            return
+            const timer = setTimeout(() => {
+                router.replace('/feed')
+            }, 300)
+            return () => clearTimeout(timer)
         }
 
         // Redirect unauthenticated users to login
         // Only redirect if we've finished loading, not fetching user, and still not authenticated
-        // Add additional check: wait a bit longer on mobile to ensure cookies are processed
+        // Add additional check: wait longer on mobile to ensure cookies are processed
+        // Also check if we're coming from a login attempt (give it more time)
         if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute && !user) {
-            // Small delay to allow cookie processing on mobile
+            // Longer delay to allow cookie processing on mobile, especially after login
+            const delay = isAuthRoute ? 1500 : 1000
             const timer = setTimeout(() => {
+                // Double check - user might have been set by now
                 if (!user && !isAuthenticated) {
                     const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
                     router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
                 }
-            }, 500)
+            }, delay)
             return () => clearTimeout(timer)
         }
     }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser, user])

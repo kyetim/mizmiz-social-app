@@ -57,13 +57,13 @@ export function LoginForm() {
       const result = await dispatch(login(data)).unwrap()
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
 
-      // Wait for cookies to be set and then verify auth before redirect
-      // This prevents redirect loop on mobile devices
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // User is already set in state from login action
+      // Wait for cookies to be processed by browser and state to be fully synced
+      await new Promise(resolve => setTimeout(resolve, 800))
 
-      // Force a page reload to ensure cookies are properly set and auth state is synced
-      // This is especially important for mobile devices
-      window.location.href = redirectTo
+      // Use router.push to maintain React state
+      // The auth state is already set from login action, so AuthProvider won't redirect
+      router.push(redirectTo)
     } catch (error: any) {
       showErrorToast(error)
 
