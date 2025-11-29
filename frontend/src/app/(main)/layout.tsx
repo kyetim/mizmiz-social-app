@@ -28,14 +28,25 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false)
 
     useEffect(() => {
+        // Wait for auth state to stabilize before checking
+        // This prevents premature redirects on mobile devices
         if (isLoading) {
             return
         }
 
         setIsInitialized(true)
 
-        if (!user) {
-            router.replace('/login')
+        // Only redirect if user is definitely not authenticated
+        // AuthProvider will handle the redirect logic
+        // This prevents double redirects on mobile
+        if (!user && !isLoading) {
+            // Small delay to allow AuthProvider to handle redirect first
+            const timer = setTimeout(() => {
+                if (!user) {
+                    router.replace('/login')
+                }
+            }, 100)
+            return () => clearTimeout(timer)
         }
     }, [router, user, isLoading])
 

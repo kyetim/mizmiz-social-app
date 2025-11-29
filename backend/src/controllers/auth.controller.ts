@@ -7,8 +7,8 @@ import { securityConfig } from '../config/security.config'
 const getCookieClearOptions = (
     cookieConfig: typeof securityConfig.cookie.accessToken
 ): CookieOptions => {
-    const { httpOnly, secure, sameSite, domain } = cookieConfig
-    const options: CookieOptions = { httpOnly, secure, sameSite }
+    const { httpOnly, secure, sameSite, domain, path } = cookieConfig
+    const options: CookieOptions = { httpOnly, secure, sameSite, path }
     if (domain) {
         options.domain = domain
     }

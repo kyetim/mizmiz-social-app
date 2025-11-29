@@ -27,6 +27,12 @@ export function ConversationList({
   currentUserId,
 }: ConversationListProps) {
   const filteredConversations = conversations.filter((conv) => {
+    // Henüz mesaj gönderilmemiş konuşmaları filtrele
+    if (!conv.lastMessage || !conv.lastMessageAt) {
+      return false
+    }
+
+    // Arama sorgusu varsa filtrele
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
     return (

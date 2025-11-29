@@ -23,9 +23,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
         data: currentUser,
         error: currentUserError,
+        isLoading: isFetchingUser,
     } = useGetCurrentUserQuery(undefined, {
         refetchOnFocus: true,
         refetchOnReconnect: true,
+        // Skip if we're on a public route to avoid unnecessary calls
+        skip: publicRoutes.includes(pathname),
     })
 
     useEffect(() => {
@@ -35,10 +38,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, [currentUser, dispatch, user?.id])
 
     useEffect(() => {
+        // Only logout on 401 if we're not on a public route
+        // This prevents logout during initial load on mobile
         if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
-            dispatch(logout())
+            const isPublicRoute = publicRoutes.includes(pathname)
+            if (!isPublicRoute) {
+                dispatch(logout())
+            }
         }
-    }, [currentUserError, dispatch])
+    }, [currentUserError, dispatch, pathname])
 
     useEffect(() => {
         const isPublicRoute = publicRoutes.includes(pathname)
@@ -51,13 +59,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         // Redirect unauthenticated users to login
-        // Only redirect if we've finished loading and still not authenticated
-        if (!isLoading && !isAuthenticated && !isPublicRoute) {
+        // Only redirect if we've finished loading, not fetching user, and still not authenticated
+        // This prevents premature redirects on mobile devices during initial auth check
+        if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute) {
             const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
             router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
             return
         }
-    }, [pathname, router, searchParams, isAuthenticated, isLoading])
+    }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser])
 
     return <>{children}</>
 }
