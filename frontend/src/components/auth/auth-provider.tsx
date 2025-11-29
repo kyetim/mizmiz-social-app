@@ -53,20 +53,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const isAuthRoute = authRoutes.includes(pathname)
 
         // Redirect authenticated users away from auth pages
-        if (isAuthenticated && isAuthRoute) {
+        // But only if we have a confirmed user (not just isAuthenticated flag)
+        if (user && isAuthenticated && isAuthRoute) {
             router.replace('/feed')
             return
         }
 
         // Redirect unauthenticated users to login
         // Only redirect if we've finished loading, not fetching user, and still not authenticated
-        // This prevents premature redirects on mobile devices during initial auth check
-        if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute) {
-            const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-            router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
-            return
+        // Add additional check: wait a bit longer on mobile to ensure cookies are processed
+        if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute && !user) {
+            // Small delay to allow cookie processing on mobile
+            const timer = setTimeout(() => {
+                if (!user && !isAuthenticated) {
+                    const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+                    router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
+                }
+            }, 500)
+            return () => clearTimeout(timer)
         }
-    }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser])
+    }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser, user])
 
     return <>{children}</>
 }

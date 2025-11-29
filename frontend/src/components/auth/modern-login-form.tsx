@@ -54,7 +54,7 @@ export function ModernLoginForm() {
 
   async function onSubmit(data: LoginFormData) {
     try {
-      await dispatch(login(data)).unwrap()
+      const result = await dispatch(login(data)).unwrap()
 
       // Success message
       toast.success('Giriş başarılı! Hoş geldiniz 🎉', {
@@ -62,11 +62,13 @@ export function ModernLoginForm() {
         duration: 2000,
       })
 
-      // Small delay before redirect for better UX
-      setTimeout(() => {
-        router.push(redirectTo)
-        router.refresh()
-      }, 500)
+      // Wait for cookies to be set and then verify auth before redirect
+      // This prevents redirect loop on mobile devices
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      // Force a page reload to ensure cookies are properly set and auth state is synced
+      // This is especially important for mobile devices
+      window.location.href = redirectTo
     } catch (error: any) {
       showErrorToast(error, {
         icon: <AlertCircle className="w-5 h-5" />,

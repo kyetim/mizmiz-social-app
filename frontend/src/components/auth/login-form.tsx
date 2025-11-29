@@ -57,11 +57,13 @@ export function LoginForm() {
       const result = await dispatch(login(data)).unwrap()
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
 
-      // Force navigation after short delay to ensure token is stored
-      setTimeout(() => {
-        router.push(redirectTo)
-        router.refresh()
-      }, 100)
+      // Wait for cookies to be set and then verify auth before redirect
+      // This prevents redirect loop on mobile devices
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      // Force a page reload to ensure cookies are properly set and auth state is synced
+      // This is especially important for mobile devices
+      window.location.href = redirectTo
     } catch (error: any) {
       showErrorToast(error)
 
