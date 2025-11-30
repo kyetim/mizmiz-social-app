@@ -140,7 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 hasStoredUser = !!(storedUser && storedAuthenticated === 'true')
                 
                 // If we have stored user but not in state, recover it
-                if (hasStoredUser && !user) {
+                if (storedUser && hasStoredUser && !user) {
                     const parsedUser = JSON.parse(storedUser)
                     dispatch(setCredentials({ user: parsedUser }))
                     return // Don't redirect yet, let state update
