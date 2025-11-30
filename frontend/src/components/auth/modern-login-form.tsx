@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
-import { api } from '@/store/api/api'
 import { formatValidationErrors, showErrorToast } from '@/lib/utils/error-handler'
 
 // Validation schema
@@ -64,32 +63,12 @@ export function ModernLoginForm() {
       })
 
       // User is already set in state and localStorage from login action
-      // For mobile: verify cookies are set by calling getCurrentUser
-      // Retry up to 3 times with delays
-      let cookiesReady = false
-      for (let attempt = 0; attempt < 3; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, 1000 + attempt * 500))
-        
-        try {
-          const testResult = await dispatch(api.endpoints.getCurrentUser.initiate(undefined))
-          
-          if (testResult.data || (testResult as any).isSuccess) {
-            cookiesReady = true
-            break
-          }
-        } catch (e) {
-          // Continue trying
-          console.log(`Cookie verification attempt ${attempt + 1} failed, retrying...`)
-        }
-      }
+      // Wait a moment for localStorage to be written and state to sync
+      await new Promise(resolve => setTimeout(resolve, 300))
 
-      // Even if cookies aren't ready, proceed - localStorage has the user
-      // Use window.location for mobile - ensures cookies are set and state is reloaded from localStorage
-      if (typeof window !== 'undefined') {
-        window.location.href = redirectTo
-      } else {
-        router.push(redirectTo)
-      }
+      // Use router.push to maintain React state
+      // AuthProvider will handle redirects based on localStorage
+      router.push(redirectTo)
     } catch (error: any) {
       showErrorToast(error, {
         icon: <AlertCircle className="w-5 h-5" />,

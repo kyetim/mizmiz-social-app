@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { logout, setCredentials } from '@/store/slices/auth-slice'
@@ -22,20 +22,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Load user from localStorage on mount if state is empty (mobile fallback)
     // This MUST run before getCurrentUser to prevent logout
+    // Use a ref to track if we've loaded from localStorage to prevent loops
+    const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false)
+    
     useEffect(() => {
-        if (!user && !isLoading && typeof window !== 'undefined') {
+        if (!user && !isLoading && !hasLoadedFromStorage && typeof window !== 'undefined') {
             try {
                 const storedUser = localStorage.getItem('auth_user')
                 const storedAuthenticated = localStorage.getItem('auth_authenticated')
                 if (storedUser && storedAuthenticated === 'true') {
                     const parsedUser = JSON.parse(storedUser)
                     dispatch(setCredentials({ user: parsedUser }))
+                    setHasLoadedFromStorage(true)
+                } else {
+                    setHasLoadedFromStorage(true) // Mark as loaded even if no user found
                 }
             } catch (e) {
                 console.warn('Failed to load auth from localStorage:', e)
+                setHasLoadedFromStorage(true)
             }
+        } else if (user) {
+            setHasLoadedFromStorage(true) // Mark as loaded if user exists
         }
-    }, [dispatch]) // Run on mount and when dispatch changes
+    }, [dispatch, user, isLoading, hasLoadedFromStorage])
 
     // Also check localStorage whenever user becomes null (fallback recovery)
     useEffect(() => {
@@ -62,7 +71,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         refetchOnReconnect: true,
         // Skip on auth routes - user is already set from login action
         // Also skip on public routes
-        skip: publicRoutes.includes(pathname) || authRoutes.includes(pathname),
+        // CRITICAL: Skip if user already exists in state - prevents pending loop
+        // Also skip if we just loaded from localStorage (mobile fallback)
+        skip: publicRoutes.includes(pathname) || authRoutes.includes(pathname) || !!user || (hasLoadedFromStorage && !!user),
     })
 
     useEffect(() => {
@@ -114,36 +125,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const isPublicRoute = publicRoutes.includes(pathname)
         const isAuthRoute = authRoutes.includes(pathname)
 
+        // Don't do any redirects if we're still loading or fetching
+        // Also don't redirect if we haven't loaded from localStorage yet
+        if (isLoading || isFetchingUser || !hasLoadedFromStorage) {
+            return
+        }
+
+        // Check localStorage for user (mobile fallback)
+        let hasStoredUser = false
+        if (typeof window !== 'undefined') {
+            try {
+                const storedUser = localStorage.getItem('auth_user')
+                const storedAuthenticated = localStorage.getItem('auth_authenticated')
+                hasStoredUser = !!(storedUser && storedAuthenticated === 'true')
+                
+                // If we have stored user but not in state, recover it
+                if (hasStoredUser && !user) {
+                    const parsedUser = JSON.parse(storedUser)
+                    dispatch(setCredentials({ user: parsedUser }))
+                    return // Don't redirect yet, let state update
+                }
+            } catch (e) {
+                // Ignore
+            }
+        }
+
+        // Determine if user exists (in state or localStorage)
+        const hasUser = !!(user || hasStoredUser)
+
         // Redirect authenticated users away from auth pages
         // But only if we have a confirmed user (not just isAuthenticated flag)
-        // Add a small delay to ensure state is fully synced after login
-        if (user && isAuthenticated && isAuthRoute) {
+        if (hasUser && isAuthRoute) {
             const timer = setTimeout(() => {
                 router.replace('/feed')
-            }, 300)
+            }, 100)
             return () => clearTimeout(timer)
         }
 
         // Redirect unauthenticated users to login
-        // Only redirect if we've finished loading, not fetching user, and still not authenticated
-        // CRITICAL: Never redirect if user exists in state - login just succeeded
-        // IMPORTANT: Don't redirect if we're on an auth route (login/register) - user might be logging in
-        if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute && !user && !isAuthRoute) {
-            // Much longer delay to allow cookie processing on mobile, especially after login
+        // Only redirect if we're NOT on a public route, NOT on an auth route, and have no user
+        // CRITICAL: Never redirect if user exists in state or localStorage
+        if (!isPublicRoute && !isAuthRoute && !hasUser) {
             const timer = setTimeout(() => {
-                // Final check - user might have been set by now, or we might be on auth route
-                const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname
-                const isCurrentlyAuthRoute = authRoutes.some(route => currentPath.startsWith(route))
-                
-                // Re-check state values - they might have been updated
-                if (!user && !isAuthenticated && !isCurrentlyAuthRoute) {
-                    const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-                    router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
-                }
-            }, 3000) // Even longer delay for mobile - give cookies time to be processed
+                const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+                router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
+            }, 1000)
             return () => clearTimeout(timer)
         }
-    }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser, user])
+    }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser, user, dispatch, hasLoadedFromStorage])
 
     return <>{children}</>
 }
