@@ -20,6 +20,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const dispatch = useAppDispatch()
     const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth)
 
+    // Load user from localStorage on mount if state is empty (mobile fallback)
+    useEffect(() => {
+        if (!user && !isLoading && typeof window !== 'undefined') {
+            try {
+                const storedUser = localStorage.getItem('auth_user')
+                const storedAuthenticated = localStorage.getItem('auth_authenticated')
+                if (storedUser && storedAuthenticated === 'true') {
+                    const parsedUser = JSON.parse(storedUser)
+                    dispatch(setCredentials({ user: parsedUser }))
+                }
+            } catch (e) {
+                console.warn('Failed to load auth from localStorage:', e)
+            }
+        }
+    }, []) // Only run on mount
+
     const {
         data: currentUser,
         error: currentUserError,

@@ -10,12 +10,43 @@ interface AuthState {
   isAuthenticated: boolean
 }
 
-const initialState: AuthState = {
-  user: null,
-  isLoading: false,
-  error: null,
-  isAuthenticated: false,
+// Initialize state from localStorage if available (for mobile persistence)
+const getInitialState = (): AuthState => {
+  if (typeof window === 'undefined') {
+    return {
+      user: null,
+      isLoading: false,
+      error: null,
+      isAuthenticated: false,
+    }
+  }
+
+  try {
+    const storedUser = localStorage.getItem('auth_user')
+    const storedAuthenticated = localStorage.getItem('auth_authenticated')
+    
+    if (storedUser && storedAuthenticated === 'true') {
+      const user = JSON.parse(storedUser)
+      return {
+        user,
+        isLoading: false,
+        error: null,
+        isAuthenticated: true,
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load auth from localStorage:', e)
+  }
+
+  return {
+    user: null,
+    isLoading: false,
+    error: null,
+    isAuthenticated: false,
+  }
 }
+
+const initialState: AuthState = getInitialState()
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -66,12 +97,30 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null
       state.isAuthenticated = false
+      // Clear localStorage as well
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('auth_user')
+          localStorage.removeItem('auth_authenticated')
+        } catch (e) {
+          console.warn('Failed to clear auth from localStorage:', e)
+        }
+      }
       // Cookies are cleared by backend
       // Note: Cache clearing for posts and categories will be handled by middleware
     },
     setCredentials: (state, action: PayloadAction<{ user: UserInterface }>) => {
       state.user = action.payload.user
       state.isAuthenticated = true
+      // Store in localStorage as well
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('auth_user', JSON.stringify(action.payload.user))
+          localStorage.setItem('auth_authenticated', 'true')
+        } catch (e) {
+          console.warn('Failed to store auth in localStorage:', e)
+        }
+      }
     },
     updateUser: (state, action: PayloadAction<UserInterface>) => {
       state.user = action.payload
@@ -88,6 +137,16 @@ const authSlice = createSlice({
         state.isLoading = false
         state.user = action.payload.user
         state.isAuthenticated = true
+        // Store user in localStorage as fallback for mobile devices
+        // This ensures state persists even if cookies aren't immediately available
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('auth_user', JSON.stringify(action.payload.user))
+            localStorage.setItem('auth_authenticated', 'true')
+          } catch (e) {
+            console.warn('Failed to store auth in localStorage:', e)
+          }
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false
@@ -104,6 +163,15 @@ const authSlice = createSlice({
         state.isLoading = false
         state.user = action.payload.user
         state.isAuthenticated = true
+        // Store user in localStorage as fallback for mobile devices
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('auth_user', JSON.stringify(action.payload.user))
+            localStorage.setItem('auth_authenticated', 'true')
+          } catch (e) {
+            console.warn('Failed to store auth in localStorage:', e)
+          }
+        }
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false
@@ -123,9 +191,25 @@ const authSlice = createSlice({
       })
       .addMatcher(api.endpoints.getCurrentUser.matchRejected, (state, action) => {
         state.isLoading = false
+        // Only clear state if we don't have a user in localStorage (fallback)
+        // This prevents clearing state on mobile when cookies aren't ready yet
         if (action.payload?.status === 401) {
-          state.isAuthenticated = false
-          state.user = null
+          if (typeof window !== 'undefined') {
+            try {
+              const storedUser = localStorage.getItem('auth_user')
+              if (!storedUser) {
+                state.isAuthenticated = false
+                state.user = null
+              }
+              // If we have stored user, keep it - cookies might not be ready yet
+            } catch (e) {
+              state.isAuthenticated = false
+              state.user = null
+            }
+          } else {
+            state.isAuthenticated = false
+            state.user = null
+          }
         }
       })
   },
