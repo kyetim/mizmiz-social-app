@@ -58,11 +58,12 @@ export function LoginForm() {
       toast.success('Giriş başarılı! Hoş geldiniz 🎉')
 
       // User is already set in state from login action
-      // Wait for cookies to be processed by browser and state to be fully synced
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Wait longer for cookies to be processed by browser, especially on mobile
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
       // Use router.push to maintain React state
       // The auth state is already set from login action, so AuthProvider won't redirect
+      // But we need to ensure cookies are ready before navigating
       router.push(redirectTo)
     } catch (error: any) {
       showErrorToast(error)
