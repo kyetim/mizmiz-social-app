@@ -67,8 +67,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: currentUserError,
         isLoading: isFetchingUser,
     } = useGetCurrentUserQuery(undefined, {
-        refetchOnFocus: true,
-        refetchOnReconnect: true,
+        refetchOnFocus: false, // Disable refetch on focus to prevent mobile keyboard issues
+        refetchOnReconnect: false, // Disable auto reconnect fetch
         // Skip on auth routes - user is already set from login action
         // Also skip on public routes
         // CRITICAL: Skip if user already exists in state - prevents pending loop

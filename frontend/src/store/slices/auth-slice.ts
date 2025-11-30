@@ -191,25 +191,12 @@ const authSlice = createSlice({
       })
       .addMatcher(api.endpoints.getCurrentUser.matchRejected, (state, action) => {
         state.isLoading = false
-        // Only clear state if we don't have a user in localStorage (fallback)
-        // This prevents clearing state on mobile when cookies aren't ready yet
+        // Don't clear state on 401 error from getCurrentUser
+        // This causes issues on mobile where cookies might be delayed or unstable
+        // We trust localStorage/state persistence instead
+        // If the token is truly invalid, backend API calls will fail anyway
         if (action.payload?.status === 401) {
-          if (typeof window !== 'undefined') {
-            try {
-              const storedUser = localStorage.getItem('auth_user')
-              if (!storedUser) {
-                state.isAuthenticated = false
-                state.user = null
-              }
-              // If we have stored user, keep it - cookies might not be ready yet
-            } catch (e) {
-              state.isAuthenticated = false
-              state.user = null
-            }
-          } else {
-            state.isAuthenticated = false
-            state.user = null
-          }
+           console.warn('getCurrentUser returned 401, but keeping session active based on client state')
         }
       })
   },
