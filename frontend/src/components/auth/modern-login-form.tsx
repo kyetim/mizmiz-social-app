@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { login } from '@/store/slices/auth-slice'
+import { api } from '@/store/api/api'
 import { formatValidationErrors, showErrorToast } from '@/lib/utils/error-handler'
 
 // Validation schema
@@ -63,10 +64,26 @@ export function ModernLoginForm() {
       })
 
       // User is already set in state and localStorage from login action
-      // For mobile devices, use full page reload to ensure cookies are properly set
-      // This is more reliable than router.push on mobile
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // For mobile: verify cookies are set by calling getCurrentUser
+      // Retry up to 3 times with delays
+      let cookiesReady = false
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 1000 + attempt * 500))
+        
+        try {
+          const testResult = await dispatch(api.endpoints.getCurrentUser.initiate(undefined))
+          
+          if (testResult.data || (testResult as any).isSuccess) {
+            cookiesReady = true
+            break
+          }
+        } catch (e) {
+          // Continue trying
+          console.log(`Cookie verification attempt ${attempt + 1} failed, retrying...`)
+        }
+      }
 
+      // Even if cookies aren't ready, proceed - localStorage has the user
       // Use window.location for mobile - ensures cookies are set and state is reloaded from localStorage
       if (typeof window !== 'undefined') {
         window.location.href = redirectTo

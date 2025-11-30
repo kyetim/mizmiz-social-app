@@ -21,6 +21,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth)
 
     // Load user from localStorage on mount if state is empty (mobile fallback)
+    // This MUST run before getCurrentUser to prevent logout
     useEffect(() => {
         if (!user && !isLoading && typeof window !== 'undefined') {
             try {
@@ -34,7 +35,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 console.warn('Failed to load auth from localStorage:', e)
             }
         }
-    }, []) // Only run on mount
+    }, [dispatch]) // Run on mount and when dispatch changes
+
+    // Also check localStorage whenever user becomes null (fallback recovery)
+    useEffect(() => {
+        if (!user && !isLoading && isAuthenticated === false && typeof window !== 'undefined') {
+            try {
+                const storedUser = localStorage.getItem('auth_user')
+                const storedAuthenticated = localStorage.getItem('auth_authenticated')
+                if (storedUser && storedAuthenticated === 'true') {
+                    const parsedUser = JSON.parse(storedUser)
+                    dispatch(setCredentials({ user: parsedUser }))
+                }
+            } catch (e) {
+                console.warn('Failed to recover auth from localStorage:', e)
+            }
+        }
+    }, [user, isLoading, isAuthenticated, dispatch])
 
     const {
         data: currentUser,
@@ -55,16 +72,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, [currentUser, dispatch, user?.id])
 
     useEffect(() => {
-        // Only logout on 401 if we're not on a public route AND we don't have a user in state
+        // Only logout on 401 if we're not on a public route AND we don't have a user in state OR localStorage
         // This prevents logout during initial load on mobile and after successful login
-        // CRITICAL: Never logout if user exists in state - this means login just succeeded
+        // CRITICAL: Never logout if user exists in state or localStorage
         if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
             const isPublicRoute = publicRoutes.includes(pathname)
             const isAuthRoute = authRoutes.includes(pathname)
-            // NEVER logout if we have a user in state - login just succeeded, cookies might not be ready yet
-            if (!isPublicRoute && !isAuthRoute && !user && !isAuthenticated) {
-                // Only logout if we're truly unauthenticated (no user, not authenticated)
+            
+            // Check localStorage as well
+            let hasStoredUser = false
+            if (typeof window !== 'undefined') {
+                try {
+                    const storedUser = localStorage.getItem('auth_user')
+                    hasStoredUser = !!storedUser
+                } catch (e) {
+                    // Ignore
+                }
+            }
+            
+            // NEVER logout if we have a user in state or localStorage
+            // Login just succeeded, cookies might not be ready yet
+            if (!isPublicRoute && !isAuthRoute && !user && !isAuthenticated && !hasStoredUser) {
+                // Only logout if we're truly unauthenticated (no user anywhere)
                 dispatch(logout())
+            } else if (hasStoredUser && !user) {
+                // Recover user from localStorage if we have it but state is empty
+                try {
+                    const storedUser = localStorage.getItem('auth_user')
+                    if (storedUser) {
+                        const parsedUser = JSON.parse(storedUser)
+                        dispatch(setCredentials({ user: parsedUser }))
+                    }
+                } catch (e) {
+                    console.warn('Failed to recover user from localStorage:', e)
+                }
             }
         }
     }, [currentUserError, dispatch, pathname, user, isAuthenticated])
