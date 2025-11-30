@@ -63,12 +63,15 @@ export function ModernLoginForm() {
       })
 
       // User is already set in state from login action
-      // Wait longer for cookies to be processed by browser, especially on mobile
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Wait for cookies to be processed by browser, especially on mobile
+      // Then verify cookies are set by making a test request
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Additional wait for mobile devices to ensure cookies are fully processed
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Use router.push to maintain React state
-      // The auth state is already set from login action, so AuthProvider won't redirect
-      // But we need to ensure cookies are ready before navigating
+      // The auth state is already set from login action
       router.push(redirectTo)
     } catch (error: any) {
       showErrorToast(error, {

@@ -41,15 +41,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     useEffect(() => {
         // Only logout on 401 if we're not on a public route AND we don't have a user in state
         // This prevents logout during initial load on mobile and after successful login
+        // CRITICAL: Never logout if user exists in state - this means login just succeeded
         if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
             const isPublicRoute = publicRoutes.includes(pathname)
             const isAuthRoute = authRoutes.includes(pathname)
-            // Don't logout if we have a user in state (login just succeeded) or we're on auth routes
-            if (!isPublicRoute && !isAuthRoute && !user) {
+            // NEVER logout if we have a user in state - login just succeeded, cookies might not be ready yet
+            if (!isPublicRoute && !isAuthRoute && !user && !isAuthenticated) {
+                // Only logout if we're truly unauthenticated (no user, not authenticated)
                 dispatch(logout())
             }
         }
-    }, [currentUserError, dispatch, pathname, user])
+    }, [currentUserError, dispatch, pathname, user, isAuthenticated])
 
     useEffect(() => {
         const isPublicRoute = publicRoutes.includes(pathname)
@@ -67,18 +69,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Redirect unauthenticated users to login
         // Only redirect if we've finished loading, not fetching user, and still not authenticated
+        // CRITICAL: Never redirect if user exists in state - login just succeeded
         // IMPORTANT: Don't redirect if we're on an auth route (login/register) - user might be logging in
         if (!isLoading && !isFetchingUser && !isAuthenticated && !isPublicRoute && !user && !isAuthRoute) {
-            // Longer delay to allow cookie processing on mobile
+            // Much longer delay to allow cookie processing on mobile, especially after login
             const timer = setTimeout(() => {
-                // Triple check - user might have been set by now, or we might be on auth route
-                const currentPath = window.location.pathname
+                // Final check - user might have been set by now, or we might be on auth route
+                const currentPath = typeof window !== 'undefined' ? window.location.pathname : pathname
                 const isCurrentlyAuthRoute = authRoutes.some(route => currentPath.startsWith(route))
+                
+                // Re-check state values - they might have been updated
                 if (!user && !isAuthenticated && !isCurrentlyAuthRoute) {
                     const redirectUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
                     router.replace(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
                 }
-            }, 2000) // Increased delay for mobile
+            }, 3000) // Even longer delay for mobile - give cookies time to be processed
             return () => clearTimeout(timer)
         }
     }, [pathname, router, searchParams, isAuthenticated, isLoading, isFetchingUser, user])

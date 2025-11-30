@@ -16,19 +16,25 @@ const resolveSameSite = (): SameSiteOption => {
   }
 
   // Cross-site deployments (e.g., Vercel frontend + separate API) require SameSite=None
-  // For mobile devices, 'lax' works better in development, 'none' in production
+  // For mobile devices, we need 'lax' in development and 'none' in production
   // 'lax' allows cookies to be sent on top-level navigations (better for mobile)
+  // But if secure is false, we can't use 'none', so use 'lax'
   return isProduction ? 'none' : 'lax'
 }
 
 const cookieDomain = process.env.COOKIE_DOMAIN?.trim() || undefined
 
+// Determine secure flag - must be false in development for mobile to work
+// In production, secure should be true (HTTPS required)
+const isSecure = isProduction && process.env.NODE_ENV !== 'development'
+
 const baseCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
+  secure: isSecure,
   sameSite: resolveSameSite(),
   // Mobile-friendly: ensure cookies work across different contexts
-  ...(cookieDomain ? { domain: cookieDomain } : {}),
+  // Don't set domain in development - let browser handle it
+  ...(cookieDomain && isProduction ? { domain: cookieDomain } : {}),
   // Path should be root to ensure cookies are accessible everywhere
   path: '/',
 }
