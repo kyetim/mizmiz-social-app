@@ -16,7 +16,7 @@ interface LoginData {
 
 interface AuthResponse {
   user: UserInterface
-  // Note: Token is now in httpOnly cookie, not in response
+  accessToken?: string
 }
 
 export const authService = {

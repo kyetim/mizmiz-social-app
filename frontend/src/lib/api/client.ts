@@ -65,6 +65,14 @@ apiClient.interceptors.request.use(
       retryCount: config.metadata?.retryCount || 0
     }
 
+    // Add Authorization header from localStorage if available (fallback for mobile)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token')
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+
     return config
   },
   (error) => {
@@ -119,6 +127,11 @@ apiClient.interceptors.response.use(
       if (isRefreshEndpoint) {
         // Refresh endpoint failed, redirect to login immediately
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          // Clear auth data to prevent infinite loops
+          localStorage.removeItem('auth_user')
+          localStorage.removeItem('auth_authenticated')
+          localStorage.removeItem('auth_token')
+
           window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
         }
         logError(error, 'Token Refresh Endpoint Failed')
@@ -151,6 +164,11 @@ apiClient.interceptors.response.use(
 
           // Redirect to login
           if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            // Clear auth data
+            localStorage.removeItem('auth_user')
+            localStorage.removeItem('auth_authenticated')
+            localStorage.removeItem('auth_token')
+
             window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
           }
           logError(refreshError, 'Token Refresh Failed')
@@ -160,6 +178,11 @@ apiClient.interceptors.response.use(
 
       // If retry already attempted, redirect to login
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        // Clear auth data
+        localStorage.removeItem('auth_user')
+        localStorage.removeItem('auth_authenticated')
+        localStorage.removeItem('auth_token')
+
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
       }
       logError(error, 'Authentication Error')

@@ -24,7 +24,7 @@ const getInitialState = (): AuthState => {
   try {
     const storedUser = localStorage.getItem('auth_user')
     const storedAuthenticated = localStorage.getItem('auth_authenticated')
-    
+
     if (storedUser && storedAuthenticated === 'true') {
       const user = JSON.parse(storedUser)
       return {
@@ -54,7 +54,11 @@ export const login = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await authService.login({ email, password })
-      // Token is now in httpOnly cookie, no localStorage needed
+      // Token is now in httpOnly cookie AND response body
+      // Store in localStorage as fallback for mobile devices
+      if (response.accessToken && typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', response.accessToken)
+      }
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed')
@@ -82,7 +86,11 @@ export const register = createAsyncThunk(
   ) => {
     try {
       const response = await authService.register({ username, email, password, firstName, lastName })
-      // Token is now in httpOnly cookie, no localStorage needed
+      // Token is now in httpOnly cookie AND response body
+      // Store in localStorage as fallback for mobile devices
+      if (response.accessToken && typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', response.accessToken)
+      }
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed')
@@ -102,6 +110,7 @@ const authSlice = createSlice({
         try {
           localStorage.removeItem('auth_user')
           localStorage.removeItem('auth_authenticated')
+          localStorage.removeItem('auth_token')
         } catch (e) {
           console.warn('Failed to clear auth from localStorage:', e)
         }
@@ -196,7 +205,7 @@ const authSlice = createSlice({
         // We trust localStorage/state persistence instead
         // If the token is truly invalid, backend API calls will fail anyway
         if (action.payload?.status === 401) {
-           console.warn('getCurrentUser returned 401, but keeping session active based on client state')
+          console.warn('getCurrentUser returned 401, but keeping session active based on client state')
         }
       })
   },
