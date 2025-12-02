@@ -8,7 +8,7 @@ const notificationsAdapter = createEntityAdapter<NotificationInterface>({
     sortComparer: (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 })
 
-interface NotificationsState extends EntityState<NotificationInterface> {
+interface NotificationsState extends EntityState<NotificationInterface, string> {
     unreadCount: number
     isLoading: boolean
     error: string | null
@@ -139,4 +139,3 @@ export const {
 } = notificationsAdapter.getSelectors((state: RootState) => state.notifications)
 
 export default notificationsSlice.reducer
-
