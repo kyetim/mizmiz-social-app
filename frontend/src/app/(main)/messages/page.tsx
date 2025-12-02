@@ -144,11 +144,11 @@ export default function MessagesPage() {
       <div className="absolute -top-40 -left-20 w-[420px] h-[420px] bg-cyan-200/40 dark:bg-cyan-500/30 blur-[220px]" />
       <div className="absolute bottom-0 right-0 w-[520px] h-[520px] bg-purple-300/30 dark:bg-purple-700/25 blur-[260px]" />
 
-      <div className="relative z-10 flex-1 min-h-0 px-4 lg:px-10 py-6 flex flex-col">
-        <div className="flex items-center justify-between mb-6 text-slate-900 dark:text-white">
+      <div className="relative z-10 flex-1 min-h-0 px-4 lg:px-10 py-4 lg:py-6 flex flex-col">
+        <div className="flex items-center justify-between mb-4 lg:mb-6 text-slate-900 dark:text-white">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.4em] text-cyan-500/80 dark:text-cyan-300/70">MIZMIZ</p>
-            <h1 className="text-3xl font-semibold">Neon Mesaj Ağı</h1>
+            <p className="text-[10px] lg:text-[11px] uppercase tracking-[0.4em] text-cyan-500/80 dark:text-cyan-300/70">MIZMIZ</p>
+            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı</h1>
           </div>
           <div className="hidden lg:flex items-center gap-3 text-sm text-slate-500 dark:text-white/60">
             <Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-300" />
@@ -156,7 +156,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 min-h-0">
           <div
             className={cn(
               'transition-all duration-300 h-full',

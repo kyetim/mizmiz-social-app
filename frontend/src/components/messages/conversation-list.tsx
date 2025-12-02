@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { ConversationInterface } from '@/interfaces/message.interface'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ConversationListProps {
   conversations: ConversationInterface[]
@@ -45,10 +46,30 @@ export function ConversationList({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm text-muted-foreground">Yükleniyor...</p>
+      <div className="flex flex-col h-full rounded-[32px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur-3xl shadow-[0_0_50px_rgba(15,23,42,0.08)] dark:shadow-[0_0_60px_rgba(0,0,0,0.45)] overflow-hidden">
+        <div className="p-6 border-b border-black/5 dark:border-white/10 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 w-32" />
+            </div>
+            <Skeleton className="w-12 h-12 rounded-2xl" />
+          </div>
+          <Skeleton className="h-11 w-full rounded-2xl" />
+        </div>
+        <div className="flex-1 p-3 space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center gap-4 p-4 rounded-3xl border border-black/5 dark:border-white/5 bg-white/50 dark:bg-white/5">
+              <Skeleton className="w-14 h-14 rounded-2xl flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     )

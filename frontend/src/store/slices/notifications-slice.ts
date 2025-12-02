@@ -1,21 +1,24 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createEntityAdapter, EntityState } from '@reduxjs/toolkit'
 import { NotificationInterface } from '@/interfaces/notification.interface'
 import { notificationsApi } from '@/lib/api/notifications'
 import { api } from '@/store/api/api'
+import { RootState } from '@/store/store'
 
-interface NotificationsState {
-    notifications: NotificationInterface[]
+const notificationsAdapter = createEntityAdapter<NotificationInterface>({
+    sortComparer: (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+})
+
+interface NotificationsState extends EntityState<NotificationInterface> {
     unreadCount: number
     isLoading: boolean
     error: string | null
 }
 
-const initialState: NotificationsState = {
-    notifications: [],
+const initialState: NotificationsState = notificationsAdapter.getInitialState({
     unreadCount: 0,
     isLoading: false,
     error: null
-}
+})
 
 // Async thunks
 export const fetchNotifications = createAsyncThunk(
@@ -56,8 +59,8 @@ const notificationsSlice = createSlice({
     name: 'notifications',
     initialState,
     reducers: {
-        addNotification: (state, action: PayloadAction<NotificationInterface>) => {
-            state.notifications.unshift(action.payload)
+        addNotification: (state, action) => {
+            notificationsAdapter.addOne(state, action.payload)
             if (!action.payload.isRead) {
                 state.unreadCount += 1
             }
@@ -77,7 +80,7 @@ const notificationsSlice = createSlice({
         })
         builder.addCase(fetchNotifications.fulfilled, (state, action) => {
             state.isLoading = false
-            state.notifications = action.payload
+            notificationsAdapter.setAll(state, action.payload)
         })
         builder.addCase(fetchNotifications.rejected, (state, action) => {
             state.isLoading = false
@@ -86,28 +89,35 @@ const notificationsSlice = createSlice({
 
         // Mark as read
         builder.addCase(markNotificationAsRead.fulfilled, (state, action) => {
-            const notification = state.notifications.find(n => n.id === action.payload.id)
-            if (notification && !notification.isRead) {
-                notification.isRead = true
+            const { id } = action.payload
+            const existingNotification = state.entities[id]
+            if (existingNotification && !existingNotification.isRead) {
                 state.unreadCount = Math.max(0, state.unreadCount - 1)
             }
+            notificationsAdapter.updateOne(state, {
+                id,
+                changes: { isRead: true }
+            })
         })
 
         // Mark all as read
         builder.addCase(markAllNotificationsAsRead.fulfilled, (state) => {
-            state.notifications.forEach(n => {
-                n.isRead = true
-            })
+            const updates = state.ids.map(id => ({
+                id,
+                changes: { isRead: true }
+            }))
+            notificationsAdapter.updateMany(state, updates)
             state.unreadCount = 0
         })
 
         // Delete notification
         builder.addCase(deleteNotification.fulfilled, (state, action) => {
-            const notification = state.notifications.find(n => n.id === action.payload)
-            if (notification && !notification.isRead) {
+            const id = action.payload
+            const existingNotification = state.entities[id]
+            if (existingNotification && !existingNotification.isRead) {
                 state.unreadCount = Math.max(0, state.unreadCount - 1)
             }
-            state.notifications = state.notifications.filter(n => n.id !== action.payload)
+            notificationsAdapter.removeOne(state, id)
         })
 
         // RTK Query integration
@@ -121,5 +131,12 @@ const notificationsSlice = createSlice({
 })
 
 export const { addNotification, incrementUnreadCount, resetUnreadCount } = notificationsSlice.actions
+
+export const {
+    selectAll: selectAllNotifications,
+    selectById: selectNotificationById,
+    selectIds: selectNotificationIds
+} = notificationsAdapter.getSelectors((state: RootState) => state.notifications)
+
 export default notificationsSlice.reducer
 

@@ -9,6 +9,7 @@ import { MessageInput } from './message-input'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ConversationViewProps {
   conversation: ConversationInterface
@@ -43,10 +44,35 @@ export function ConversationView({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm text-muted-foreground">Mesajlar yükleniyor...</p>
+      <div className="flex flex-col h-full rounded-[40px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur-3xl shadow-[0_30px_80px_rgba(15,23,42,0.12)] dark:shadow-[0_40px_120px_rgba(0,0,0,0.55)] overflow-hidden">
+        <div className="px-4 lg:px-10 py-5 border-b border-black/5 dark:border-white/10 flex items-center gap-4">
+          <div className="lg:hidden">
+            <Skeleton className="w-9 h-9 rounded-full" />
+          </div>
+          <Skeleton className="w-16 h-16 rounded-3xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <div className="hidden lg:flex gap-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="w-12 h-12 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 p-4 lg:p-10 space-y-6 overflow-hidden">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className={cn("flex gap-4 max-w-[80%]", i % 2 === 0 ? "ml-auto flex-row-reverse" : "")}>
+              <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+              <div className={cn("space-y-2", i % 2 === 0 ? "items-end" : "")}>
+                <Skeleton className={cn("h-12 rounded-2xl", i % 2 === 0 ? "w-64 rounded-tr-none" : "w-56 rounded-tl-none")} />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="p-4">
+          <Skeleton className="h-14 w-full rounded-2xl" />
         </div>
       </div>
     )
@@ -126,7 +152,7 @@ export function ConversationView({
 
         <div
           ref={containerRef}
-          className="flex-1 min-h-0 overflow-y-auto px-4 lg:px-10 py-6 space-y-4"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 lg:px-10 py-6 space-y-4"
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-slate-600 dark:text-white/70">

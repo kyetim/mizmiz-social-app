@@ -154,7 +154,14 @@ export const api = createApi({
         method: 'get',
         params: { following: true, ...params },
       }),
-      providesTags: ['Posts'],
+      providesTags: (result) =>
+        result
+          ? [
+            ...result.map(({ id }) => ({ type: 'Posts' as const, id })),
+            { type: 'Posts', id: 'LIST' },
+            'Feed',
+          ]
+          : [{ type: 'Posts', id: 'LIST' }, 'Feed'],
     }),
     getExplorePosts: builder.query<
       PostInterface[],
@@ -165,7 +172,13 @@ export const api = createApi({
         method: 'get',
         params: { following: false, ...params },
       }),
-      providesTags: ['Posts'],
+      providesTags: (result) =>
+        result
+          ? [
+            ...result.map(({ id }) => ({ type: 'Posts' as const, id })),
+            { type: 'Posts', id: 'LIST' },
+          ]
+          : [{ type: 'Posts', id: 'LIST' }],
     }),
     getPost: builder.query<PostInterface, string>({
       query: (postId) => ({ url: `/posts/${postId}`, method: 'get' }),
@@ -210,8 +223,40 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, postId) => [
         { type: 'Posts', id: postId },
-        'Posts',
       ],
+      async onQueryStarted(postId, { dispatch, queryFulfilled }) {
+        const patchResultFeed = dispatch(
+          api.util.updateQueryData('getFeedPosts', undefined, (draft) => {
+            const post = draft.find((p) => p.id === postId)
+            if (post) {
+              post.isLikedByCurrentUser = true
+              post.likesCount += 1
+            }
+          })
+        )
+        const patchResultExplore = dispatch(
+          api.util.updateQueryData('getExplorePosts', undefined, (draft) => {
+            const post = draft.find((p) => p.id === postId)
+            if (post) {
+              post.isLikedByCurrentUser = true
+              post.likesCount += 1
+            }
+          })
+        )
+        const patchResultPost = dispatch(
+          api.util.updateQueryData('getPost', postId, (draft) => {
+            draft.isLikedByCurrentUser = true
+            draft.likesCount += 1
+          })
+        )
+        try {
+          await queryFulfilled
+        } catch {
+          patchResultFeed.undo()
+          patchResultExplore.undo()
+          patchResultPost.undo()
+        }
+      },
     }),
     unlikePost: builder.mutation<void, string>({
       query: (postId) => ({
@@ -220,8 +265,40 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, postId) => [
         { type: 'Posts', id: postId },
-        'Posts',
       ],
+      async onQueryStarted(postId, { dispatch, queryFulfilled }) {
+        const patchResultFeed = dispatch(
+          api.util.updateQueryData('getFeedPosts', undefined, (draft) => {
+            const post = draft.find((p) => p.id === postId)
+            if (post) {
+              post.isLikedByCurrentUser = false
+              post.likesCount -= 1
+            }
+          })
+        )
+        const patchResultExplore = dispatch(
+          api.util.updateQueryData('getExplorePosts', undefined, (draft) => {
+            const post = draft.find((p) => p.id === postId)
+            if (post) {
+              post.isLikedByCurrentUser = false
+              post.likesCount -= 1
+            }
+          })
+        )
+        const patchResultPost = dispatch(
+          api.util.updateQueryData('getPost', postId, (draft) => {
+            draft.isLikedByCurrentUser = false
+            draft.likesCount -= 1
+          })
+        )
+        try {
+          await queryFulfilled
+        } catch {
+          patchResultFeed.undo()
+          patchResultExplore.undo()
+          patchResultPost.undo()
+        }
+      },
     }),
     // Comments endpoints
     getComments: builder.query<CommentInterface[], string>({
@@ -229,9 +306,13 @@ export const api = createApi({
         url: `/posts/${postId}/comments`,
         method: 'get',
       }),
-      providesTags: (result, error, postId) => [
-        { type: 'Comments', id: postId },
-      ],
+      providesTags: (result, error, postId) =>
+        result
+          ? [
+            ...result.map(({ id }) => ({ type: 'Comments' as const, id })),
+            { type: 'Comments', id: `LIST-${postId}` },
+          ]
+          : [{ type: 'Comments', id: `LIST-${postId}` }],
     }),
     createComment: builder.mutation<
       CommentInterface,
@@ -316,9 +397,20 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, userId) => [
         { type: 'Users', id: userId },
-        'Users',
-        'Auth',
       ],
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          api.util.updateQueryData('getUserProfile', userId, (draft) => {
+            draft.isFollowing = true
+            draft.followersCount += 1
+          })
+        )
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
     }),
     unfollowUser: builder.mutation<void, string>({
       query: (userId) => ({
@@ -327,9 +419,20 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, userId) => [
         { type: 'Users', id: userId },
-        'Users',
-        'Auth',
       ],
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          api.util.updateQueryData('getUserProfile', userId, (draft) => {
+            draft.isFollowing = false
+            draft.followersCount -= 1
+          })
+        )
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
     }),
     // Notifications endpoints
     getNotifications: builder.query<NotificationInterface[], { limit?: number; offset?: number } | void>({
