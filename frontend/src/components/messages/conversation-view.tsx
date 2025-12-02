@@ -33,10 +33,22 @@ export function ConversationView({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom when new messages arrive
+  const isUserNearBottom = useRef(true)
+
+  // Track scroll position to determine if we should auto-scroll
+  const handleScroll = () => {
+    if (!containerRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+    isUserNearBottom.current = distanceFromBottom < 100
+  }
+
+  // Auto-scroll to bottom when new messages arrive, but only if user is near bottom or sending
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (isUserNearBottom.current || isSending) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, isSending])
 
   const isOnline = conversation.otherUser.lastLoginAt
     ? new Date(conversation.otherUser.lastLoginAt).getTime() > Date.now() - 5 * 60 * 1000
@@ -152,6 +164,7 @@ export function ConversationView({
 
         <div
           ref={containerRef}
+          onScroll={handleScroll}
           className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 lg:px-10 py-6 space-y-4"
         >
           {messages.length === 0 ? (
