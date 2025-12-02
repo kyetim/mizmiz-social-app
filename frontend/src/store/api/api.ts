@@ -154,6 +154,7 @@ export const api = createApi({
         method: 'get',
         params: { following: true, ...params },
       }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: (result) =>
         result
           ? [
@@ -172,6 +173,7 @@ export const api = createApi({
         method: 'get',
         params: { following: false, ...params },
       }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: (result) =>
         result
           ? [
@@ -182,6 +184,7 @@ export const api = createApi({
     }),
     getPost: builder.query<PostInterface, string>({
       query: (postId) => ({ url: `/posts/${postId}`, method: 'get' }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: (result, error, postId) => [
         { type: 'Posts', id: postId },
       ],
@@ -346,6 +349,7 @@ export const api = createApi({
     // Users endpoints
     getUserProfile: builder.query<UserInterface, string>({
       query: (userId) => ({ url: `/users/${userId}`, method: 'get' }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: (result, error, userId) => [
         { type: 'Users', id: userId },
       ],
