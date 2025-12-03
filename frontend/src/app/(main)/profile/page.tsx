@@ -62,11 +62,6 @@ export default function ProfilePage() {
     const [updateProfile] = useUpdateProfileMutation()
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.replace('/login')
-            return
-        }
         if (user) {
             if (user.avatarUrl) {
                 setAvatarUrl(user.avatarUrl)
@@ -75,7 +70,7 @@ export default function ProfilePage() {
                 setCoverUrl(user.coverImageUrl)
             }
         }
-    }, [router, user])
+    }, [user])
 
     function handlePostUpdated() {
         refetchUserPosts()

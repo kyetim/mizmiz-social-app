@@ -45,12 +45,7 @@ export default function PeoplePage() {
         [usersData, currentUser?.id]
     )
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.replace('/login')
-        }
-    }, [router])
+
 
     useEffect(() => {
         const followingIds = otherUsers

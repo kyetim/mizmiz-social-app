@@ -35,13 +35,7 @@ export default function ExplorePage() {
     const [searchQuery, setSearchQuery] = useState('')
     const isLoading = isLoadingPosts || isFetchingCategories
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.replace('/login')
-            return
-        }
-    }, [router])
+
 
     const normalizedQuery = searchQuery.trim().toLowerCase()
     const isSearching = normalizedQuery.length > 0

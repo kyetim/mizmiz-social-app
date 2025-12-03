@@ -66,12 +66,7 @@ export default function NotificationsPage() {
     const [markAllAsRead] = useMarkAllNotificationsAsReadMutation()
     const [deleteNotification] = useDeleteNotificationMutation()
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            router.replace('/login')
-        }
-    }, [router])
+
 
     const handleMarkAsRead = async (notificationId: string) => {
         try {
