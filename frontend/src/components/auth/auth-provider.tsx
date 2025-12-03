@@ -24,7 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // This MUST run before getCurrentUser to prevent logout
     // Use a ref to track if we've loaded from localStorage to prevent loops
     const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false)
-    
+
     useEffect(() => {
         if (!user && !isLoading && !hasLoadedFromStorage && typeof window !== 'undefined') {
             try {
@@ -72,8 +72,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Skip on auth routes - user is already set from login action
         // Also skip on public routes
         // CRITICAL: Skip if user already exists in state - prevents pending loop
-        // Also skip if we just loaded from localStorage (mobile fallback)
-        skip: publicRoutes.includes(pathname) || authRoutes.includes(pathname) || !!user || (hasLoadedFromStorage && !!user),
+        // Also skip if we haven't loaded from localStorage yet (mobile fallback)
+        skip: publicRoutes.includes(pathname) || authRoutes.includes(pathname) || !!user || !hasLoadedFromStorage,
     })
 
     useEffect(() => {
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
             const isPublicRoute = publicRoutes.includes(pathname)
             const isAuthRoute = authRoutes.includes(pathname)
-            
+
             // Check localStorage as well
             let hasStoredUser = false
             if (typeof window !== 'undefined') {
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     // Ignore
                 }
             }
-            
+
             // NEVER logout if we have a user in state or localStorage
             // Login just succeeded, cookies might not be ready yet
             if (!isPublicRoute && !isAuthRoute && !user && !isAuthenticated && !hasStoredUser) {
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const storedUser = localStorage.getItem('auth_user')
                 const storedAuthenticated = localStorage.getItem('auth_authenticated')
                 hasStoredUser = !!(storedUser && storedAuthenticated === 'true')
-                
+
                 // If we have stored user but not in state, recover it
                 if (storedUser && hasStoredUser && !user) {
                     const parsedUser = JSON.parse(storedUser)
