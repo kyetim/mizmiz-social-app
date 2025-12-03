@@ -59,6 +59,10 @@ model User {
   conversationsAsUser2   Conversation[] @relation("User2Conversations")
   sentMessages           Message[]
   
+  @@index([username])
+  @@index([email])
+  @@index([firstName, lastName])
+  @@index([followersCount])
   @@map("users")
 }
 
@@ -86,8 +90,9 @@ model Post {
   postCategories PostCategory[]
   postVibes      PostVibe[]
   
-  @@index([userId])
-  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([likesCount])
+  @@index([commentsCount])
   @@map("posts")
 }
 
@@ -208,8 +213,8 @@ model Category {
   battlesAsCategory1 CategoryBattle[]       @relation("BattleCategory1")
   battlesAsCategory2 CategoryBattle[]       @relation("BattleCategory2")
   
-  @@index([type])
-  @@index([isActive])
+  @@index([type, isActive])
+  @@index([postsCount])
   @@map("categories")
 }
 

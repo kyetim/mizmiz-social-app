@@ -58,10 +58,12 @@ export const api = createApi({
     }),
     getCategories: builder.query<Category[], { type?: string; isActive?: boolean } | void>({
       query: (params) => ({ url: '/categories', method: 'get', params }),
+      keepUnusedDataFor: 600, // Cache for 10 minutes
       providesTags: ['Categories'],
     }),
     getTrendingCategories: builder.query<Category[], { limit?: number } | void>({
       query: (params) => ({ url: '/categories/trending', method: 'get', params }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: ['Categories'],
     }),
     getPostCategories: builder.query<PostCategory[], string>({
@@ -363,6 +365,7 @@ export const api = createApi({
         method: 'get',
         params: { userId, ...params },
       }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: (result, error, { userId }) => [
         { type: 'Posts', id: `user-${userId}` },
       ],
@@ -381,6 +384,7 @@ export const api = createApi({
         method: 'get',
         params,
       }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
       providesTags: ['Users'],
     }),
     getUserLikedPosts: builder.query<PostInterface[], { userId: string; limit?: number }>({
