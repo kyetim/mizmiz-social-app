@@ -115,7 +115,13 @@ export function ConversationList({
           <AnimatePresence>
             {filteredConversations.map((conversation) => {
               const isActive = selectedConversationId === conversation.id
-              const lastMessageText = conversation.lastMessage?.content || 'Henüz mesaj yok'
+              let lastMessageText = conversation.lastMessage?.content
+              if (!lastMessageText && conversation.lastMessage) {
+                if (conversation.lastMessage.type === 'IMAGE') lastMessageText = '📷 Fotoğraf'
+                else if (conversation.lastMessage.type === 'VIDEO') lastMessageText = '🎥 Video'
+                else if (conversation.lastMessage.type === 'FILE') lastMessageText = '📁 Dosya'
+              }
+              lastMessageText = lastMessageText || 'Henüz mesaj yok'
               const lastActivity = conversation.lastMessageAt
                 ? formatDistanceToNow(new Date(conversation.lastMessageAt), {
                   addSuffix: true,

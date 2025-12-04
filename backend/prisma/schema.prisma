@@ -503,11 +503,23 @@ model Conversation {
   @@map("conversations")
 }
 
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  FILE
+}
+
 model Message {
   id             String   @id @default(uuid()) @db.Uuid
   conversationId String   @db.Uuid
   senderId       String   @db.Uuid
-  content        String   @db.VarChar(2000)
+  content        String?  @db.VarChar(2000)
+  
+  // Media support
+  type           MessageType @default(TEXT)
+  mediaUrl       String?
+  mediaType      String?  // MIME type
   
   // Read status
   isRead         Boolean  @default(false)

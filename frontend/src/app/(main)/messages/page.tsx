@@ -102,13 +102,20 @@ export default function MessagesPage() {
     setShowConversationList(false)
   }
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, media?: { url: string; type: 'IMAGE' | 'VIDEO' | 'FILE'; mimeType: string }) => {
     if (!selectedConversationId || !user) return
 
     try {
       await sendMessage({
         conversationId: selectedConversationId,
-        data: { content },
+        data: {
+          content,
+          ...(media && {
+            type: media.type,
+            mediaUrl: media.url,
+            mediaType: media.mimeType
+          })
+        },
       }).unwrap()
       refetchMessages()
       refetchConversations()

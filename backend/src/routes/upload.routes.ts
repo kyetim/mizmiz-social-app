@@ -17,5 +17,8 @@ router.post('/avatar', upload.single('avatar'), uploadController.uploadAvatar)
 // Upload cover photo
 router.post('/cover', upload.single('cover'), uploadController.uploadCover)
 
+// Upload message media
+router.post('/message-media', upload.single('file'), uploadController.uploadMessageMedia)
+
 export default router
 

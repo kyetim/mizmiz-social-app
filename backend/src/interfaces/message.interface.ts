@@ -1,12 +1,25 @@
+export enum MessageType {
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+  FILE = 'FILE'
+}
+
 export interface CreateMessageDTO {
-  content: string
+  content?: string
+  type?: MessageType
+  mediaUrl?: string
+  mediaType?: string
 }
 
 export interface MessageResponse {
   id: string
   conversationId: string
   senderId: string
-  content: string
+  content: string | null
+  type: MessageType
+  mediaUrl?: string | null
+  mediaType?: string | null
   isRead: boolean
   readAt: Date | null
   isDeleted: boolean

@@ -6,6 +6,7 @@ import {
   CreateConversationDTO,
   MessageResponse,
   ConversationResponse,
+  MessageType,
 } from '../interfaces/message.interface'
 
 export class MessageService {
@@ -117,27 +118,27 @@ export class MessageService {
     const isUser1 = conversation.user1Id === currentUserId
     const otherUserInConv = isUser1
       ? await prisma.user.findUnique({
-          where: { id: conversation.user2Id },
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            lastLoginAt: true,
-          },
-        })
+        where: { id: conversation.user2Id },
+        select: {
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          lastLoginAt: true,
+        },
+      })
       : await prisma.user.findUnique({
-          where: { id: conversation.user1Id },
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            lastLoginAt: true,
-          },
-        })
+        where: { id: conversation.user1Id },
+        select: {
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          lastLoginAt: true,
+        },
+      })
 
     if (!otherUserInConv) {
       throw new NotFoundError('Other user not found')
@@ -161,17 +162,20 @@ export class MessageService {
       otherUser: otherUserInConv,
       lastMessage: lastMessage
         ? {
-            id: lastMessage.id,
-            conversationId: lastMessage.conversationId,
-            senderId: lastMessage.senderId,
-            content: lastMessage.content,
-            isRead: lastMessage.isRead,
-            readAt: lastMessage.readAt,
-            isDeleted: lastMessage.isDeleted,
-            createdAt: lastMessage.createdAt,
-            updatedAt: lastMessage.updatedAt,
-            sender: lastMessage.sender,
-          }
+          id: lastMessage.id,
+          conversationId: lastMessage.conversationId,
+          senderId: lastMessage.senderId,
+          content: lastMessage.content,
+          isRead: lastMessage.isRead,
+          readAt: lastMessage.readAt,
+          isDeleted: lastMessage.isDeleted,
+          createdAt: lastMessage.createdAt,
+          updatedAt: lastMessage.updatedAt,
+          sender: lastMessage.sender,
+          type: lastMessage.type as MessageType,
+          mediaUrl: lastMessage.mediaUrl,
+          mediaType: lastMessage.mediaType,
+        }
         : null,
       unreadCount,
     }
@@ -200,7 +204,7 @@ export class MessageService {
           },
         },
       },
-      orderBy: { lastMessageAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
     })
 
     // Get other user info for each conversation
@@ -243,17 +247,20 @@ export class MessageService {
           otherUser,
           lastMessage: lastMessage
             ? {
-                id: lastMessage.id,
-                conversationId: lastMessage.conversationId,
-                senderId: lastMessage.senderId,
-                content: lastMessage.content,
-                isRead: lastMessage.isRead,
-                readAt: lastMessage.readAt,
-                isDeleted: lastMessage.isDeleted,
-                createdAt: lastMessage.createdAt,
-                updatedAt: lastMessage.updatedAt,
-                sender: lastMessage.sender,
-              }
+              id: lastMessage.id,
+              conversationId: lastMessage.conversationId,
+              senderId: lastMessage.senderId,
+              content: lastMessage.content,
+              isRead: lastMessage.isRead,
+              readAt: lastMessage.readAt,
+              isDeleted: lastMessage.isDeleted,
+              createdAt: lastMessage.createdAt,
+              updatedAt: lastMessage.updatedAt,
+              sender: lastMessage.sender,
+              type: lastMessage.type as MessageType,
+              mediaUrl: lastMessage.mediaUrl,
+              mediaType: lastMessage.mediaType,
+            }
             : null,
           unreadCount,
         }
@@ -335,17 +342,20 @@ export class MessageService {
       otherUser,
       lastMessage: lastMessage
         ? {
-            id: lastMessage.id,
-            conversationId: lastMessage.conversationId,
-            senderId: lastMessage.senderId,
-            content: lastMessage.content,
-            isRead: lastMessage.isRead,
-            readAt: lastMessage.readAt,
-            isDeleted: lastMessage.isDeleted,
-            createdAt: lastMessage.createdAt,
-            updatedAt: lastMessage.updatedAt,
-            sender: lastMessage.sender,
-          }
+          id: lastMessage.id,
+          conversationId: lastMessage.conversationId,
+          senderId: lastMessage.senderId,
+          content: lastMessage.content,
+          isRead: lastMessage.isRead,
+          readAt: lastMessage.readAt,
+          isDeleted: lastMessage.isDeleted,
+          createdAt: lastMessage.createdAt,
+          updatedAt: lastMessage.updatedAt,
+          sender: lastMessage.sender,
+          type: lastMessage.type as MessageType,
+          mediaUrl: lastMessage.mediaUrl,
+          mediaType: lastMessage.mediaType,
+        }
         : null,
       unreadCount,
     }
@@ -403,6 +413,9 @@ export class MessageService {
       createdAt: msg.createdAt,
       updatedAt: msg.updatedAt,
       sender: msg.sender,
+      type: msg.type as MessageType,
+      mediaUrl: msg.mediaUrl,
+      mediaType: msg.mediaType,
     }))
   }
 
@@ -412,13 +425,13 @@ export class MessageService {
     conversationId: string,
     data: CreateMessageDTO
   ): Promise<MessageResponse> {
-    const { content } = data
+    const { content, type, mediaUrl, mediaType } = data
 
-    if (!content || content.trim().length === 0) {
-      throw new ValidationError('Message content cannot be empty')
+    if ((!content || content.trim().length === 0) && !mediaUrl) {
+      throw new ValidationError('Message must have content or media')
     }
 
-    if (content.length > 2000) {
+    if (content && content.length > 2000) {
       throw new ValidationError('Message content cannot exceed 2000 characters')
     }
 
@@ -448,7 +461,10 @@ export class MessageService {
       data: {
         conversationId,
         senderId: currentUserId,
-        content: content.trim(),
+        content: content ? content.trim() : null,
+        type: type || 'TEXT',
+        mediaUrl,
+        mediaType,
       },
       include: {
         sender: {
@@ -488,6 +504,9 @@ export class MessageService {
       conversationId: message.conversationId,
       senderId: message.senderId,
       content: message.content,
+      type: message.type as MessageType,
+      mediaUrl: message.mediaUrl,
+      mediaType: message.mediaType,
       isRead: message.isRead,
       readAt: message.readAt,
       isDeleted: message.isDeleted,

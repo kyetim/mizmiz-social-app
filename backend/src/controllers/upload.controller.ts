@@ -30,7 +30,7 @@ export const uploadController = {
 
         try {
             const result = await uploadImage(req.file, 'mizmiz/posts')
-            
+
             // Cleanup local file
             cleanupFile(req.file.path)
 
@@ -70,7 +70,7 @@ export const uploadController = {
 
         try {
             const result = await uploadAvatar(req.file)
-            
+
             // Cleanup local file
             cleanupFile(req.file.path)
 
@@ -108,7 +108,7 @@ export const uploadController = {
 
         try {
             const result = await uploadCover(req.file)
-            
+
             // Cleanup local file
             cleanupFile(req.file.path)
 
@@ -117,6 +117,52 @@ export const uploadController = {
                 data: {
                     url: result.url,
                     publicId: result.publicId
+                }
+            })
+        } catch (error) {
+            cleanupFile(req.file.path)
+            throw error
+        }
+    }),
+
+    // Upload message media
+    uploadMessageMedia: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        if (!req.file) {
+            res.status(400).json({
+                success: false,
+                error: { message: 'No file uploaded' }
+            })
+            return
+        }
+
+        if (!isCloudinaryConfigured()) {
+            cleanupFile(req.file.path)
+            res.status(500).json({
+                success: false,
+                error: { message: 'Upload service not configured' }
+            })
+            return
+        }
+
+        try {
+            // Determine folder based on file type (image or video/file)
+            const isImage = req.file.mimetype.startsWith('image/')
+            const folder = isImage ? 'mizmiz/messages/images' : 'mizmiz/messages/files'
+
+            const result = await uploadImage(req.file, folder)
+
+            // Cleanup local file
+            cleanupFile(req.file.path)
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    url: result.url,
+                    publicId: result.publicId,
+                    width: result.width,
+                    height: result.height,
+                    format: result.format,
+                    resourceType: result.resourceType
                 }
             })
         } catch (error) {

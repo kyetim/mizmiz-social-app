@@ -55,5 +55,21 @@ export const uploadApi = {
 
         return response.data.data || response.data
     },
+
+    /**
+     * Upload message media
+     */
+    async uploadMessageMedia(file: File): Promise<UploadResponse> {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await apiClient.post('/upload/message-media', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+        return response.data.data || response.data
+    },
 }
 

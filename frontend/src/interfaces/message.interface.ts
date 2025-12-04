@@ -15,6 +15,9 @@ export interface MessageInterface {
     lastName: string | null
     avatarUrl: string | null
   }
+  type?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE'
+  mediaUrl?: string | null
+  mediaType?: string | null
 }
 
 export interface ConversationInterface {
@@ -42,7 +45,10 @@ export interface ConversationInterface {
 }
 
 export interface CreateMessageDto {
-  content: string
+  content?: string
+  type?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE'
+  mediaUrl?: string
+  mediaType?: string
 }
 
 export interface CreateConversationDto {

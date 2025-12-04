@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Phone, Search, User, Video } from 'lucide-react'
 import { ConversationInterface, MessageInterface } from '@/interfaces/message.interface'
@@ -11,12 +11,15 @@ import { tr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
+import { uploadApi } from '@/lib/api/upload'
+import { toast } from 'react-hot-toast'
+
 interface ConversationViewProps {
   conversation: ConversationInterface
   messages: MessageInterface[]
   currentUserId: string
   isLoading?: boolean
-  onSendMessage: (content: string) => void
+  onSendMessage: (content: string, media?: { url: string; type: 'IMAGE' | 'VIDEO' | 'FILE'; mimeType: string }) => void
   onBack?: () => void
   isSending?: boolean
 }
@@ -32,6 +35,7 @@ export function ConversationView({
 }: ConversationViewProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const isUserNearBottom = useRef(true)
 
@@ -53,6 +57,33 @@ export function ConversationView({
   const isOnline = conversation.otherUser.lastLoginAt
     ? new Date(conversation.otherUser.lastLoginAt).getTime() > Date.now() - 5 * 60 * 1000
     : false
+
+  const handleSend = async (content: string, file?: File) => {
+    if (!file) {
+      onSendMessage(content)
+      return
+    }
+
+    try {
+      setIsUploading(true)
+      const response = await uploadApi.uploadMessageMedia(file)
+
+      let type: 'IMAGE' | 'VIDEO' | 'FILE' = 'FILE'
+      if (file.type.startsWith('image/')) type = 'IMAGE'
+      else if (file.type.startsWith('video/')) type = 'VIDEO'
+
+      onSendMessage(content, {
+        url: response.url,
+        type,
+        mimeType: file.type
+      })
+    } catch (error) {
+      console.error('Failed to upload media:', error)
+      toast.error('Dosya yüklenirken bir hata oluştu')
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -185,8 +216,8 @@ export function ConversationView({
 
         <div className="flex-shrink-0">
           <MessageInput
-            onSend={onSendMessage}
-            disabled={isSending}
+            onSend={handleSend}
+            disabled={isSending || isUploading}
             placeholder="Neon ağında bir mesaj bırak..."
           />
         </div>

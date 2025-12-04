@@ -55,6 +55,33 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
               : 'bg-white text-slate-900 border-black/5 shadow-[0_20px_60px_rgba(15,23,42,0.15)] dark:bg-white/10 dark:text-white/90 dark:border-white/10 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]'
           )}
         >
+          {message.mediaUrl && (
+            <div className="mb-2 rounded-xl overflow-hidden">
+              {message.type === 'IMAGE' ? (
+                <img
+                  src={message.mediaUrl}
+                  alt="Media"
+                  className="max-w-full h-auto max-h-[300px] object-cover"
+                  loading="lazy"
+                />
+              ) : message.type === 'VIDEO' ? (
+                <video
+                  src={message.mediaUrl}
+                  controls
+                  className="max-w-full h-auto max-h-[300px]"
+                />
+              ) : (
+                <a
+                  href={message.mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-3 bg-black/10 dark:bg-white/10 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition-colors"
+                >
+                  <span className="underline">Dosyayı Görüntüle</span>
+                </a>
+              )}
+            </div>
+          )}
           <p className="whitespace-pre-wrap break-words">
             {message.content}
           </p>
