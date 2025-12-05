@@ -559,7 +559,7 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
-}
+
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.78);
