@@ -78,10 +78,17 @@ export const messageController = {
     const data: CreateMessageDTO = req.body
 
     // Validation
+    // Validation
     const errors: Record<string, string> = {}
-    if (!data.content || data.content.trim().length === 0) {
-      errors.content = 'Message content is required'
-    } else if (data.content.length > 2000) {
+
+    const hasContent = data.content && data.content.trim().length > 0
+    const hasMedia = !!data.mediaUrl
+
+    if (!hasContent && !hasMedia) {
+      errors.content = 'Message must have content or media'
+    }
+
+    if (hasContent && data.content!.length > 2000) {
       errors.content = 'Message content cannot exceed 2000 characters'
     }
 
