@@ -56,6 +56,30 @@ export const postController = {
     })
   }),
 
+  // Search posts
+  searchPosts: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const { query, limit, offset } = req.query
+
+    if (!query) {
+      res.status(400).json({
+        success: false,
+        error: { message: 'Search query is required' }
+      })
+      return
+    }
+
+    const posts = await postService.searchPosts(
+      query as string,
+      limit ? parseInt(limit as string) : undefined,
+      offset ? parseInt(offset as string) : undefined
+    )
+
+    res.json({
+      success: true,
+      data: posts
+    })
+  }),
+
   // Get a single post
   getPost: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { postId } = req.params

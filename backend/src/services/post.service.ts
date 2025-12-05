@@ -68,6 +68,58 @@ export const postService = {
     return post as unknown as PostResponse
   },
 
+  // Search posts
+  async searchPosts(query: string, limit: number = 20, offset: number = 0): Promise<PostResponse[]> {
+    const posts = await prisma.post.findMany({
+      where: {
+        content: {
+          contains: query,
+          mode: 'insensitive'
+        },
+        isDeleted: false
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            isVerified: true
+          }
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true
+          }
+        },
+        postCategories: {
+          include: {
+            category: true
+          }
+        },
+        postVibes: {
+          include: {
+            vibe: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit,
+      skip: offset
+    })
+
+    return posts.map(post => ({
+      ...post,
+      likesCount: post._count.likes,
+      commentsCount: post._count.comments
+    })) as unknown as PostResponse[]
+  },
+
   // Get all posts with filters
   async getPosts(filters: PostFilters, currentUserId?: string): Promise<PostResponse[]> {
     const { userId, following, limit = 20, cursor, categoryId, vibeId } = filters

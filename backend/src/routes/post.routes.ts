@@ -8,6 +8,7 @@ const router = Router()
 // Post routes
 router.post('/', authenticate, postController.createPost)
 router.get('/', optionalAuth, postController.getPosts) // Public route, but returns more data if authenticated
+router.get('/search', optionalAuth, postController.searchPosts)
 router.get('/:postId', optionalAuth, postController.getPost)
 router.put('/:postId', authenticate, postController.updatePost)
 router.delete('/:postId', authenticate, postController.deletePost)

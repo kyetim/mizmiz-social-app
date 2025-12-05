@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, TrendingUp } from 'lucide-react'
@@ -10,6 +12,17 @@ interface MobileSearchSheetProps {
 }
 
 export function MobileSearchSheet({ isOpen, onClose }: MobileSearchSheetProps) {
+    const router = useRouter()
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (searchQuery.trim()) {
+            router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`)
+            onClose()
+        }
+    }
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -37,14 +50,16 @@ export function MobileSearchSheet({ isOpen, onClose }: MobileSearchSheetProps) {
 
                             {/* Search Box */}
                             <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-3 mb-4">
-                                <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-700 rounded-xl">
+                                <form onSubmit={handleSearch} className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-700 rounded-xl">
                                     <Search className="w-4 h-4 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="MIZMIZ'de Ara..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
                                         className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400"
                                     />
-                                </div>
+                                </form>
                             </div>
 
                             {/* Trending Topics */}

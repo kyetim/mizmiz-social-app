@@ -60,7 +60,7 @@ export const postsApi = {
 
   // Get explore/all posts (not filtered by following)
   async getExplorePosts(params?: { limit?: number; cursor?: string }): Promise<PostInterface[]> {
-    const response = await apiClient.get('/posts', { 
+    const response = await apiClient.get('/posts', {
       params: {
         ...params,
         following: false
@@ -71,10 +71,23 @@ export const postsApi = {
 
   // Get timeline/feed posts (filtered by following)
   async getFeedPosts(params?: { limit?: number; cursor?: string }): Promise<PostInterface[]> {
-    const response = await apiClient.get('/posts', { 
+    const response = await apiClient.get('/posts', {
       params: {
         ...params,
         following: true
+      }
+    })
+    return response.data.data
+  },
+
+
+  // Search posts
+  async searchPosts(query: string, limit: number = 20, offset: number = 0): Promise<PostInterface[]> {
+    const response = await apiClient.get('/posts/search', {
+      params: {
+        query,
+        limit,
+        offset
       }
     })
     return response.data.data

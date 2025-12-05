@@ -184,6 +184,24 @@ export const api = createApi({
           ]
           : [{ type: 'Posts', id: 'LIST' }],
     }),
+    searchPosts: builder.query<
+      PostInterface[],
+      { query: string; limit?: number; offset?: number }
+    >({
+      query: (params) => ({
+        url: '/posts/search',
+        method: 'get',
+        params,
+      }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
+      providesTags: (result) =>
+        result
+          ? [
+            ...result.map(({ id }) => ({ type: 'Posts' as const, id })),
+            { type: 'Posts', id: 'LIST' },
+          ]
+          : [{ type: 'Posts', id: 'LIST' }],
+    }),
     getPost: builder.query<PostInterface, string>({
       query: (postId) => ({ url: `/posts/${postId}`, method: 'get' }),
       keepUnusedDataFor: 300, // Cache for 5 minutes
@@ -555,6 +573,7 @@ export const {
   useVoteOnVibeMutation,
   useGetFeedPostsQuery,
   useGetExplorePostsQuery,
+  useSearchPostsQuery,
   useGetPostQuery,
   useCreatePostMutation,
   useUpdatePostMutation,

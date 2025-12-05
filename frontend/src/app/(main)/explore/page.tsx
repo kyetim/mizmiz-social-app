@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAppSelector } from '@/store/hooks'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { useGetExplorePostsQuery, useGetTrendingCategoriesQuery } from '@/store/api/api'
+import { searchAll, setQuery, clearSearch } from '@/store/slices/search-slice'
 import { PostCard } from '@/components/ui/post-card'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 import {
@@ -20,7 +21,11 @@ import { toast } from 'react-hot-toast'
 
 export default function ExplorePage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
+    const { posts: searchPosts, users: searchUsers, isLoading: isSearchingLoading, query: globalQuery } = useAppSelector((state) => state.search)
+
     const {
         data: explorePosts = [],
         isLoading: isLoadingPosts,
@@ -31,46 +36,54 @@ export default function ExplorePage() {
         isFetching: isFetchingCategories,
         refetch: refetchTrendingCategories,
     } = useGetTrendingCategoriesQuery({ limit: 10 })
+
     const [activeTab, setActiveTab] = useState<'trending' | 'categories' | 'popular'>('trending')
-    const [searchQuery, setSearchQuery] = useState('')
-    const isLoading = isLoadingPosts || isFetchingCategories
+    const [localSearchQuery, setLocalSearchQuery] = useState('')
 
+    const isLoading = isLoadingPosts || isFetchingCategories || isSearchingLoading
 
+    // Handle URL search params
+    useEffect(() => {
+        const query = searchParams.get('q')
+        if (query && query !== globalQuery) {
+            setLocalSearchQuery(query)
+            dispatch(searchAll(query))
+        } else if (!query && globalQuery) {
+            dispatch(clearSearch())
+            setLocalSearchQuery('')
+        }
+    }, [searchParams, dispatch, globalQuery])
 
-    const normalizedQuery = searchQuery.trim().toLowerCase()
-    const isSearching = normalizedQuery.length > 0
+    const isSearching = localSearchQuery.length > 0
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (localSearchQuery.trim()) {
+            router.push(`/explore?q=${encodeURIComponent(localSearchQuery.trim())}`)
+        } else {
+            router.push('/explore')
+        }
+    }
 
     const filteredPosts = useMemo(() => {
         if (!isSearching) {
             return explorePosts
         }
-
-        return explorePosts.filter((post) => {
-            const content = post.content.toLowerCase()
-            const username = post.user?.username?.toLowerCase() ?? ''
-            const firstName = post.user?.firstName?.toLowerCase() ?? ''
-            const lastName = post.user?.lastName?.toLowerCase() ?? ''
-
-            return (
-                content.includes(normalizedQuery) ||
-                username.includes(normalizedQuery) ||
-                firstName.includes(normalizedQuery) ||
-                lastName.includes(normalizedQuery)
-            )
-        })
-    }, [isSearching, normalizedQuery, explorePosts])
+        return searchPosts
+    }, [isSearching, explorePosts, searchPosts])
 
     const filteredCategories = useMemo(() => {
         if (!isSearching) {
             return trendingCategories
         }
-
+        // For categories, we still filter locally for now as backend search is mainly for posts/users
+        // Or we could implement category search later
         return trendingCategories.filter((category) => {
             const name = category.name.toLowerCase()
             const description = category.description?.toLowerCase() ?? ''
-            return name.includes(normalizedQuery) || description.includes(normalizedQuery)
+            return name.includes(localSearchQuery.toLowerCase()) || description.includes(localSearchQuery.toLowerCase())
         })
-    }, [isSearching, normalizedQuery, trendingCategories])
+    }, [isSearching, localSearchQuery, trendingCategories])
 
     function handlePostUpdated() {
         // RTK Query will automatically invalidate and refetch
@@ -104,27 +117,32 @@ export default function ExplorePage() {
 
                     {/* Search Bar */}
                     <GlassmorphismCard hover={false} tone="emerald">
-                        <div className="relative">
+                        <form onSubmit={handleSearch} className="relative w-full">
                             <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Gönderi, kategori veya kullanıcı ara..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                value={localSearchQuery}
+                                onChange={(e) => setLocalSearchQuery(e.target.value)}
                                 className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 text-sm sm:text-base text-foreground placeholder-muted-foreground transition-all backdrop-blur-sm"
                             />
-                            {searchQuery && (
+                            {localSearchQuery && (
                                 <button
-                                    onClick={() => setSearchQuery('')}
+                                    type="button"
+                                    onClick={() => {
+                                        setLocalSearchQuery('')
+                                        dispatch(clearSearch())
+                                        router.push('/explore')
+                                    }}
                                     className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
                                 >
                                     <X className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             )}
-                        </div>
-                        {searchQuery && isSearching && (
+                        </form>
+                        {localSearchQuery && isSearching && (
                             <p className="text-center mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                &quot;{searchQuery}&quot; için {filteredPosts.length} gönderi, {filteredCategories.length} kategori bulundu
+                                &quot;{localSearchQuery}&quot; için {filteredPosts.length} gönderi, {filteredCategories.length} kategori bulundu
                             </p>
                         )}
                     </GlassmorphismCard>
@@ -201,17 +219,21 @@ export default function ExplorePage() {
                                 ) : (
                                     <GlassmorphismCard>
                                         <div className="text-center py-12">
-                                            {searchQuery ? (
+                                            {localSearchQuery ? (
                                                 <>
                                                     <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                                                         Arama sonucu bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        &quot;{searchQuery}&quot; için gönderi bulunamadı
+                                                        &quot;{localSearchQuery}&quot; için gönderi bulunamadı
                                                     </p>
                                                     <button
-                                                        onClick={() => setSearchQuery('')}
+                                                        onClick={() => {
+                                                            setLocalSearchQuery('')
+                                                            dispatch(clearSearch())
+                                                            router.push('/explore')
+                                                        }}
                                                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                                                     >
                                                         Aramayı Temizle
@@ -245,7 +267,7 @@ export default function ExplorePage() {
                                 <GlassmorphismCard>
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                         <Hash className="w-5 h-5 text-green-600" />
-                                        {searchQuery ? `"${searchQuery}" için Kategoriler` : 'Tüm Kategoriler'}
+                                        {localSearchQuery ? `"${localSearchQuery}" için Kategoriler` : 'Tüm Kategoriler'}
                                     </h3>
                                     {isLoading ? (
                                         <div className="flex items-center justify-center py-12">
@@ -284,17 +306,21 @@ export default function ExplorePage() {
                                         </div>
                                     ) : (
                                         <div className="text-center py-12">
-                                            {searchQuery ? (
+                                            {localSearchQuery ? (
                                                 <>
                                                     <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                                                         Kategori bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        &quot;{searchQuery}&quot; ile eşleşen kategori yok
+                                                        &quot;{localSearchQuery}&quot; ile eşleşen kategori yok
                                                     </p>
                                                     <button
-                                                        onClick={() => setSearchQuery('')}
+                                                        onClick={() => {
+                                                            setLocalSearchQuery('')
+                                                            dispatch(clearSearch())
+                                                            router.push('/explore')
+                                                        }}
                                                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                                                     >
                                                         Aramayı Temizle
@@ -334,17 +360,21 @@ export default function ExplorePage() {
                                 ) : (
                                     <GlassmorphismCard>
                                         <div className="text-center py-12">
-                                            {searchQuery ? (
+                                            {localSearchQuery ? (
                                                 <>
                                                     <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                                                         Arama sonucu bulunamadı
                                                     </h3>
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        &quot;{searchQuery}&quot; için popüler gönderi bulunamadı
+                                                        &quot;{localSearchQuery}&quot; için popüler gönderi bulunamadı
                                                     </p>
                                                     <button
-                                                        onClick={() => setSearchQuery('')}
+                                                        onClick={() => {
+                                                            setLocalSearchQuery('')
+                                                            dispatch(clearSearch())
+                                                            router.push('/explore')
+                                                        }}
                                                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                                                     >
                                                         Aramayı Temizle

@@ -1,23 +1,37 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Search, TrendingUp } from 'lucide-react'
 import { GlassmorphismCard } from '@/components/ui/glassmorphism-card'
 
 export function RightSidebar() {
+    const router = useRouter()
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (searchQuery.trim()) {
+            router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`)
+        }
+    }
+
     return (
         <aside className="hidden xl:block sticky top-4 h-fit space-y-4">
             {/* Search Box */}
             <GlassmorphismCard hover={false} tone="cyan" className="p-3">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-3 py-2 dark:bg-white/5">
+                <form onSubmit={handleSearch} className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-3 py-2 dark:bg-white/5">
                     <Search className="w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="MIZMIZ'de Ara..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
                     />
-                </div>
+                </form>
             </GlassmorphismCard>
 
             {/* Trending Topics */}

@@ -39,14 +39,8 @@ export const searchPosts = createAsyncThunk(
     'search/searchPosts',
     async (query: string, { rejectWithValue }) => {
         try {
-            // For now, we'll use explore posts with filters
-            // TODO: Implement proper post search on backend
-            const posts = await postsApi.getExplorePosts({ limit: 20 })
-            // Client-side filtering as fallback
-            const filtered = posts.filter(post => 
-                post.content.toLowerCase().includes(query.toLowerCase())
-            )
-            return filtered
+            const posts = await postsApi.searchPosts(query, 20)
+            return posts
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Failed to search posts')
         }
