@@ -168,7 +168,7 @@ export default function MessagesPage() {
             className={cn(
               'transition-all duration-300 h-full',
               showConversationList ? 'flex' : 'hidden',
-              'lg:flex w-full lg:w-[280px] xl:w-[320px]'
+              'lg:flex w-full lg:w-72 xl:w-80 flex-shrink-0'
             )}
           >
             <ConversationList
