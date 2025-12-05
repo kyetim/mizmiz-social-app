@@ -161,7 +161,7 @@ export function ConversationList({
                     />
                   )}
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-400 to-blue-600">
+                    <div className="w-14 h-14 lg:w-12 lg:h-12 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-400 to-blue-600">
                       {conversation.otherUser.avatarUrl ? (
                         <img src={conversation.otherUser.avatarUrl} alt={conversation.otherUser.username} className="w-full h-full object-cover" />
                       ) : (
@@ -184,14 +184,14 @@ export function ConversationList({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold truncate">
+                      <h3 className="font-semibold lg:text-sm truncate">
                         {conversation.otherUser.firstName && conversation.otherUser.lastName
                           ? `${conversation.otherUser.firstName} ${conversation.otherUser.lastName}`
                           : `@${conversation.otherUser.username}`}
                       </h3>
-                      <span className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-white/50">{lastActivity}</span>
+                      <span className="text-xs lg:text-[10px] uppercase tracking-widest text-slate-500 dark:text-white/50">{lastActivity}</span>
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-white/60 truncate">{lastMessageText}</p>
+                    <p className="text-sm lg:text-xs text-slate-500 dark:text-white/60 truncate">{lastMessageText}</p>
                   </div>
                   {conversation.unreadCount > 0 && (
                     <span className="ml-auto px-3 py-1 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 text-[11px] font-semibold">
