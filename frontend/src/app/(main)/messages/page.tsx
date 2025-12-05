@@ -163,7 +163,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-[18rem_1fr] xl:grid-cols-[20rem_1fr] gap-4 lg:gap-8 flex-1 min-h-0">
+        <div className="flex flex-col lg:grid messages-grid gap-4 lg:gap-8 flex-1 min-h-0">
           <div
             className={cn(
               'transition-all duration-300 h-full',
