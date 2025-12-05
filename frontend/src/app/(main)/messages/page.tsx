@@ -163,7 +163,21 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:grid messages-grid gap-4 lg:gap-8 flex-1 min-h-0">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+          @media (min-width: 1024px) {
+            .messages-layout-grid {
+              display: grid;
+              grid-template-columns: 288px 1fr;
+            }
+          }
+          @media (min-width: 1280px) {
+            .messages-layout-grid {
+              grid-template-columns: 320px 1fr;
+            }
+          }
+        `}} />
+        <div className="flex flex-col messages-layout-grid gap-4 lg:gap-8 flex-1 min-h-0">
           <div
             className={cn(
               'transition-all duration-300 h-full',
