@@ -164,12 +164,12 @@ export default function MessagesPage() {
         </div>
 
 
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 flex-1 min-h-0 w-full relative">
+        <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 w-full relative">
           <div
             className={cn(
-              'h-full z-20',
+              'h-full z-20 relative',
               showConversationList ? 'flex' : 'hidden',
-              'lg:flex w-full lg:w-72 xl:w-80 flex-shrink-0'
+              'lg:flex w-full lg:w-64 xl:w-72 flex-shrink-0'
             )}
           >
             <ConversationList
