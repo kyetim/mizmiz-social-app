@@ -195,8 +195,9 @@ export function ConversationView({
               data={messages}
               initialTopMostItemIndex={messages.length - 1}
               followOutput="auto"
-              style={{ height: '100%' }}
-              className="scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20"
+              style={{ height: '100%', overflowY: 'auto' }}
+              className="scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20 overscroll-y-contain focus:outline-none"
+              tabIndex={0}
               itemContent={(index, message) => (
                 <div className="py-2 px-4 lg:px-10 first:pt-6 last:pb-6">
                   <MessageBubble key={message.id} message={message} isOwn={message.senderId === currentUserId} />
