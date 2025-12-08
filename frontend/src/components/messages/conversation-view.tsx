@@ -182,7 +182,7 @@ export function ConversationView({
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 px-4 lg:px-10 py-6">
+        <div className="flex-1 min-h-0">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-slate-600 dark:text-white/70">
               <User className="w-14 h-14 mb-4" />
@@ -195,9 +195,10 @@ export function ConversationView({
               data={messages}
               initialTopMostItemIndex={messages.length - 1}
               followOutput="auto"
-              className="h-full no-scrollbar"
+              style={{ height: '100%' }}
+              className="scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20"
               itemContent={(index, message) => (
-                <div className="py-2">
+                <div className="py-2 px-4 lg:px-10 first:pt-6 last:pb-6">
                   <MessageBubble key={message.id} message={message} isOwn={message.senderId === currentUserId} />
                 </div>
               )}
