@@ -182,7 +182,7 @@ export function ConversationView({
           </div>
         </div>
 
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 h-full">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-slate-600 dark:text-white/70">
               <User className="w-14 h-14 mb-4" />
@@ -194,10 +194,11 @@ export function ConversationView({
               ref={virtuosoRef}
               data={messages}
               initialTopMostItemIndex={messages.length - 1}
+              alignToBottom
               followOutput="auto"
-              style={{ height: '100%', overflowY: 'auto' }}
+              style={{ height: '100%' }}
               className="scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20 overscroll-y-contain focus:outline-none"
-              tabIndex={0}
+              tabIndex={-1}
               itemContent={(index, message) => (
                 <div className="py-2 px-4 lg:px-10 first:pt-6 last:pb-6">
                   <MessageBubble key={message.id} message={message} isOwn={message.senderId === currentUserId} />
