@@ -21,8 +21,8 @@ export const metadata: Metadata = {
   keywords: ["sosyal medya", "içerik paylaşımı", "topluluk", "blog"],
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
   viewport: {
     width: "device-width",

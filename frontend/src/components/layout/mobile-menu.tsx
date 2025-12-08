@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, TrendingUp, Users, Bell, User, LogOut, X } from 'lucide-react'
@@ -47,8 +48,14 @@ export function MobileMenu({ isOpen, onClose, user, unreadCount, onLogout }: Mob
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <Link href="/feed" className="flex items-center gap-3" onClick={onClose}>
-                                    <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md">
-                                        <span className="text-white font-bold text-lg">M</span>
+                                    <div className="relative w-10 h-10">
+                                        <Image
+                                            src="/logo.png"
+                                            alt="MIZMIZ Logo"
+                                            fill
+                                            className="object-contain"
+                                            sizes="40px"
+                                        />
                                     </div>
                                     <span className="text-2xl font-bold text-gray-900 dark:text-white">MIZMIZ</span>
                                 </Link>

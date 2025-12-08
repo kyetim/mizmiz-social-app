@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Home, TrendingUp, Users, Bell, User, LogOut, Plus, MessageCircle } from 'lucide-react'
@@ -39,9 +40,15 @@ export function Sidebar({ user, unreadCount, onLogout, onCreatePost }: SidebarPr
                 <motion.div
                     whileHover={{ rotate: 3 }}
                     transition={{ duration: 0.15 }}
-                    className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
+                    className="relative w-12 h-12 flex-shrink-0"
                 >
-                    <span className="text-white font-bold text-lg">M</span>
+                    <Image
+                        src="/logo.png"
+                        alt="MIZMIZ Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
                 </motion.div>
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">MIZMIZ</span>
             </Link>

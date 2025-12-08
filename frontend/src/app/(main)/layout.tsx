@@ -8,6 +8,7 @@ import { CreatePostModal } from '@/components/post/create-post-modal'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Menu, Search } from 'lucide-react'
+import Image from 'next/image'
 import { useGetUnreadNotificationsCountQuery } from '@/store/api/api'
 import { AmbientBackground } from '@/components/layout/ambient-background'
 import { Sidebar } from '@/components/layout/sidebar'
@@ -107,8 +108,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     </motion.button>
 
                     <Link href="/feed" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold">M</span>
+                        <div className="relative w-8 h-8">
+                            <Image
+                                src="/logo.png"
+                                alt="MIZMIZ"
+                                fill
+                                className="object-contain"
+                            />
                         </div>
                         <span className="text-lg font-bold text-gray-900 dark:text-white">MIZMIZ</span>
                     </Link>

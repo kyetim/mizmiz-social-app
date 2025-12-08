@@ -2,6 +2,7 @@
 
 import { ModernRegisterForm } from '@/components/auth/modern-register-form'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { AmbientBackground } from '@/components/layout/ambient-background'
 import { motion } from 'framer-motion'
@@ -131,11 +132,17 @@ export default function RegisterPage() {
             <motion.div
               whileHover={{ scale: 1.1, rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/40 ring-2 ring-emerald-500/20"
+              className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
             >
-              <span className="text-white font-bold text-lg sm:text-xl">M</span>
+              <Image
+                src="/logo.png"
+                alt="MIZMIZ Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </motion.div>
-            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-foreground transition-colors">
+            <span className="ml-3 sm:ml-4 text-2xl sm:text-3xl font-bold text-foreground transition-colors">
               MIZMIZ
             </span>
           </Link>
