@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Phone, Search, User, Video } from 'lucide-react'
 import Image from 'next/image'
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { ConversationInterface, MessageInterface } from '@/interfaces/message.interface'
 import { MessageBubble } from './message-bubble'
 import { MessageInput } from './message-input'
@@ -34,26 +35,15 @@ export function ConversationView({
   onBack,
   isSending = false,
 }: ConversationViewProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const virtuosoRef = useRef<VirtuosoHandle>(null)
   const [isUploading, setIsUploading] = useState(false)
 
-  const isUserNearBottom = useRef(true)
-
-  // Track scroll position to determine if we should auto-scroll
-  const handleScroll = () => {
-    if (!containerRef.current) return
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
-    isUserNearBottom.current = distanceFromBottom < 100
-  }
-
-  // Auto-scroll to bottom when new messages arrive, but only if user is near bottom or sending
+  // Auto-scroll to bottom when sending a new message
   useEffect(() => {
-    if (isUserNearBottom.current || isSending) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (isSending) {
+      virtuosoRef.current?.scrollToIndex({ index: messages.length - 1, behavior: 'smooth' })
     }
-  }, [messages, isSending])
+  }, [isSending, messages.length])
 
   const isOnline = conversation.otherUser.lastLoginAt
     ? new Date(conversation.otherUser.lastLoginAt).getTime() > Date.now() - 5 * 60 * 1000
@@ -122,17 +112,9 @@ export function ConversationView({
     )
   }
 
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return
-    if (!containerRef.current.contains(event.target as Node)) return
-    event.preventDefault()
-    containerRef.current.scrollTop += event.deltaY
-  }
-
   return (
     <div
       className="relative flex flex-col h-full min-h-0 rounded-[40px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur-3xl overflow-hidden shadow-[0_30px_80px_rgba(15,23,42,0.12)] dark:shadow-[0_40px_120px_rgba(0,0,0,0.55)] text-slate-900 dark:text-white"
-      onWheel={handleWheel}
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-32 -right-24 w-80 h-80 bg-cyan-200/30 dark:bg-cyan-500/20 blur-[160px]" />
@@ -140,7 +122,7 @@ export function ConversationView({
       </div>
 
       <div className="relative z-10 flex flex-col h-full">
-        <div className="px-4 lg:px-10 py-5 border-b border-black/5 dark:border-white/10 flex items-center gap-4">
+        <div className="px-4 lg:px-10 py-5 border-b border-black/5 dark:border-white/10 flex items-center gap-4 shrink-0">
           {onBack && (
             <motion.button
               onClick={onBack}
@@ -200,24 +182,26 @@ export function ConversationView({
           </div>
         </div>
 
-        <div
-          ref={containerRef}
-          onScroll={handleScroll}
-          className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 lg:px-10 py-6 space-y-4"
-        >
+        <div className="flex-1 min-h-0 px-4 lg:px-10 py-6">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center text-slate-600 dark:text-white/70">
+            <div className="flex flex-col items-center justify-center h-full text-center text-slate-600 dark:text-white/70">
               <User className="w-14 h-14 mb-4" />
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Henüz mesaj yok</h3>
               <p className="text-sm text-slate-500 dark:text-white/60">Neon hatlarını ilk sen ateşle.</p>
             </div>
           ) : (
-            <>
-              {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} isOwn={message.senderId === currentUserId} />
-              ))}
-              <div ref={messagesEndRef} />
-            </>
+            <Virtuoso
+              ref={virtuosoRef}
+              data={messages}
+              initialTopMostItemIndex={messages.length - 1}
+              followOutput="auto"
+              className="h-full no-scrollbar"
+              itemContent={(index, message) => (
+                <div className="py-2">
+                  <MessageBubble key={message.id} message={message} isOwn={message.senderId === currentUserId} />
+                </div>
+              )}
+            />
           )}
         </div>
 
