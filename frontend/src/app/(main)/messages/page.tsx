@@ -155,7 +155,7 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between mb-4 lg:mb-6 text-slate-900 dark:text-white">
           <div>
             <p className="text-[10px] lg:text-[11px] uppercase tracking-[0.4em] text-cyan-500/80 dark:text-cyan-300/70">MIZMIZ</p>
-            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı ✅</h1>
+            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı 🚀</h1>
           </div>
           <div className="hidden lg:flex items-center gap-3 text-sm text-slate-500 dark:text-white/60">
             <Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-300" />
@@ -164,12 +164,12 @@ export default function MessagesPage() {
         </div>
 
 
-        <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 w-full relative">
+        <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0 w-full">
           <div
             className={cn(
-              'h-full z-20 relative',
+              'h-full',
               showConversationList ? 'flex' : 'hidden',
-              'lg:flex w-full lg:w-64 xl:w-72 flex-shrink-0'
+              'lg:flex w-full lg:w-60 xl:w-64 flex-shrink-0'
             )}
           >
             <ConversationList
@@ -185,7 +185,7 @@ export default function MessagesPage() {
 
           <div
             className={cn(
-              'flex-1 min-h-0 h-full z-10',
+              'flex-1 min-h-0 h-full',
               showConversationList && !selectedConversation
                 ? 'hidden lg:flex'
                 : 'flex'
