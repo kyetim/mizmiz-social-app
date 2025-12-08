@@ -155,7 +155,7 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between mb-4 lg:mb-6 text-slate-900 dark:text-white">
           <div>
             <p className="text-[10px] lg:text-[11px] uppercase tracking-[0.4em] text-cyan-500/80 dark:text-cyan-300/70">MIZMIZ</p>
-            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı 🚀</h1>
+            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı 💎</h1>
           </div>
           <div className="hidden lg:flex items-center gap-3 text-sm text-slate-500 dark:text-white/60">
             <Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-300" />
@@ -163,13 +163,13 @@ export default function MessagesPage() {
           </div>
         </div>
 
-
-        <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0 w-full">
+        {/* CSS GRID LAYOUT - Strict columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 flex-1 min-h-0 w-full">
           <div
             className={cn(
-              'h-full',
-              showConversationList ? 'flex' : 'hidden',
-              'lg:flex w-full lg:w-60 xl:w-64 flex-shrink-0'
+              'h-full min-h-0 overflow-hidden',
+              showConversationList ? 'block' : 'hidden',
+              'lg:block'
             )}
           >
             <ConversationList
@@ -185,10 +185,10 @@ export default function MessagesPage() {
 
           <div
             className={cn(
-              'flex-1 min-h-0 h-full',
+              'h-full min-h-0 overflow-hidden',
               showConversationList && !selectedConversation
-                ? 'hidden lg:flex'
-                : 'flex'
+                ? 'hidden lg:block'
+                : 'block'
             )}
           >
             {selectedConversationId && selectedConversation ? (
@@ -202,7 +202,7 @@ export default function MessagesPage() {
                 isSending={isSending}
               />
             ) : (
-              <div className="flex flex-1 min-h-0 items-center justify-center rounded-[40px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur-2xl text-center text-slate-700 dark:text-white/70">
+              <div className="flex flex-1 h-full min-h-0 items-center justify-center rounded-[40px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-white/5 backdrop-blur-2xl text-center text-slate-700 dark:text-white/70">
                 <div className="space-y-4 max-w-sm px-6">
                   <MessageCircle className="w-16 h-16 mx-auto text-cyan-500 dark:text-cyan-400" />
                   <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">Bir konuşma seç</h3>
@@ -218,4 +218,3 @@ export default function MessagesPage() {
     </div>
   )
 }
-
