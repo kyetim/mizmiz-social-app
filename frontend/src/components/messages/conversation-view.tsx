@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Phone, Search, User, Video } from 'lucide-react'
+import Image from 'next/image'
 import { ConversationInterface, MessageInterface } from '@/interfaces/message.interface'
 import { MessageBubble } from './message-bubble'
 import { MessageInput } from './message-input'
@@ -151,9 +152,15 @@ export function ConversationView({
             </motion.button>
           )}
 
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-700 flex items-center justify-center overflow-hidden ring-2 ring-white/70 dark:ring-white/20 shadow-lg shadow-cyan-500/40">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-700 flex items-center justify-center overflow-hidden ring-2 ring-white/70 dark:ring-white/20 shadow-lg shadow-cyan-500/40 relative">
             {conversation.otherUser.avatarUrl ? (
-              <img src={conversation.otherUser.avatarUrl} alt={conversation.otherUser.username} className="w-full h-full object-cover" />
+              <Image
+                src={conversation.otherUser.avatarUrl}
+                alt={conversation.otherUser.username}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             ) : (
               <span className="text-white text-xl font-semibold">
                 {conversation.otherUser.username[0]?.toUpperCase()}

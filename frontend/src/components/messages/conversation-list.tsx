@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, Search } from 'lucide-react'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { ConversationInterface } from '@/interfaces/message.interface'
@@ -161,9 +162,15 @@ export function ConversationList({
                     />
                   )}
                   <div className="relative">
-                    <div className="w-14 h-14 lg:w-12 lg:h-12 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-400 to-blue-600">
+                    <div className="w-14 h-14 lg:w-12 lg:h-12 rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-400 to-blue-600 relative">
                       {conversation.otherUser.avatarUrl ? (
-                        <img src={conversation.otherUser.avatarUrl} alt={conversation.otherUser.username} className="w-full h-full object-cover" />
+                        <Image
+                          src={conversation.otherUser.avatarUrl}
+                          alt={conversation.otherUser.username}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 56px, 48px"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xl">
                           {conversation.otherUser.username[0]?.toUpperCase()}

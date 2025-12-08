@@ -14,6 +14,7 @@ import { CategoryVotingModal } from '@/components/post/category-voting-modal'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   useGetPostCategoriesQuery,
   useGetPostVibesQuery,
@@ -132,12 +133,14 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
               href={post.userId ? `/user/${post.userId}` : '#'}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-full flex items-center justify-center shadow-sm ring-2 ring-primary/20 overflow-hidden">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-light to-primary rounded-full flex items-center justify-center shadow-sm ring-2 ring-primary/20 overflow-hidden relative">
                 {post.user?.avatarUrl ? (
-                  <img
+                  <Image
                     src={post.user.avatarUrl}
                     alt={authorName}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="48px"
                   />
                 ) : (
                   <span className="text-white font-semibold text-base">
@@ -220,16 +223,18 @@ export function PostCard({ post, onPostUpdated }: PostCardProps) {
           {/* Image */}
           {post.imageUrl && (
             <div
-              className="mb-6 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
+              className="mb-6 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity relative w-full h-[400px]"
               onClick={(e) => {
                 e.stopPropagation()
                 setIsImageLightboxOpen(true)
               }}
             >
-              <img
+              <Image
                 src={post.imageUrl}
                 alt="Post"
-                className="w-full h-auto max-h-[400px] object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
           )}

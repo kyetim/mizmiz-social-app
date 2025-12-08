@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Check, CheckCheck } from 'lucide-react'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { MessageInterface } from '@/interfaces/message.interface'
@@ -31,12 +32,14 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       className={cn('flex gap-3 max-w-[90%] lg:max-w-[70%] xl:max-w-[60%]', isOwn ? 'ml-auto flex-row-reverse' : 'mr-auto')}
     >
       {!isOwn && (
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-lg shadow-cyan-500/40 ring-2 ring-white/10">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-lg shadow-cyan-500/40 ring-2 ring-white/10 relative">
           {message.sender.avatarUrl ? (
-            <img
+            <Image
               src={message.sender.avatarUrl}
               alt={message.sender.username}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="40px"
             />
           ) : (
             <span className="text-white text-xs font-semibold">
@@ -56,13 +59,14 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           )}
         >
           {message.mediaUrl && (
-            <div className="mb-2 rounded-xl overflow-hidden">
+            <div className="mb-2 rounded-xl overflow-hidden relative min-w-[200px]">
               {message.type === 'IMAGE' ? (
-                <img
+                <Image
                   src={message.mediaUrl}
                   alt="Media"
-                  className="max-w-full h-auto max-h-[300px] object-cover"
-                  loading="lazy"
+                  width={500}
+                  height={300}
+                  className="w-auto h-auto max-h-[300px] object-cover"
                 />
               ) : message.type === 'VIDEO' ? (
                 <video
