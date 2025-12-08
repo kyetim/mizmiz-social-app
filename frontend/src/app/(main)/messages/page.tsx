@@ -155,7 +155,7 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between mb-4 lg:mb-6 text-slate-900 dark:text-white">
           <div>
             <p className="text-[10px] lg:text-[11px] uppercase tracking-[0.4em] text-cyan-500/80 dark:text-cyan-300/70">MIZMIZ</p>
-            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı 💎</h1>
+            <h1 className="text-2xl lg:text-3xl font-semibold">Neon Mesaj Ağı</h1>
           </div>
           <div className="hidden lg:flex items-center gap-3 text-sm text-slate-500 dark:text-white/60">
             <Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-300" />
