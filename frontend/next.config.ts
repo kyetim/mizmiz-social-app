@@ -9,7 +9,18 @@ const withPWA = require('next-pwa')({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Other config options here
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default withPWA(nextConfig);

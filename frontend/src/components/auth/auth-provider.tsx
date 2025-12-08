@@ -87,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // This prevents logout during initial load on mobile and after successful login
         // CRITICAL: Never logout if user exists in state or localStorage
         if (currentUserError && 'status' in currentUserError && currentUserError.status === 401) {
-            const isPublicRoute = publicRoutes.includes(pathname)
+            const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/user/') || pathname.startsWith('/post/')
             const isAuthRoute = authRoutes.includes(pathname)
 
             // Check localStorage as well
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, [currentUserError, dispatch, pathname, user, isAuthenticated])
 
     useEffect(() => {
-        const isPublicRoute = publicRoutes.includes(pathname)
+        const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/user/') || pathname.startsWith('/post/')
         const isAuthRoute = authRoutes.includes(pathname)
 
         // Don't do any redirects if we're still loading or fetching
