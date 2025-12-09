@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma'
 import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors'
 import { logInfo } from '../utils/logger'
+import { socketService } from './socket.service'
 import {
   CreateMessageDTO,
   CreateConversationDTO,
@@ -499,7 +500,7 @@ export class MessageService {
       senderId: currentUserId,
     })
 
-    return {
+    const messageResponse = {
       id: message.id,
       conversationId: message.conversationId,
       senderId: message.senderId,
@@ -514,6 +515,11 @@ export class MessageService {
       updatedAt: message.updatedAt,
       sender: message.sender,
     }
+
+    // Emit socket event
+    socketService.emitToRoom(conversationId, 'new_message', messageResponse)
+
+    return messageResponse
   }
 
   // Mark messages as read
@@ -557,6 +563,12 @@ export class MessageService {
         ...(isUser1 ? { user1UnreadCount: 0 } : { user2UnreadCount: 0 }),
       },
     })
+
+    // Emit socket event
+    socketService.emitToRoom(conversationId, 'messages_read', {
+      conversationId,
+      readBy: currentUserId,
+    })
   }
 
   // Delete a message
@@ -581,6 +593,15 @@ export class MessageService {
         deletedAt: new Date(),
       },
     })
+
+    // Emit socket event
+    // Find conversationId first (optimization: could be passed or fetched)
+    if (message.conversationId) {
+        socketService.emitToRoom(message.conversationId, 'message_deleted', {
+            messageId,
+            conversationId: message.conversationId
+        })
+    }
 
     logInfo('Message deleted', {
       messageId,

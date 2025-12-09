@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express'
+import { createServer } from 'http'
 import cors from 'cors'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
@@ -12,13 +13,18 @@ import logger, { logInfo, logError } from './utils/logger'
 import { securityConfig } from './config/security.config'
 import fs from 'fs'
 import path from 'path'
+import { socketService } from './services/socket.service'
 
 // Load environment variables
 dotenv.config()
 
 // Initialize Express app
 const app: Application = express()
+const httpServer = createServer(app)
 const PORT = process.env.PORT || 5000
+
+// Initialize Socket.io
+socketService.initialize(httpServer)
 
 // Initialize Prisma Client
 export const prisma = new PrismaClient()
@@ -112,7 +118,7 @@ process.on('unhandledRejection', (reason: any) => {
 })
 
 // Start server
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     logInfo(`Server started on port ${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV || 'development',
