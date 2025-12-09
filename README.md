@@ -1,167 +1,149 @@
-# MIZMIZ - Modern Sosyal Medya Platformu
+# MIZMIZ - Neon Sosyal Medya Platformu 💎
 
-![MIZMIZ Logo](https://img.shields.io/badge/MIZMIZ-Social%20Platform-1DA1F2?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-0.1.0--MVP-brightgreen?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
+> **Geleceğin sosyal ağ deneyimi.** Cyberpunk estetiği, ultra-modern teknolojiler ve kesintisiz performans ile donatılmış yeni nesil sosyal medya platformu.
 
-## 🎯 Proje Hakkında
+![MIZMIZ Banner](https://via.placeholder.com/1200x400/050505/06b6d4?text=MIZMIZ+SOCIAL+PLATFORM)
 
-MIZMIZ, kullanıcıların içerik paylaşabileceği, etkileşime girebileceği ve topluluk oluşturabileceği modern bir sosyal medya platformudur. Genç yazılımcılar, öğrenciler ve içerik üreticileri için tasarlanmıştır.
+## 🌟 Proje Hakkında
 
-## ✨ Özellikler
+MIZMIZ, modern web teknolojilerinin sınırlarını zorlayan, tam donanımlı bir sosyal medya platformudur. Next.js 15 ve Node.js/Express mimarisi üzerine kurulu olan bu proje, **PWA desteği**, **sanallaştırılmış mesajlaşma listeleri** ve **gelişmiş görsel optimizasyonları** ile hem mobil hem masaüstünde kusursuz, "app-like" bir deneyim sunar.
 
-### Kullanıcı Özellikleri
-- 🔐 Güvenli kayıt ve giriş sistemi (JWT Authentication)
-- 👤 Profil oluşturma ve düzenleme
-- 📝 Gönderi paylaşma (metin + resim)
-- ❤️ Beğenme ve yorum yapma
-- 👥 Takip etme / takipçi sistemi
-- 🔔 Bildirim sistemi
-- 🔍 Arama ve keşfet bölümü
+Tasarım dili olarak **"Cyberpunk"** ve **"Glassmorphism"** benimsenmiş; koyu mod, neon vurgular ve akıcı animasyonlarla kullanıcıyı içine çeken bir atmosfer yaratılmıştır.
 
-### Yönetici Özellikleri
-- 👨‍💼 Kullanıcı yönetimi
-- 🛡️ İçerik moderasyonu
+## ✨ Öne Çıkan Özellikler
 
-## 🛠️ Teknoloji Stack
+*   **🎨 Cyberpunk UI/UX:** Derin siyah zemin üzerinde neon cyan/blue vurgular, glassmorphism paneller ve Framer Motion ile güçlendirilmiş akıcı animasyonlar.
+*   **📱 PWA (Progressive Web App):** Mobil cihazlara kurulabilir (installable), çevrimdışı (offline) yeteneklere sahip ve native uygulama hissi verir.
+*   **⚡ Yüksek Performanslı Mesajlaşma:** `react-virtuoso` ile sanallaştırılmış liste yapısı sayesinde binlerce mesaj olsa bile takılmayan, yağ gibi akan bir sohbet deneyimi.
+*   **🖼️ Gelişmiş Görsel Optimizasyonu:** `next/image` entegrasyonu ile görseller otomatik olarak formatlanır (WebP/AVIF), lazy load edilir ve CLS (Layout Shift) önlenir.
+*   **🔐 Güvenli Kimlik Doğrulama:** HTTP-Only Cookie tabanlı güvenli auth sistemi ve mobil tarayıcılar için `localStorage` fallback mekanizması ile kesintisiz oturum yönetimi.
+*   **💬 Gerçek Zamanlı İletişim (WebSocket):** Socket.io altyapısı ile anlık mesajlaşma, "yazıyor..." göstergesi, canlı okundu bilgisi ve çevrimiçi durumu takibi.
+*   **🏆 Gamification:** Kullanıcı etkileşimlerini artıran rozetler ve puan sistemi.
+*   **📂 Kategorizasyon:** İçerikleri akıllıca ayıran kategori ve etiket sistemi.
 
-### Frontend
-- **Framework:** Next.js 14+ (App Router)
-- **Dil:** TypeScript
-- **UI Kütüphaneleri:** Shadcn UI, Radix UI
-- **Stil:** Tailwind CSS
-- **Animasyon:** Framer Motion
-- **3D:** Three.js + React Three Fiber
-- **State Yönetimi:** Redux Toolkit
-- **URL State:** nuqs
+## 🛠️ Teknoloji Yığını
 
-### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Dil:** TypeScript
-- **Kimlik Doğrulama:** JWT
-- **Veritabanı:** PostgreSQL (önerilen) / MongoDB
-- **ORM/ODM:** Prisma (PostgreSQL için) / Mongoose (MongoDB için)
+Bu proje, endüstri standardı en güncel teknolojiler kullanılarak geliştirilmiştir.
 
-## 📁 Proje Yapısı
+### Frontend (Client)
+*   **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+*   **Dil:** [TypeScript](https://www.typescriptlang.org/)
+*   **Stil:** [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/), GSAP
+*   **State Yönetimi:** [Redux Toolkit](https://redux-toolkit.js.org/), RTK Query
+*   **UI Bileşenleri:** [Radix UI](https://www.radix-ui.com/), Lucide React Icons
+*   **3D Grafikler:** Three.js, React Three Fiber, Drei
+*   **Form Yönetimi:** React Hook Form, Zod
+*   **Optimizasyon:** `next-pwa`, `react-virtuoso`, `next/image`
 
-```
-mizmiz-social-app/
-├── backend/              # Backend API
-│   ├── src/
-│   │   ├── controllers/  # Route controller'ları
-│   │   ├── middleware/   # Express middleware'leri
-│   │   ├── models/       # Database modelleri
-│   │   ├── routes/       # API route'ları
-│   │   ├── services/     # Business logic
-│   │   ├── utils/        # Yardımcı fonksiyonlar
-│   │   ├── config/       # Konfigürasyon dosyaları
-│   │   └── server.ts     # Ana server dosyası
-│   ├── package.json
-│   └── tsconfig.json
-│
-└── frontend/             # Next.js Frontend
-    ├── src/
-    │   ├── app/          # Next.js App Router sayfaları
-    │   ├── components/   # React bileşenleri
-    │   ├── lib/          # Yardımcı kütüphaneler
-    │   ├── store/        # Redux store
-    │   ├── hooks/        # Custom React hooks
-    │   ├── interfaces/   # TypeScript interface'leri
-    │   └── styles/       # Global stiller
-    ├── public/           # Statik dosyalar
-    ├── package.json
-    ├── next.config.js
-    ├── tailwind.config.ts
-    └── tsconfig.json
-```
+### Backend (Server)
+*   **Runtime:** [Node.js](https://nodejs.org/)
+*   **Framework:** [Express.js](https://expressjs.com/)
+*   **Real-time:** [Socket.io](https://socket.io/) (WebSocket)
+*   **Veritabanı:** [PostgreSQL](https://www.postgresql.org/), [Prisma ORM](https://www.prisma.io/)
+*   **Auth:** JWT (JSON Web Tokens), BCryptJS
+*   **Dosya Yönetimi:** Cloudinary, Multer
+*   **Güvenlik:** Helmet, Rate Limiting, CORS
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Kurulum ve Başlatma
 
-### Gereksinimler
-- Node.js 18+
-- npm veya yarn
-- PostgreSQL 14+ (veya MongoDB 6+)
+Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyin.
 
-### Kurulum
+### Ön Gereksinimler
+*   Node.js (v18 veya üzeri)
+*   PostgreSQL Veritabanı
+*   npm veya yarn
 
-1. **Repository'yi klonlayın:**
+### 1. Projeyi Klonlayın
 ```bash
-git clone <repository-url>
+git clone https://github.com/kyetim/mizmiz-social-app.git
 cd mizmiz-social-app
 ```
 
-2. **Backend Kurulumu:**
+### 2. Backend Kurulumu
+Backend servisini ayağa kaldırın ve veritabanı bağlantılarını yapın.
+
 ```bash
 cd backend
 npm install
+
+# Örnek env dosyasını kopyalayın
 cp .env.example .env
-# .env dosyasını düzenleyin
+
+# .env dosyasını kendi veritabanı ve Cloudinary bilgilerinizle düzenleyin!
+
+# Veritabanı şemasını oluşturun ve migration yapın
+npm run prisma:generate
+npm run prisma:migrate
+
+# Opsiyonel: Test verilerini yükleyin
+npm run prisma:seed
+
+# Sunucuyu başlatın
 npm run dev
 ```
+Backend `http://localhost:5000` adresinde çalışacaktır.
 
-3. **Frontend Kurulumu:**
+### 3. Frontend Kurulumu
+Frontend uygulamasını başlatın.
+
 ```bash
-cd frontend
+cd ../frontend
 npm install
-cp .env.local.example .env.local
-# .env.local dosyasını düzenleyin
+
+# Örnek env dosyasını kopyalayın
+cp .env.example .env.local
+
+# .env.local dosyasında NEXT_PUBLIC_API_URL'in doğru olduğundan emin olun (varsayılan: http://localhost:5000/api)
+
+# Uygulamayı başlatın
 npm run dev
 ```
+Frontend `http://localhost:3000` adresinde çalışacaktır.
 
-4. **Tarayıcınızda açın:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+## 🌍 Environment Variables
 
-## 📚 Dokümantasyon
+Projenin çalışması için aşağıdaki çevre değişkenlerinin `.env` dosyalarında tanımlanması gerekir.
 
-Detaylı dokümantasyon için aşağıdaki dosyalara göz atın:
+**Backend (.env)**
+```env
+PORT=5000
+DATABASE_URL="postgresql://user:password@localhost:5432/mizmiz?schema=public"
+JWT_SECRET="guclu-bir-secret-key"
+JWT_REFRESH_SECRET="guclu-bir-refresh-key"
+CORS_ORIGIN="http://localhost:3000"
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+NODE_ENV="development"
+```
 
-- [CODE_STYLE.md](./CODE_STYLE.md) - Kodlama standartları ve stil rehberi
-- [ROADMAP.md](./ROADMAP.md) - Proje yol haritası ve sprint planlaması
-- [FEATURES.md](./FEATURES.md) - Detaylı özellik listesi
-- [BACKEND_GUIDE.md](./BACKEND_GUIDE.md) - Backend geliştirme rehberi
-- [FRONTEND_GUIDE.md](./FRONTEND_GUIDE.md) - Frontend geliştirme rehberi
-- [PRD.md](./PRD.md) - Ürün gereksinim belgesi
+**Frontend (.env.local)**
+```env
+NEXT_PUBLIC_API_URL="http://localhost:5000/api"
+```
 
-## 🎨 Marka Kimliği
+## 📱 Mobil Uyumluluk & PWA
 
-### Renk Paleti
-- **Primary:** #1DA1F2 (Mavi - Güven ve iletişim)
-- **Secondary:** #14171A (Koyu gri - Okunabilirlik)
-- **Accent:** #FFAD1F (Canlı vurgu rengi)
-
-### Tipografi
-- **Başlıklar:** Poppins, Bold
-- **Gövde Metni:** Roboto, Regular
-
-### Ses Tonu
-Samimi, topluluk odaklı ve kullanıcı dostu
-
-## 📊 Başarı Kriterleri (MVP)
-
-- ✅ Kullanıcıların %80'i kayıt olduktan sonra en az 1 gönderi paylaşmalı
-- ✅ Sayfa yüklenme süresi < 2 saniye
-- ✅ %100 mobil uyumluluk
-- ✅ Web Vitals: LCP < 2.5s, FID < 100ms, CLS < 0.1
+MIZMIZ, **Progressive Web App (PWA)** standartlarına tam uyumludur.
+*   **Kurulum:** Mobil tarayıcınızda (Chrome/Safari) "Ana Ekrana Ekle" seçeneği ile native uygulama gibi yükleyebilirsiniz.
+*   **Icon:** Özel olarak tasarlanmış app ikonları mevcuttur.
+*   **Offline:** İnternet bağlantısı kesildiğinde bile temel arayüz elementleri çalışmaya devam eder.
 
 ## 🤝 Katkıda Bulunma
 
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/AmazingFeature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add some AmazingFeature'`)
-4. Branch'inizi push edin (`git push origin feature/AmazingFeature`)
-5. Pull Request açın
+Katkılarınızı bekliyoruz! Lütfen büyük değişiklikler yapmadan önce bir "Issue" açarak tartışma başlatın.
 
-## 📝 Lisans
+1.  Forklayın
+2.  Feature branch oluşturun (`git checkout -b feature/harika-ozellik`)
+3.  Commit atın (`git commit -m 'feat: harika özellik eklendi'`)
+4.  Pushlayın (`git push origin feature/harika-ozellik`)
+5.  Pull Request açın
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+## 📄 Lisans
 
-## 📧 İletişim
-
-Proje Link: [https://github.com/yourusername/mizmiz-social-app](https://github.com/yourusername/mizmiz-social-app)
+Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
 ---
-
-**MIZMIZ** ile topluluk deneyimini yeniden keşfedin! 🚀
-
+<p align="center">
+  <sub>Designed & Developed by <strong>MIZMIZ Team</strong> 🚀</sub>
+</p>

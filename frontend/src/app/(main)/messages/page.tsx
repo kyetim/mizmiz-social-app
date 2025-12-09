@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import {
   useGetConversationsQuery,
   useGetOrCreateConversationMutation,
@@ -10,16 +10,22 @@ import {
   useGetMessagesQuery,
   useSendMessageMutation,
   useMarkMessagesAsReadMutation,
+  api,
 } from '@/store/api/api'
 import { MessageCircle, Sparkles } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { ConversationList } from '@/components/messages/conversation-list'
 import { ConversationView } from '@/components/messages/conversation-view'
+import { useSocket } from '@/lib/socket-context'
+import { MessageInterface } from '@/interfaces/message.interface'
+
 import { cn } from '@/lib/utils'
 
 export default function MessagesPage() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
+  const { socket, isConnected } = useSocket()
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>()
   const [searchQuery, setSearchQuery] = useState('')
   const [showConversationList, setShowConversationList] = useState(true)
@@ -45,7 +51,7 @@ export default function MessagesPage() {
     refetch: refetchConversations,
   } = useGetConversationsQuery(undefined, {
     skip: !user,
-    pollingInterval: 10000, // Poll every 10 seconds
+    // Polling removed in favor of Socket.io
     refetchOnFocus: true,
     refetchOnReconnect: true,
   })
@@ -69,13 +75,96 @@ export default function MessagesPage() {
     { conversationId: selectedConversationId!, limit: 50 },
     {
       skip: !selectedConversationId || !user,
-      pollingInterval: 5000, // Poll messages more frequently
+      // Polling removed in favor of Socket.io
     }
   )
 
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation()
   const [markAsRead] = useMarkMessagesAsReadMutation()
   const [getOrCreateConversation] = useGetOrCreateConversationMutation()
+
+  // Socket.io Integration
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    // Listen for new messages
+    const handleNewMessage = (message: MessageInterface) => {
+      // Update messages cache if in the active conversation
+      if (selectedConversationId && message.conversationId === selectedConversationId) {
+        // Optimistic update
+        dispatch(
+          api.util.updateQueryData('getMessages', { conversationId: selectedConversationId, limit: 50 }, (draft) => {
+            const exists = draft.find((m) => m.id === message.id)
+            if (!exists) {
+              draft.unshift(message) 
+            }
+          })
+        )
+        
+        // Also invalidate tags to ensure full consistency and trigger refetch
+        dispatch(api.util.invalidateTags([{ type: 'Messages', id: selectedConversationId }]))
+
+        // Mark as read immediately if user is viewing this conversation and it's not their message
+        if (message.senderId !== user?.id) {
+            socket.emit('mark_read', { conversationId: selectedConversationId, messageId: message.id })
+            markAsRead(selectedConversationId)
+        }
+      }
+
+      // Update conversations list cache
+      dispatch(
+        api.util.updateQueryData('getConversations', undefined, (draft) => {
+          const conversation = draft.find((c) => c.id === message.conversationId)
+          if (conversation) {
+            conversation.lastMessage = message
+            conversation.lastMessageAt = message.createdAt
+            
+            // Increment unread count if it's not our message and we are not in this conversation
+            if (message.senderId !== user?.id && message.conversationId !== selectedConversationId) {
+                 if (conversation.user1Id === user?.id) {
+                     conversation.user1UnreadCount = (conversation.user1UnreadCount || 0) + 1
+                 } else {
+                     conversation.user2UnreadCount = (conversation.user2UnreadCount || 0) + 1
+                 }
+            }
+          }
+        })
+      )
+    }
+
+    const handleMessagesRead = ({ conversationId }: { conversationId: string }) => {
+        // Update messages cache to mark as read
+        if (selectedConversationId && conversationId === selectedConversationId) {
+            dispatch(api.util.updateQueryData('getMessages', { conversationId, limit: 50 }, (draft) => {
+                draft.forEach(msg => {
+                    if (!msg.isRead && msg.senderId === user?.id) {
+                        msg.isRead = true
+                        msg.readAt = new Date().toISOString()
+                    }
+                })
+            }))
+        }
+    }
+
+    socket.on('new_message', handleNewMessage)
+    socket.on('messages_read', handleMessagesRead)
+
+    return () => {
+      socket.off('new_message', handleNewMessage)
+      socket.off('messages_read', handleMessagesRead)
+    }
+  }, [socket, isConnected, selectedConversationId, dispatch, user?.id, markAsRead])
+
+  // Join/Leave conversation room
+  useEffect(() => {
+    if (!socket || !isConnected || !selectedConversationId) return
+
+    socket.emit('join_conversation', selectedConversationId)
+
+    return () => {
+      socket.emit('leave_conversation', selectedConversationId)
+    }
+  }, [socket, isConnected, selectedConversationId])
 
   useEffect(() => {
     if (!user) {

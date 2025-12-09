@@ -8,17 +8,19 @@ import { ErrorBoundary } from './error-boundary'
 import { OfflineDetector } from './offline-detector'
 import { SmoothScrollProvider } from './smooth-scroll-provider'
 import { NotificationListener } from './notification-listener'
+import { SocketProvider } from '@/lib/socket-context'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <Provider store={store}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SmoothScrollProvider>
-            <OfflineDetector />
-            <NotificationListener />
-            {children}
-            <Toaster
+        <SocketProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SmoothScrollProvider>
+              <OfflineDetector />
+              <NotificationListener />
+              {children}
+              <Toaster
               position="top-center"
               toastOptions={{
                 // Default options
@@ -75,6 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             />
           </SmoothScrollProvider>
         </ThemeProvider>
+        </SocketProvider>
       </Provider>
     </ErrorBoundary>
   )
