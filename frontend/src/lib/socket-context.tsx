@@ -29,12 +29,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     const socketUrl = apiUrl.replace(/\/api\/?$/, '')
 
     if (!isAuthenticated || !user) {
-        if (socket) {
-            socket.disconnect()
-            setSocket(null)
-            setIsConnected(false)
-        }
-        return
+      if (socket) {
+        socket.disconnect()
+        setSocket(null)
+        setIsConnected(false)
+      }
+      return
     }
 
     if (socket && socket.connected) return
@@ -61,29 +61,32 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     })
 
     socketInstance.on('connect_error', async (err) => {
+      // Only log errors if user is authenticated (unexpected errors)
+      if (isAuthenticated) {
         console.error('Socket connection error:', err.message)
-        
-        // If authentication error, try to refresh token
-        if (err.message.includes('Authentication error')) {
-            try {
-                console.log('Socket auth failed, attempting to refresh token...')
-                await apiClient.post('/auth/refresh')
-                console.log('Token refreshed, retrying socket connection...')
-                
-                // Update token in auth object for next attempt
-                const newToken = localStorage.getItem('auth_token')
-                if (newToken) {
-                    socketInstance.auth = { token: newToken }
-                }
-                
-                // Retry connection
-                socketInstance.connect()
-            } catch (refreshError) {
-                console.error('Socket token refresh failed:', refreshError)
-                // If refresh fails, user might need to login again
-                // apiClient interceptor handles redirect usually
-            }
+      }
+
+      // If authentication error, try to refresh token
+      if (err.message.includes('Authentication error') && isAuthenticated) {
+        try {
+          console.log('Socket auth failed, attempting to refresh token...')
+          await apiClient.post('/auth/refresh')
+          console.log('Token refreshed, retrying socket connection...')
+
+          // Update token in auth object for next attempt
+          const newToken = localStorage.getItem('auth_token')
+          if (newToken) {
+            socketInstance.auth = { token: newToken }
+          }
+
+          // Retry connection
+          socketInstance.connect()
+        } catch (refreshError) {
+          console.error('Socket token refresh failed:', refreshError)
+          // If refresh fails, user might need to login again
+          // apiClient interceptor handles redirect usually
         }
+      }
     })
 
     setSocket(socketInstance)
@@ -93,7 +96,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         socketInstance.disconnect()
       }
     }
-  }, [isAuthenticated, user]) 
+  }, [isAuthenticated, user])
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
