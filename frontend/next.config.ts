@@ -10,9 +10,6 @@ const withPWA = require("next-pwa")({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Monorepo kökünü Next'e açıkça bildirerek
-  // yanlış workspace root tahminine bağlı uyarıyı engelle
-  outputFileTracingRoot: path.join(__dirname, ".."),
   images: {
     remotePatterns: [
       {
