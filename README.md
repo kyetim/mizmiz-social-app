@@ -99,10 +99,10 @@ npm run dev
 ## 🌐 Deployment
 
 ### Frontend (Vercel)
-```bash
-cd frontend
-vercel deploy
-```
+1. Push to your repository.
+2. In Vercel Project Settings > General, set **Root Directory** to `frontend`.
+3. Deployments will be automatic.
+
 
 ### Backend
 Deploy to your preferred hosting service (Railway, Render, etc.)
