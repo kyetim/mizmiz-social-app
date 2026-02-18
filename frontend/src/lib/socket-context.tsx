@@ -41,12 +41,33 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     console.log('Connecting to socket at:', socketUrl)
 
+    const getStoredToken = () => {
+      if (typeof window === 'undefined') return null
+      const token = localStorage.getItem('auth_token')
+      if (!token) return null
+
+      // If token is expired, remove it so socket can fall back to cookies.
+      try {
+        const parts = token.split('.')
+        if (parts.length !== 3) return token
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+        if (payload?.exp && Date.now() / 1000 >= payload.exp) {
+          localStorage.removeItem('auth_token')
+          return null
+        }
+      } catch {
+        // If decoding fails, keep token as-is.
+      }
+
+      return token
+    }
+
     // Connect to socket
     const socketInstance = io(socketUrl, {
       withCredentials: true,
       transports: ['websocket', 'polling'], // Prioritize websocket
       auth: {
-        token: typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+        token: getStoredToken()
       }
     })
 
@@ -70,11 +91,23 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       if (err.message.includes('Authentication error') && isAuthenticated) {
         try {
           console.log('Socket auth failed, attempting to refresh token...')
-          await apiClient.post('/auth/refresh')
+          const resp = await apiClient.post('/auth/refresh')
           console.log('Token refreshed, retrying socket connection...')
 
+          // Persist refreshed token for socket auth fallback (cookies are primary).
+          const newToken = resp?.data?.data?.accessToken
+          if (typeof window !== 'undefined' && typeof newToken === 'string' && newToken.length > 0) {
+            localStorage.setItem('auth_token', newToken)
+          }
+
           // Update token in auth object for next attempt
-          const newToken = localStorage.getItem('auth_token')
+          const stored = getStoredToken()
+          if (stored) {
+            socketInstance.auth = { token: stored }
+          } else {
+            socketInstance.auth = { token: null }
+          }
+
           if (newToken) {
             socketInstance.auth = { token: newToken }
           }

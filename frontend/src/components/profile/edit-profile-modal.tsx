@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Loader2, MapPin, Link as LinkIcon, FileText } from 'lucide-react'
+import { X, Save, Loader2, MapPin, Link as LinkIcon, FileText, Eye, EyeOff } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { updateUser } from '@/store/slices/auth-slice'
-import { useUpdateProfileMutation } from '@/store/api/api'
+import { useUpdateProfileMutation, useGetMessageSettingsQuery, useUpdateMessageSettingsMutation } from '@/store/api/api'
 import { toast } from 'react-hot-toast'
 
 interface EditProfileModalProps {
@@ -17,6 +17,8 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
     const dispatch = useAppDispatch()
     const { user } = useAppSelector((state) => state.auth)
     const [updateProfile, { isLoading }] = useUpdateProfileMutation()
+    const { data: messageSettings } = useGetMessageSettingsQuery()
+    const [updateMessageSettings, { isLoading: isUpdatingMessageSettings }] = useUpdateMessageSettingsMutation()
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -24,6 +26,11 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
         bio: '',
         location: '',
         website: ''
+    })
+
+    const [messageSettingsState, setMessageSettingsState] = useState({
+        showLastSeen: true,
+        showReadReceipts: true,
     })
 
     const [errors, setErrors] = useState({
@@ -42,6 +49,15 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
             })
         }
     }, [user])
+
+    useEffect(() => {
+        if (messageSettings) {
+            setMessageSettingsState({
+                showLastSeen: messageSettings.showLastSeen,
+                showReadReceipts: messageSettings.showReadReceipts,
+            })
+        }
+    }, [messageSettings])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
@@ -85,9 +101,13 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
         }
 
         try {
-            const updatedUser = await updateProfile(formData).unwrap()
+            const [updatedUser] = await Promise.all([
+                updateProfile(formData).unwrap(),
+                updateMessageSettings(messageSettingsState).unwrap(),
+            ])
+
             dispatch(updateUser(updatedUser))
-            toast.success('Profiliniz güncellendi!')
+            toast.success('Profil ve mesaj ayarları güncellendi!')
             onClose()
             // RTK Query will automatically invalidate and refetch
         } catch (error: any) {
@@ -222,6 +242,84 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
                                     <p className="mt-1 text-xs text-red-500">{errors.website}</p>
                                 )}
                             </div>
+
+                            {/* Messaging settings */}
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    Mesaj Ayarları
+                                </h4>
+
+                                {/* Last seen */}
+                                <label className="flex items-start justify-between gap-4 cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <Eye className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                Son görülmemi göster
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Konuşmalarda çevrimiçi durumun ve son görülme zamanın gösterilsin.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setMessageSettingsState(prev => ({
+                                                ...prev,
+                                                showLastSeen: !prev.showLastSeen,
+                                            }))
+                                        }
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                            messageSettingsState.showLastSeen
+                                                ? 'bg-green-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                                                messageSettingsState.showLastSeen ? 'translate-x-5' : 'translate-x-1'
+                                            }`}
+                                        />
+                                    </button>
+                                </label>
+
+                                {/* Read receipts */}
+                                <label className="flex items-start justify-between gap-4 cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <EyeOff className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                Görüldü bilgisini gönder
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Bunu kapatırsan, diğer kullanıcılar mesajlarını ne zaman okuduğunu
+                                                göremez.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setMessageSettingsState(prev => ({
+                                                ...prev,
+                                                showReadReceipts: !prev.showReadReceipts,
+                                            }))
+                                        }
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                            messageSettingsState.showReadReceipts
+                                                ? 'bg-green-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                                                messageSettingsState.showReadReceipts ? 'translate-x-5' : 'translate-x-1'
+                                            }`}
+                                        />
+                                    </button>
+                                </label>
+                            </div>
                         </div>
 
                         {/* Footer */}
@@ -229,19 +327,19 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                disabled={isLoading}
+                                disabled={isLoading || isUpdatingMessageSettings}
                                 className="px-6 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl font-medium transition-colors disabled:opacity-50"
                             >
                                 İptal
                             </button>
                             <motion.button
                                 type="submit"
-                                disabled={isLoading || !!errors.bio || !!errors.website}
+                                disabled={isLoading || isUpdatingMessageSettings || !!errors.bio || !!errors.website}
                                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
                                 className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
-                                {isLoading ? (
+                                {isLoading || isUpdatingMessageSettings ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         <span>Kaydediliyor...</span>

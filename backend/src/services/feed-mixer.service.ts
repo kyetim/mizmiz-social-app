@@ -271,6 +271,10 @@ export const feedMixerService = {
     })
 
     // Check if user liked each post
+    if (posts.length === 0) {
+      return []
+    }
+
     const postIds = posts.map((p) => p.id)
     const likes = await prisma.like.findMany({
       where: {

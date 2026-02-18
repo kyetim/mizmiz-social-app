@@ -13,6 +13,10 @@ router.get('/', userController.getUsers)
 // Get current user profile
 router.get('/me', userController.getCurrentUser)
 
+// Messaging privacy settings
+router.get('/me/message-settings', userController.getMessageSettings)
+router.put('/me/message-settings', userController.updateMessageSettings)
+
 // Update current user profile
 router.put('/me', userController.updateProfile)
 

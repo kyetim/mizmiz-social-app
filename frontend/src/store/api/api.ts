@@ -4,7 +4,7 @@ import apiClient from '@/lib/api/client'
 import type { UserInterface } from '@/interfaces/user.interface'
 import type { Category, Vibe, PostVibe, PostCategory } from '@/interfaces/category.interface'
 import type { PostInterface, CommentInterface, CreatePostDto, CreateCommentDto } from '@/interfaces/post.interface'
-import type { UpdateUserProfileDto } from '@/lib/api/users'
+import type { UpdateUserProfileDto, MessageSettingsDto, MessageSettings } from '@/lib/api/users'
 import type { NotificationInterface } from '@/interfaces/notification.interface'
 import type { MessageInterface, ConversationInterface, CreateMessageDto, CreateConversationDto } from '@/interfaces/message.interface'
 
@@ -415,6 +415,19 @@ export const api = createApi({
         { type: 'Posts', id: `user-liked-${userId}` },
       ],
     }),
+    // Messaging privacy settings
+    getMessageSettings: builder.query<MessageSettings, void>({
+      query: () => ({ url: '/users/me/message-settings', method: 'get' }),
+      providesTags: ['Users'],
+    }),
+    updateMessageSettings: builder.mutation<MessageSettings, MessageSettingsDto>({
+      query: (data) => ({
+        url: '/users/me/message-settings',
+        method: 'put',
+        data,
+      }),
+      invalidatesTags: ['Users'],
+    }),
     // Follow endpoints
     followUser: builder.mutation<void, string>({
       query: (userId) => ({
@@ -586,6 +599,8 @@ export const {
   useGetUserProfileQuery,
   useGetUserPostsQuery,
   useUpdateProfileMutation,
+  useGetMessageSettingsQuery,
+  useUpdateMessageSettingsMutation,
   useFollowUserMutation,
   useUnfollowUserMutation,
   useGetUsersQuery,

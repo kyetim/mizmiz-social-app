@@ -11,6 +11,16 @@ export interface UpdateUserProfileDto {
     website?: string
 }
 
+export interface MessageSettingsDto {
+    showLastSeen?: boolean
+    showReadReceipts?: boolean
+}
+
+export interface MessageSettings {
+    showLastSeen: boolean
+    showReadReceipts: boolean
+}
+
 export const usersApi = {
     // Get all users
     async getUsers(params?: {
@@ -39,6 +49,18 @@ export const usersApi = {
     // Update user profile
     async updateProfile(data: UpdateUserProfileDto): Promise<UserInterface> {
         const response = await apiClient.put('/users/me', data)
+        return response.data.data || response.data
+    },
+
+    // Get messaging privacy settings
+    async getMessageSettings(): Promise<MessageSettings> {
+        const response = await apiClient.get('/users/me/message-settings')
+        return response.data.data || response.data
+    },
+
+    // Update messaging privacy settings
+    async updateMessageSettings(data: MessageSettingsDto): Promise<MessageSettings> {
+        const response = await apiClient.put('/users/me/message-settings', data)
         return response.data.data || response.data
     },
 

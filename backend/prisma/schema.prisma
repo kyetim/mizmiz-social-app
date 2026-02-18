@@ -22,6 +22,9 @@ model User {
   birthDate     DateTime?
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
+  // Messaging privacy
+  showLastSeen      Boolean   @default(true) @map("show_last_seen")
+  showReadReceipts  Boolean   @default(true) @map("show_read_receipts")
   role          String    @default("user")
   
   // Security

@@ -62,12 +62,6 @@ export function ModernLoginForm() {
         duration: 2000,
       })
 
-      // User is already set in state and localStorage from login action
-      // Wait a moment for localStorage to be written and state to sync
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      // Use router.push to maintain React state
-      // AuthProvider will handle redirects based on localStorage
       router.push(redirectTo)
     } catch (error: any) {
       showErrorToast(error, {

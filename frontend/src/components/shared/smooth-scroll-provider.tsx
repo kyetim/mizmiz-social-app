@@ -15,6 +15,9 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
     const lenisRef = useRef<Lenis | null>(null)
 
     useEffect(() => {
+        // Performance optimization: Disable custom smooth scroll
+        // It causes stuttering/lag on some devices
+        /*
         if (typeof window === 'undefined') return
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
         if (prefersReducedMotion) return
@@ -40,6 +43,7 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
             lenis.destroy()
             lenisRef.current = null
         }
+        */
     }, [])
 
     return <>{children}</>

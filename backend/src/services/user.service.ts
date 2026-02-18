@@ -13,6 +13,16 @@ export interface UpdateUserProfileDto {
     website?: string
 }
 
+export interface MessageSettingsDto {
+    showLastSeen?: boolean
+    showReadReceipts?: boolean
+}
+
+export interface MessageSettings {
+    showLastSeen: boolean
+    showReadReceipts: boolean
+}
+
 export class UserService {
     // Get user by ID
     static async getUserById(userId: string, currentUserId?: string) {
@@ -195,6 +205,43 @@ export class UserService {
         logInfo('User cover image updated', { userId })
 
         return updatedUser
+    }
+
+    // Get messaging privacy settings
+    static async getMessageSettings(userId: string): Promise<MessageSettings> {
+        const result = await prisma.$queryRaw<
+            { show_last_seen: boolean | null; show_read_receipts: boolean | null }[]
+        >`SELECT show_last_seen, show_read_receipts FROM "users" WHERE id = ${userId}::uuid LIMIT 1`
+
+        if (!result[0]) {
+            throw new NotFoundError('User not found')
+        }
+
+        const row = result[0]
+
+        return {
+            showLastSeen: row.show_last_seen ?? true,
+            showReadReceipts: row.show_read_receipts ?? true,
+        }
+    }
+
+    // Update messaging privacy settings
+    static async updateMessageSettings(userId: string, data: MessageSettingsDto): Promise<MessageSettings> {
+        await prisma.$executeRaw`
+            UPDATE "users"
+            SET
+                show_last_seen = COALESCE(${data.showLastSeen}, show_last_seen),
+                show_read_receipts = COALESCE(${data.showReadReceipts}, show_read_receipts)
+            WHERE id = ${userId}::uuid
+        `
+
+        logInfo('User message settings updated', {
+            userId,
+            showLastSeen: data.showLastSeen,
+            showReadReceipts: data.showReadReceipts,
+        })
+
+        return this.getMessageSettings(userId)
     }
 
     // Get users list (for explore/search)

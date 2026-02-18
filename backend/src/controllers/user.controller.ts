@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { UserService, UpdateUserProfileDto } from '../services/user.service'
+import { UserService, UpdateUserProfileDto, MessageSettingsDto } from '../services/user.service'
 import { asyncHandler } from '../middleware/error.middleware'
 
 interface AuthRequest extends Request {
@@ -55,6 +55,44 @@ export const userController = {
         res.status(200).json({
             success: true,
             data: updatedUser
+        })
+    }),
+
+    // Get messaging privacy settings
+    getMessageSettings: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        if (!req.user?.userId) {
+            res.status(401).json({
+                success: false,
+                error: { message: 'Unauthorized' }
+            })
+            return
+        }
+
+        const settings = await UserService.getMessageSettings(req.user.userId)
+
+        res.status(200).json({
+            success: true,
+            data: settings
+        })
+    }),
+
+    // Update messaging privacy settings
+    updateMessageSettings: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+        if (!req.user?.userId) {
+            res.status(401).json({
+                success: false,
+                error: { message: 'Unauthorized' }
+            })
+            return
+        }
+
+        const updateData: MessageSettingsDto = req.body
+
+        const settings = await UserService.updateMessageSettings(req.user.userId, updateData)
+
+        res.status(200).json({
+            success: true,
+            data: settings
         })
     }),
 

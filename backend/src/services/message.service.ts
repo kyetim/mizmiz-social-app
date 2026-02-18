@@ -32,6 +32,7 @@ export class MessageService {
         lastName: true,
         avatarUrl: true,
         lastLoginAt: true,
+        showLastSeen: true,
       },
     })
 
@@ -115,36 +116,18 @@ export class MessageService {
       })
     }
 
-    // Determine which user is the "other user" from current user's perspective
-    const isUser1 = conversation.user1Id === currentUserId
-    const otherUserInConv = isUser1
-      ? await prisma.user.findUnique({
-        where: { id: conversation.user2Id },
-        select: {
-          id: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          avatarUrl: true,
-          lastLoginAt: true,
-        },
-      })
-      : await prisma.user.findUnique({
-        where: { id: conversation.user1Id },
-        select: {
-          id: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          avatarUrl: true,
-          lastLoginAt: true,
-        },
-      })
+    const canShowLastSeen = otherUser.showLastSeen ?? true
 
-    if (!otherUserInConv) {
-      throw new NotFoundError('Other user not found')
+    const safeOtherUser = {
+      id: otherUser.id,
+      username: otherUser.username,
+      firstName: otherUser.firstName,
+      lastName: otherUser.lastName,
+      avatarUrl: otherUser.avatarUrl,
+      lastLoginAt: canShowLastSeen ? otherUser.lastLoginAt : null,
     }
 
+    const isUser1 = conversation.user1Id === currentUserId
     const unreadCount = isUser1 ? conversation.user1UnreadCount : conversation.user2UnreadCount
     const lastMessage = conversation.messages[0] || null
 
@@ -160,7 +143,7 @@ export class MessageService {
       user2CanMessage: conversation.user2CanMessage,
       createdAt: conversation.createdAt,
       updatedAt: conversation.updatedAt,
-      otherUser: otherUserInConv,
+      otherUser: safeOtherUser,
       lastMessage: lastMessage
         ? {
           id: lastMessage.id,
@@ -208,67 +191,94 @@ export class MessageService {
       orderBy: { updatedAt: 'desc' },
     })
 
-    // Get other user info for each conversation
-    const conversationsWithOtherUser = await Promise.all(
-      conversations.map(async (conv) => {
-        const isUser1 = conv.user1Id === currentUserId
-        const otherUserId = isUser1 ? conv.user2Id : conv.user1Id
+    if (conversations.length === 0) {
+      return []
+    }
 
-        const otherUser = await prisma.user.findUnique({
-          where: { id: otherUserId },
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-            lastLoginAt: true,
-          },
-        })
+    // Collect all other user IDs
+    const otherUserIds = new Set<string>()
+    conversations.forEach((conv) => {
+      const otherId = conv.user1Id === currentUserId ? conv.user2Id : conv.user1Id
+      otherUserIds.add(otherId)
+    })
 
-        if (!otherUser) {
-          return null
-        }
+    // Fetch all other users in one query
+    const otherUsers = await prisma.user.findMany({
+      where: {
+        id: { in: Array.from(otherUserIds) },
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        avatarUrl: true,
+        lastLoginAt: true,
+        showLastSeen: true,
+      },
+    })
 
-        const unreadCount = isUser1 ? conv.user1UnreadCount : conv.user2UnreadCount
-        const lastMessage = conv.messages[0] || null
+    const otherUsersMap = new Map(otherUsers.map((u) => [u.id, u]))
 
-        return {
-          id: conv.id,
-          user1Id: conv.user1Id,
-          user2Id: conv.user2Id,
-          lastMessageId: conv.lastMessageId,
-          lastMessageAt: conv.lastMessageAt,
-          user1UnreadCount: conv.user1UnreadCount,
-          user2UnreadCount: conv.user2UnreadCount,
-          user1CanMessage: conv.user1CanMessage,
-          user2CanMessage: conv.user2CanMessage,
-          createdAt: conv.createdAt,
-          updatedAt: conv.updatedAt,
-          otherUser,
-          lastMessage: lastMessage
-            ? {
-              id: lastMessage.id,
-              conversationId: lastMessage.conversationId,
-              senderId: lastMessage.senderId,
-              content: lastMessage.content,
-              isRead: lastMessage.isRead,
-              readAt: lastMessage.readAt,
-              isDeleted: lastMessage.isDeleted,
-              createdAt: lastMessage.createdAt,
-              updatedAt: lastMessage.updatedAt,
-              sender: lastMessage.sender,
-              type: lastMessage.type as MessageType,
-              mediaUrl: lastMessage.mediaUrl,
-              mediaType: lastMessage.mediaType,
-            }
-            : null,
-          unreadCount,
-        }
-      })
-    )
+    // Map conversations to response
+    const results = conversations.map((conv) => {
+      const isUser1 = conv.user1Id === currentUserId
+      const otherUserId = isUser1 ? conv.user2Id : conv.user1Id
+      const otherUser = otherUsersMap.get(otherUserId)
 
-    return conversationsWithOtherUser.filter((conv) => conv !== null) as ConversationResponse[]
+      if (!otherUser) {
+        return null
+      }
+
+      const canShowLastSeen = otherUser.showLastSeen ?? true
+
+      const safeOtherUser = {
+        id: otherUser.id,
+        username: otherUser.username,
+        firstName: otherUser.firstName,
+        lastName: otherUser.lastName,
+        avatarUrl: otherUser.avatarUrl,
+        lastLoginAt: canShowLastSeen ? otherUser.lastLoginAt : null,
+      }
+
+      const unreadCount = isUser1 ? conv.user1UnreadCount : conv.user2UnreadCount
+      const lastMessage = conv.messages[0] || null
+
+      return {
+        id: conv.id,
+        user1Id: conv.user1Id,
+        user2Id: conv.user2Id,
+        lastMessageId: conv.lastMessageId,
+        lastMessageAt: conv.lastMessageAt,
+        user1UnreadCount: conv.user1UnreadCount,
+        user2UnreadCount: conv.user2UnreadCount,
+        user1CanMessage: conv.user1CanMessage,
+        user2CanMessage: conv.user2CanMessage,
+        createdAt: conv.createdAt,
+        updatedAt: conv.updatedAt,
+        otherUser: safeOtherUser,
+        lastMessage: lastMessage
+          ? {
+            id: lastMessage.id,
+            conversationId: lastMessage.conversationId,
+            senderId: lastMessage.senderId,
+            content: lastMessage.content,
+            isRead: lastMessage.isRead,
+            readAt: lastMessage.readAt,
+            isDeleted: lastMessage.isDeleted,
+            createdAt: lastMessage.createdAt,
+            updatedAt: lastMessage.updatedAt,
+            sender: lastMessage.sender,
+            type: lastMessage.type as MessageType,
+            mediaUrl: lastMessage.mediaUrl,
+            mediaType: lastMessage.mediaType,
+          }
+          : null,
+        unreadCount,
+      }
+    })
+
+    return results.filter((r) => r !== null) as ConversationResponse[]
   }
 
   // Get single conversation by ID
@@ -318,11 +328,23 @@ export class MessageService {
         lastName: true,
         avatarUrl: true,
         lastLoginAt: true,
+        showLastSeen: true,
       },
     })
 
     if (!otherUser) {
       throw new NotFoundError('Other user not found')
+    }
+
+    const canShowLastSeen = otherUser.showLastSeen ?? true
+
+    const safeOtherUser = {
+      id: otherUser.id,
+      username: otherUser.username,
+      firstName: otherUser.firstName,
+      lastName: otherUser.lastName,
+      avatarUrl: otherUser.avatarUrl,
+      lastLoginAt: canShowLastSeen ? otherUser.lastLoginAt : null,
     }
 
     const unreadCount = isUser1 ? conversation.user1UnreadCount : conversation.user2UnreadCount
@@ -340,7 +362,7 @@ export class MessageService {
       user2CanMessage: conversation.user2CanMessage,
       createdAt: conversation.createdAt,
       updatedAt: conversation.updatedAt,
-      otherUser,
+      otherUser: safeOtherUser,
       lastMessage: lastMessage
         ? {
           id: lastMessage.id,
@@ -403,21 +425,43 @@ export class MessageService {
       take: limit,
     })
 
-    return messages.map((msg) => ({
-      id: msg.id,
-      conversationId: msg.conversationId,
-      senderId: msg.senderId,
-      content: msg.content,
-      isRead: msg.isRead,
-      readAt: msg.readAt,
-      isDeleted: msg.isDeleted,
-      createdAt: msg.createdAt,
-      updatedAt: msg.updatedAt,
-      sender: msg.sender,
-      type: msg.type as MessageType,
-      mediaUrl: msg.mediaUrl,
-      mediaType: msg.mediaType,
-    }))
+    // Determine other user to respect their read receipt preference
+    const isUser1 = conversation.user1Id === currentUserId
+    const otherUserId = isUser1 ? conversation.user2Id : conversation.user1Id
+
+    // Optimized: use findUnique with select instead of queryRaw
+    const otherUser = await prisma.user.findUnique({
+      where: { id: otherUserId },
+      select: { showReadReceipts: true },
+    })
+
+    const canShowReadReceipts = otherUser?.showReadReceipts ?? true
+
+    return messages.map((msg) => {
+      const isOwnMessage = msg.senderId === currentUserId
+
+      // If other user has disabled read receipts, hide read status for our own messages
+      const maskedIsRead =
+        isOwnMessage && !canShowReadReceipts ? false : msg.isRead
+      const maskedReadAt =
+        isOwnMessage && !canShowReadReceipts ? null : msg.readAt
+
+      return {
+        id: msg.id,
+        conversationId: msg.conversationId,
+        senderId: msg.senderId,
+        content: msg.content,
+        isRead: maskedIsRead,
+        readAt: maskedReadAt,
+        isDeleted: msg.isDeleted,
+        createdAt: msg.createdAt,
+        updatedAt: msg.updatedAt,
+        sender: msg.sender,
+        type: msg.type as MessageType,
+        mediaUrl: msg.mediaUrl,
+        mediaType: msg.mediaType,
+      }
+    })
   }
 
   // Send a message
@@ -564,11 +608,22 @@ export class MessageService {
       },
     })
 
-    // Emit socket event
-    socketService.emitToRoom(conversationId, 'messages_read', {
-      conversationId,
-      readBy: currentUserId,
+    // Check if current user allows sending read receipts
+    // Optimized: use findUnique instead of queryRaw
+    const user = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: { showReadReceipts: true },
     })
+
+    const canSendReadReceipts = user?.showReadReceipts ?? true
+
+    // Emit socket event only if user hasn't disabled read receipts
+    if (canSendReadReceipts) {
+      socketService.emitToRoom(conversationId, 'messages_read', {
+        conversationId,
+        readBy: currentUserId,
+      })
+    }
   }
 
   // Delete a message
@@ -597,10 +652,10 @@ export class MessageService {
     // Emit socket event
     // Find conversationId first (optimization: could be passed or fetched)
     if (message.conversationId) {
-        socketService.emitToRoom(message.conversationId, 'message_deleted', {
-            messageId,
-            conversationId: message.conversationId
-        })
+      socketService.emitToRoom(message.conversationId, 'message_deleted', {
+        messageId,
+        conversationId: message.conversationId
+      })
     }
 
     logInfo('Message deleted', {
@@ -609,4 +664,3 @@ export class MessageService {
     })
   }
 }
-
