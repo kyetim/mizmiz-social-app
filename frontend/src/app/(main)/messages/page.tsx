@@ -56,14 +56,13 @@ export default function MessagesPage() {
     refetchOnReconnect: true,
   })
 
-  // Get selected conversation
+  // Get selected conversation — polling kaldırıldı, Socket.io real-time günceller
   const {
     data: selectedConversation,
     isLoading: isLoadingConversation,
     refetch: refetchConversation,
   } = useGetConversationQuery(selectedConversationId!, {
     skip: !selectedConversationId || !user,
-    pollingInterval: 10000,
   })
 
   // Get messages for selected conversation
@@ -91,18 +90,15 @@ export default function MessagesPage() {
     const handleNewMessage = (message: MessageInterface) => {
       // Update messages cache if in the active conversation
       if (selectedConversationId && message.conversationId === selectedConversationId) {
-        // Optimistic update
+        // Sadece optimistic update — invalidation kaldırıldı (ikisi birden çelişiyordu, ağ isteği tetikliyordu)
         dispatch(
           api.util.updateQueryData('getMessages', { conversationId: selectedConversationId, limit: 50 }, (draft) => {
             const exists = draft.find((m) => m.id === message.id)
             if (!exists) {
-              draft.unshift(message) 
+              draft.unshift(message)
             }
           })
         )
-        
-        // Also invalidate tags to ensure full consistency and trigger refetch
-        dispatch(api.util.invalidateTags([{ type: 'Messages', id: selectedConversationId }]))
 
         // Mark as read immediately if user is viewing this conversation and it's not their message
         if (message.senderId !== user?.id) {
@@ -173,18 +169,16 @@ export default function MessagesPage() {
   }, [user, router])
 
   // Mark messages as read when conversation is selected
+  // refetchConversations() kaldırıldı — markAsRead invalidateTags ile otomatik günceller
   useEffect(() => {
     if (selectedConversationId && selectedConversation?.unreadCount && selectedConversation.unreadCount > 0) {
       markAsRead(selectedConversationId)
         .unwrap()
-        .then(() => {
-          refetchConversations()
-        })
         .catch((error) => {
           console.error('Failed to mark messages as read:', error)
         })
     }
-  }, [selectedConversationId, selectedConversation?.unreadCount, markAsRead, refetchConversations])
+  }, [selectedConversationId, selectedConversation?.unreadCount, markAsRead])
 
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversationId(conversationId)
@@ -195,7 +189,7 @@ export default function MessagesPage() {
     if (!selectedConversationId || !user) return
 
     try {
-      await sendMessage({
+      const sentMessage = await sendMessage({
         conversationId: selectedConversationId,
         data: {
           content,
@@ -206,8 +200,9 @@ export default function MessagesPage() {
           })
         },
       }).unwrap()
-      refetchMessages()
-      refetchConversations()
+      // refetchMessages() ve refetchConversations() kaldırıldı
+      // Socket.io new_message eventi optimistic update ile cache'i anlık güncelliyor
+      // sendMessage'ın invalidateTags'i de kaldırıldı (api.ts) — çift istek önlendi
     } catch (error: any) {
       toast.error(error.data?.message || 'Mesaj gönderilemedi')
     }

@@ -503,6 +503,7 @@ export const api = createApi({
     getConversations: builder.query<ConversationInterface[], void>({
       query: () => ({ url: '/messages/conversations', method: 'get' }),
       providesTags: ['Conversations'],
+      keepUnusedDataFor: 120, // Cache 2 dakika — sekme değişiminde yeniden istek atmayı önler
     }),
     getOrCreateConversation: builder.mutation<ConversationInterface, CreateConversationDto>({
       query: (data) => ({
@@ -520,6 +521,7 @@ export const api = createApi({
       providesTags: (result, error, conversationId) => [
         { type: 'Conversations', id: conversationId },
       ],
+      keepUnusedDataFor: 120,
     }),
     getMessages: builder.query<
       MessageInterface[],
@@ -533,6 +535,7 @@ export const api = createApi({
       providesTags: (result, error, { conversationId }) => [
         { type: 'Messages', id: conversationId },
       ],
+      keepUnusedDataFor: 60, // Mesajları 1 dakika cache'de tut
     }),
     sendMessage: builder.mutation<
       MessageInterface,
@@ -543,19 +546,17 @@ export const api = createApi({
         method: 'post',
         data,
       }),
-      invalidatesTags: (result, error, { conversationId }) => [
-        { type: 'Messages', id: conversationId },
-        { type: 'Conversations', id: conversationId },
-        'Conversations',
-      ],
+      // invalidatesTags kaldırıldı — Socket.io optimistic update ile cache güncelleniyor
+      // Manuel refetch messages/page.tsx'den de kaldırıldı, çift istek önlendi
     }),
     markMessagesAsRead: builder.mutation<void, string>({
       query: (conversationId) => ({
         url: `/messages/conversations/${conversationId}/read`,
         method: 'put',
       }),
+      // Sadece conversations listesini güncelle (unread count için), messages'ı değil
+      // Socket.io zaten messages_read eventi ile cache'i güncelliyor
       invalidatesTags: (result, error, conversationId) => [
-        { type: 'Messages', id: conversationId },
         { type: 'Conversations', id: conversationId },
         'Conversations',
       ],
