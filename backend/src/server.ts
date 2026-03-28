@@ -8,12 +8,12 @@ import routes from './routes'
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.middleware'
 import { requestLoggerMiddleware } from './middleware/request-logger.middleware'
 import { generalRateLimiter } from './middleware/rate-limit.middleware'
-import { PrismaClient } from '@prisma/client'
 import logger, { logInfo, logError } from './utils/logger'
 import { securityConfig } from './config/security.config'
 import fs from 'fs'
 import path from 'path'
 import { socketService } from './services/socket.service'
+import { prisma } from './lib/prisma'
 
 // Load environment variables
 dotenv.config()
@@ -25,9 +25,6 @@ const PORT = process.env.PORT || 5000
 
 // Initialize Socket.io
 socketService.initialize(httpServer)
-
-// Initialize Prisma Client
-export const prisma = new PrismaClient()
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../logs')

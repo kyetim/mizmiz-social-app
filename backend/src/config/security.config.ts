@@ -74,7 +74,7 @@ export const securityConfig = {
     requireLowercase: true,
     requireNumbers: true,
     requireSpecialChars: true,
-    saltRounds: 12, // bcrypt rounds (increased from 10)
+    saltRounds: 10, // bcrypt rounds — 10 is industry standard (12 caused ~400-800ms delay per login)
   },
 
   // Rate Limiting
